@@ -78,14 +78,14 @@ conn.close()       #关闭连接
 
 # 我想查看数据   方式1
 # sqlite3 database.db
-# SELECT * FROM user;
+# SELECT * FROM users;
 # .exit
 
 # 显示列名
 # .headers on
 # .mode column
 # SELECT * FROM users;
-
+# ;不能少了
 
 # 我想查看数据   方式2
 # import sqlite3
@@ -109,3 +109,9 @@ conn.close()       #关闭连接
 
 
 
+# users  requests                    students
+# requests
+# id  title  description  username  created_at
+# --  -----  -----------  --------  -------------------
+# 1   1      1                      2024-03-26 11:37:10
+# 2   1      1                      2024-03-26 11:40:37

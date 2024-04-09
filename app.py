@@ -12,7 +12,37 @@ def create_student():
 
 
 
-
+# 添加学生的路由，支持POST和GET请求    @app.route('/addstudent/')     http://127.0.0.1:5000/addstudent/
+@app.route('/addstudent/',methods = ['POST', 'GET'])
+def add_student():
+    try:
+        #获取请求中的nm、add、city、pin的数据
+        nm = request.form['nm']
+        addr = request.form['add']
+        city = request.form['city']
+        pin = request.form['pin']
+        #连接    建立与database.db数据库的连接
+        with sqlite3.connect("database.db") as con:  
+           cur = con.cursor()    #获取游标
+           #添加数据，执行单条的sql语句
+        #    cur.execute("IN INTO students (name,addr,city,pin) VALUES (?,?,?,?)",(nm,addr,city,pin) )   
+           cur.execute("INSERT INTO students (name,addr,city,pin) VALUES (?,?,?,?)",(nm,addr,city,pin) )                
+           con.commit()     #提交事务
+           msg = "添加这个新的学生   成功"
+    except:
+        con.rollback()
+        #撤消当前事务中所做的所有更改
+        #要故意触发 except 块，你可以：
+        # 断开数据库连接：移除或重命名 database.db 文件。
+        # 修改 SQL 语句，使其含有错误：改变列名为一个不存在的列名。
+        # 传入不合法的数据：比如对于一个要求整数的字段，传入一个文本字符串
+        msg = "添加这个新的学生   失败"
+    finally:
+        # 这个才是对的
+        if con:
+            con.close()
+        # 改url_for       而不是返回html
+        return redirect(url_for('show_student'))
 
 
 # http://127.0.0.1:5000    返回这个   form action    register    http://127.0.0.1:5000/register/
@@ -71,7 +101,9 @@ def login():
                     session['loggedin'] = True
                     session['username'] = user['name']
                     msg = '登录成功！'
-                    # 重定向到主界面或其他页面，取决于你的应用逻辑
+                    # 登录成功后   保存   测试
+                    session['username'] = username  # 假设这是登录视图函数中的代码
+                    # login   登录成功     重定向到主界面或其他页面，取决于你的应用逻辑
                     return render_template('main.html', msg=msg)
                     # return redirect(url_for('main'))
                 else:
@@ -201,21 +233,42 @@ def errorPage():
 
 
 
+# 剩余3个view    和后端息息相关
+# http://127.0.0.1:5000/main/
+@app.route('/main')
+def main():
+    return render_template('main.html')
 
-
-
-
-# 剩余两个view    和后端息息相关
-@app.route('/findRequest')
-def findRequest():
-    # 在这里实现搜索逻辑
-    # return "这是查找请求的页面"
-    return render_template('findRequest.html')
-
+# http://127.0.0.1:5000/createRequest/
 @app.route('/createRequest', methods=['GET', 'POST'])
 def createRequest():
-    if request.method == 'POST':
-        
+    if request.method == 'POST':  
+        try:
+            # 从表单请求中获取标题和描述的数据
+            title = request.form['title']
+            description = request.form['description']
+            # 从会话中获取username
+            username = session.get('username')
+            # 确保在登录后才能创建请求
+            # if not username:
+            #     # 可能需要重定向到登录页面或显示错误消息
+            #     return redirect(url_for('login'))
+
+            # 连接数据库
+            with sqlite3.connect("database.db") as con:
+                cur = con.cursor()  # 获取游标
+                # 将请求信息添加到数据库，包括用户名
+                cur.execute("INSERT INTO requests (title, description, username) VALUES (?, ?, ?)", (title, description, username))
+                con.commit()  # 提交事务
+                # 操作成功，这里你有两个重定向，只需要一个
+                # 重定向到查找请求的页面或回到主页
+                return render_template('main.html')
+                return redirect(url_for('findRequest'))  # 假设你有一个叫做findRequest的视图函数来显示所有请求
+        except Exception as e:
+            print(f"创建请求失败，错误: {e}")
+            return render_template('main.html', error=str(e))
+            return render_template('errorPage.html', error=str(e))
+             
         try:
             # 从表单请求中获取标题和描述的数据
             title = request.form['title']
@@ -223,20 +276,29 @@ def createRequest():
             # 连接数据库
             with sqlite3.connect("database.db") as con:
                 cur = con.cursor()  # 获取游标
-                # 将请求信息添加到数据库
+                # requests        将请求信息添加到数据库
                 cur.execute("INSERT INTO requests (title, description) VALUES (?, ?)", (title, description))
                 con.commit()  # 提交事务
                 # 操作成功，重定向到查找请求的页面
+                return render_template('main.html')
                 return redirect(url_for('findRequest'))
         except Exception as e:
             # 如果操作失败，可能是数据库连接问题或执行SQL语句有误
             print(f"创建请求失败，错误: {e}")  # 打印错误信息，实际应用中应考虑记录日志
             # 操作失败，也可以选择重定向到某个页面，或返回错误信息
+            return render_template('main.html')
             return redirect(url_for('errorPage'))  # 假设有一个显示错误的页面
     else:
         # 如果不是POST请求，则渲染创建请求的页面
         return render_template('createRequest.html')
 
+
+# http://127.0.0.1:5000/main/
+@app.route('/findRequest')
+def findRequest():
+    # 在这里实现搜索逻辑
+    # return "这是查找请求的页面"
+    return render_template('findRequest.html')
 
 
 
