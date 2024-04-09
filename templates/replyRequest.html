@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- 头部省略 -->
+<body>
+    <div class="container mt-5">
+        <h2>Reply to Request</h2>
+        <form action="{{ url_for('reply_request', request_id=request_id) }}" method="POST">
+            <div class="form-group">
+                <label for="reply">Your Reply:</label>
+                <textarea class="form-control" id="reply" name="reply" rows="3" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-success">Submit Reply</button>
+        </form>
+    </div>
+</body>
+</html>

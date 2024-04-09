@@ -1,0 +1,46 @@
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>registerLogin</title>
+</head>
+<body>
+    <h2>注册</h2>
+    <form action="{{ url_for('register') }}" method="POST">
+        <p>用户名<input type="text" name="username" required /></p>
+        <p>密码<input type="password" name="password" required /></p>
+        <p>邮箱<input type="email" name="email" /></p>
+
+        <input type="submit" value="注册button" />
+    </form>
+
+    <h2>登录</h2>
+    <form action="{{ url_for('login') }}" method="POST">
+        <p>用户名<input type="text" name="username" required /></p>
+        <p>密码<input type="password" name="password" required /></p>
+
+        <input type="submit" value="登录button" />
+    </form>
+</body>
+</html>
+
+
+
+
+
+<!-- 创建一个既包括注册也包括登录功能的界面，我们需要在同一页面上定义两个不同的表单：一个用于注册，另一个用于登录。
+这样的设计让用户可以在同一页面选择要进行的操作 -->
+
+
+
+<!-- 表单操作（action）: action 属性被设置为 "{{ url_for('register') }}" 
+对于注册表单，而对于登录表单则是 "{{ url_for('login') }}"。
+当用户提交注册表单时，数据会发送到 Flask 应用中的 register 函数；
+登录表单则会发送到 login 函数。你需要在 Flask 应用中定义这些函数并设置相应的路由。
+
+输入字段（required）: 在用户名和密码输入字段上，我使用了 required 属性来确保在提交表单之前用户必须填写这些字段。
+
+密码字段: 对于密码，我使用了 <input type="password" name="password" />，这样在用户输入密码时，显示的是点（•），而不是实际的字符。
+
+邮箱字段（可选）: 在注册表单中，我还包括了一个邮箱输入字段。这取决于你的应用程序是否需要用户提供邮箱地址 -->
+
+
