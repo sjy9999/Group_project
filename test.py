@@ -81,6 +81,10 @@ conn.close()       #关闭连接
 # SELECT * FROM user;
 # .exit
 
+# 显示列名
+# .headers on
+# .mode column
+# SELECT * FROM users;
 
 
 # 我想查看数据   方式2

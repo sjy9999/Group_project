@@ -1,43 +1,60 @@
-<html>
+<!DOCTYPE html>
+<html lang="zh">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>Title</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>标题</title>
+    <!-- 引入Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .container {
+            padding-top: 20px;
+        }
+    </style>
 </head>
-   <body>
-      <!-- Flask 无法为名为 'register' 的端点构建 URL   因为在 Flask 应用中没有找到与之对应的视图函数 -->
-      <form action="{{ url_for('register') }}" method="POST">
-         <p>用户名<input type="text" name="name" required /></p>
-         <p>密码<input type="password" name="password" required /></p>
-         <p>邮箱<input type="email" name="email" /></p>
- 
-         <input type="submit" value="注册button" />
-     </form>
+<body>
+
+<div class="container">
+    <h2 class="mb-4">注册</h2>
+    <form action="{{ url_for('register') }}" method="POST" class="needs-validation" novalidate>
+        <div class="form-group">
+            <label for="name">用户名</label>
+            <input type="text" class="form-control" id="name" name="name" required>
+        </div>
+        <div class="form-group">
+            <label for="password">密码</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+        </div>
+        <div class="form-group">
+            <label for="email">邮箱</label>
+            <input type="email" class="form-control" id="email" name="email">
+        </div>
+        <button type="submit" class="btn btn-primary">注册</button>
+    </form>
+
+    <h2 class="mb-4 mt-5">登录</h2>
+    <form action="{{ url_for('login') }}" method="POST" class="needs-validation" novalidate>
+        <div class="form-group">
+            <label for="username">用户名</label>
+            <input type="text" class="form-control" id="username" name="username" required>
+        </div>
+        <div class="form-group">
+            <label for="passwordLogin">密码</label>
+            <input type="password" class="form-control" id="passwordLogin" name="password" required>
+        </div>
+        <button type="submit" class="btn btn-primary">登录</button>
+    </form>
+</div>
+
+<!-- 引入Bootstrap的JS和依赖 -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.9/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
 
 
-<!--       
-     <h2>登录</h2>
-     <form action="{{ url_for('login') }}" method="POST">
-         <p>用户名<input type="text" name="username" required /></p>
-         <p>密码<input type="password" name="password" required /></p>
- 
-         <input type="submit" value="登录button" />
-     </form> -->
-
-
-
-     
-     <form action = "{{ url_for('add_student') }}" method = "POST">
-          <p>姓名<input type = "text" name = "nm" /></p>
-          <p>地址<textarea name = "add" ></textarea></p>
-          <p>城市<input type = "text" name = "city" /></p>
-          <p>邮编<input type = "text" name = "pin" /></p>
-          <input type = "submit" value = "提交" />
-      </form>
-
-
-
-   </body>
- </html>
 
 
 
@@ -45,3 +62,8 @@
  这意味着当表单被提交时，它将数据发送到 add_student 函数对应的路由处理器。
  这就是为什么当你访问 /create 并且页面加载 student.html 后，一旦你填写表单并点击提交，浏览器会将你重定向到 /addstudent 的原因。
  这是 Flask 应用预期的行为，因为 url_for('add_student') 将解析为 /addstudent/ 路由 -->
+
+
+
+ <!-- Flask 无法为名为 'register' 的端点构建 URL   因为在 Flask 应用中没有找到与之对应的视图函数 -->
+      <!-- 涉及    register的函数 -->

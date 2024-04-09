@@ -5,8 +5,7 @@ app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # 用于保持会话安全
 
 
-
-# 先打开   这个界面   创建学生
+# 先打开   这个界面   注册学生账号       这是   http://127.0.0.1:5000/create/
 @app.route('/create/')
 def create_student():
     return render_template('student.html')  #渲染student.html模板
@@ -14,54 +13,10 @@ def create_student():
 
 
 
-# 添加学生的路由，支持POST和GET请求    @app.route('/addstudent/')
-@app.route('/addstudent/',methods = ['POST', 'GET'])
-def add_student():
-    try:
-        #获取请求中的nm、add、city、pin的数据
-        nm = request.form['nm']
-        addr = request.form['add']
-        city = request.form['city']
-        pin = request.form['pin']
-        #连接    建立与database.db数据库的连接
-        with sqlite3.connect("database.db") as con:  
-           cur = con.cursor()    #获取游标
-           #添加数据，执行单条的sql语句
-        #    cur.execute("IN INTO students (name,addr,city,pin) VALUES (?,?,?,?)",(nm,addr,city,pin) )   
-           cur.execute("INSERT INTO students (name,addr,city,pin) VALUES (?,?,?,?)",(nm,addr,city,pin) )                
-           con.commit()     #提交事务
-           msg = "添加这个新的学生   成功"
-    except:
-        con.rollback()
-        #撤消当前事务中所做的所有更改
-        #要故意触发 except 块，你可以：
-        # 断开数据库连接：移除或重命名 database.db 文件。
-        # 修改 SQL 语句，使其含有错误：改变列名为一个不存在的列名。
-        # 传入不合法的数据：比如对于一个要求整数的字段，传入一个文本字符串
-        msg = "添加这个新的学生   失败"
-    finally:
-        # 这个才是对的
-        if con:
-            con.close()
-        # 改url_for       而不是返回html
-        return redirect(url_for('show_student'))
-        return render_template("result.html",msg = msg)  #渲染result.html模板并传递msg值
-        con.close()     #关闭数据库连接  其实已经  return了
 
 
-
-
-
-
-
-
-
-
-
-
-
-# 其实比login复杂
-# GET 请求通常用于从服务器获取数据或者显示一个页面，而 POST 请求通常用于当用户提交表单数据到服务器
+# http://127.0.0.1:5000    返回这个   form action    register    http://127.0.0.1:5000/register/
+# register比login复杂    GET 请求通常用于从服务器获取数据或者显示一个页面 POST 请求通常用于当用户提交表单数据到服务器
 @app.route('/register/', methods=['POST', 'GET'])
 def register():
     if request.method == 'POST':
@@ -84,62 +39,102 @@ def register():
         # 成功的情况下也返回结果页面，并传递成功消息
         return render_template("result.html", msg=msg)
         
-        # try:
-        #     # 从表单请求中获取用户名  密码和邮箱的数据
-        #     username = request.form['name']
-        #     password = request.form['password']
-        #     email = request.form['email']
-        #     # 连接数据库
-        #     with sqlite3.connect("database.db") as con:
-        #         cur = con.cursor()  # 获取游标
-        #         # 添加用户数据，执行单条的SQL语句
-        #         cur.execute("INSERT INTO users (username, password, email) VALUES (?, ?, ?)", (username, password, email))
-        #         con.commit()  # 提交事务
-        #         msg = "注册成功"
-        # except Exception as e:
-        #     con.rollback()  # 撤销当前事务中所做的所有更改
-        #     return f"注册失败，错误: {str(e)}"  # 直接返回错误信息
-        #     # msg = f"注册失败，错误: {str(e)}"
-        # finally:
-        #     if con:
-        #         con.close()  # 关闭数据库连接
-        #     # return render_template("result.html", msg=msg)  # 渲染result.html模板并传递msg值
+
     else:
         # 如果不是POST请求，则渲染注册表单的页面
         # 用户首次访问你的注册页面，他们还没有提交任何信息。在这种情况下，他们是通过 GET 请求来访问页面的。
         # 这时候，你的代码中的 else 部分会执行，并显示注册表单，允许用户输入他们的信息
         return render_template("student.html")
-        return render_template("register.html")
+        # return render_template("register.html")
 
 
 
-
-
+# http://127.0.0.1:5000    返回这个   form action   login    http://127.0.0.1:5000/login/
 @app.route('/login/', methods=['POST', 'GET'])
 def login():
+    # 默认情况下，假设没有错误消息
     msg = ''
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        # 连接数据库
-        with sqlite3.connect("database.db") as con:
-            con.row_factory = sqlite3.Row  # 这使得可以像字典那样访问行，这样我们就可以通过列名称来访问数据
-            cur = con.cursor()
-            # 查询数据库以查找匹配的用户名和密码
-            cur.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, password))
-            user = cur.fetchone()
-            if user:
-                # 用户验证成功，设置用户会话
-                session['loggedin'] = True
-                session['username'] = user['username']
-                msg = '登录成功！'
-                return render_template('login_success.html', msg=msg)
-            else:
-                msg = '用户名或密码错误！'
-    return render_template('login.html', msg=msg)
+        try:
+            # 连接数据库
+            with sqlite3.connect("database.db") as con:
+                con.row_factory = sqlite3.Row
+                cur = con.cursor()
+                # 修改查询语句中的列名为实际的列名
+                cur.execute("SELECT * FROM users WHERE name = ? AND password = ?", (username, password))
+
+                user = cur.fetchone()
+                if user:
+                    # 用户验证成功，设置用户会话
+                    session['loggedin'] = True
+                    session['username'] = user['name']
+                    msg = '登录成功！'
+                    # 重定向到主界面或其他页面，取决于你的应用逻辑
+                    return render_template('main.html', msg=msg)
+                    # return redirect(url_for('main'))
+                else:
+                    # 登录失败，设置错误消息
+                    msg = '用户名或密码错误！'
+        except Exception as e:
+            # 处理异常，设置错误消息
+            msg = f"错误: {str(e)}"
+        # 登录失败或发生异常，使用同一个结果页面来显示错误消息
+        return render_template("result.html", msg=msg)
+    # 如果不是POST请求，或者出现其他情况，重定向到登录页面
+    return redirect(url_for('login'))
 
 
 
+
+
+    
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 这个甚至     可能不需要吧
 @app.route('/logout/')
 def logout():
     # 移除会话中的用户信息
@@ -148,10 +143,7 @@ def logout():
     return redirect(url_for('login'))
 
 
-
-
-
-# 显示所有学生的路由     显示出来
+# 显示所有学生的路由   显示出来    这个是为了检查  好看    http://127.0.0.1:5000/show/ 
 @app.route('/show/')
 def show_student():
     con = sqlite3.connect("database.db")  #建立数据库连接
@@ -162,7 +154,7 @@ def show_student():
     return render_template("show.html",rows = rows)  #渲染show.html模板并传递rows值
 
 
-# 这是一个测试       没有路径 
+# 这是一个测试       没有路径    只是    http://127.0.0.1:5000
 # @app.route('/')
 # def index():
 #     return "Hello, World!"
@@ -171,11 +163,49 @@ def regi_login():
     return render_template('student.html')
 
 
+# http://127.0.0.1:5000/errorPage/
+@app.route('/errorPage')
+def errorPage():
+    # 这里可以展示错误信息或提供错误反馈
+    return "出错了！请稍后重试。"
 
 
 
 
-# 剩余两个view
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 剩余两个view    和后端息息相关
 @app.route('/findRequest')
 def findRequest():
     # 在这里实现搜索逻辑
@@ -208,17 +238,9 @@ def createRequest():
         return render_template('createRequest.html')
 
 
-@app.route('/errorPage')
-def errorPage():
-    # 这里可以展示错误信息或提供错误反馈
-    return "出错了！请稍后重试。"
 
 
-
-
-
-
-
+# 可能要用
 # @app.route('/findRequest', methods=['GET'])
 # def findRequest():
 #     search_query = request.args.get('searchQuery', '')
@@ -229,7 +251,6 @@ def errorPage():
 #         cur.execute("SELECT * FROM requests WHERE title LIKE ?", ('%' + search_query + '%',))
 #         rows = cur.fetchall()
 #     return render_template('findRequests.html', rows=rows)
-
 
 
 
