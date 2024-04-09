@@ -256,9 +256,6 @@ def reply_request(request_id):
 
 
 
-
-
-
 if __name__ == "__main__":
     # print(app.url_map)     这是一个测试     打印出来  app.url_map  print(app.url_map+'999')
     app.run(debug=True)
