@@ -296,6 +296,30 @@ def createRequest():
 # http://127.0.0.1:5000/main/
 @app.route('/findRequest')
 def findRequest():
+    search_queryFR = request.args.get('searchQueryFR', '').strip()
+    # search_query = request.args.get('searchQuery', '')  # 获取搜索关键词
+    rows = []
+    message = ''  # 初始化消息为空字符串
+
+    if search_queryFR:
+        try:
+            with sqlite3.connect("database.db") as con:
+                con.row_factory = sqlite3.Row  # 使行为字典
+                cur = con.cursor()
+                # 只根据标题搜索requests表
+                cur.execute("SELECT * FROM requests WHERE title LIKE ?", ('%'+search_queryFR+'%',))
+                rows = cur.fetchall()  # 获取所有查询结果
+                if not rows:  # 如果没有找到任何行
+                    message = '未找到匹配的请求。'  # 设置消息为“未找到”
+        except Exception as e:
+            message = '搜索过程中出现问题。'  # 如果出现异常，设置一个通用消息
+            print(f"搜索请求失败，错误: {e}")  # 可以选择在服务器日志中记录真实的错误
+
+    # 渲染页面，将查询结果和消息传递给模板
+    return render_template('findRequest.html', rows=rows, message=message)
+
+
+    return render_template('findRequests.html', rows=rows)
     # 在这里实现搜索逻辑
     # return "这是查找请求的页面"
     return render_template('findRequest.html')

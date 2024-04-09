@@ -12,25 +12,42 @@
 
 
         <h2>Find Requests</h2>
-        <form action="/search_requests" method="GET">
+        <form action="{{ url_for('findRequest') }}" method="get">
             <div class="form-group">
                 <label for="searchQuery">Search Requests:</label>
-                <input type="text" class="form-control" id="searchQuery" name="searchQuery" placeholder="Enter keywords">
+                <input type="text" class="form-control" id="searchQuery" name="searchQueryFR" placeholder="Enter keywords of requests">
             </div>
+        
             <button type="submit" class="btn btn-primary">Search</button>
         </form>
+
+        
+        
+        
+        <!-- <form action="/search_requests" method="GET">
+            <div class="form-group">
+                <label for="searchQuery">Search Requests:</label>
+                <input type="text" class="form-control" id="searchQuery" name="searchQueryFR" placeholder="Enter keywords of requests">
+            </div>
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form> -->
+
+
+
+        
         <!-- Results could be displayed here -->
-
-
-        <!-- {% for row in rows %}
+        {% for row in rows %}
         <div class="card mt-3">
             <div class="card-body">
                 <h5 class="card-title">{{ row.title }}</h5>
                 <p class="card-text">{{ row.description }}</p>
+                <p class="card-text"><small class="text-muted">Posted by {{ row.username }} on {{ row.created_at }}</small></p>
                 <a href="{{ url_for('reply_request', request_id=row.id) }}" class="btn btn-primary">Reply</a>
             </div>
         </div>
-        {% endfor %} -->
+        {% else %}
+        <p>No requests found.</p>
+        {% endfor %}
     </div>
 </body>
 </html>
