@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>标题</title>
+    <!-- 引入Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .container {
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2 class="mb-4">Register 注册</h2>
+    <form action="{{ url_for('register') }}" method="POST" class="needs-validation" novalidate>
+        <div class="form-group">
+            <label for="name">Username 用户名</label>
+            <input type="text" class="form-control" id="name" name="name" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password 密码</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email 邮箱</label>
+            <input type="email" class="form-control" id="email" name="email">
+        </div>
+        <button type="submit" class="btn btn-primary">Register 注册</button>
+    </form>
+    
+    <h2 class="mb-4 mt-5">Login 登录</h2>
+    <form action="{{ url_for('login') }}" method="POST" class="needs-validation" novalidate>
+        <div class="form-group">
+            <label for="username">Username 用户名</label>
+            <input type="text" class="form-control" id="username" name="username" required>
+        </div>
+        <div class="form-group">
+            <label for="passwordLogin">Password 密码</label>
+            <input type="password" class="form-control" id="passwordLogin" name="password" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Login 登录</button>
+    </form>
+    
+</div>
+
+<!-- 引入Bootstrap的JS和依赖 -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.9/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
+
+
+
+
+
+ <!-- 使用 {{ url_for('add_student') }} 动态生成 action 属性的值，
+ 这意味着当表单被提交时，它将数据发送到 add_student 函数对应的路由处理器。
+ 这就是为什么当你访问 /create 并且页面加载 student.html 后，一旦你填写表单并点击提交，浏览器会将你重定向到 /addstudent 的原因。
+ 这是 Flask 应用预期的行为，因为 url_for('add_student') 将解析为 /addstudent/ 路由 -->
+
+
+
+ <!-- Flask 无法为名为 'register' 的端点构建 URL   因为在 Flask 应用中没有找到与之对应的视图函数 -->
+      <!-- 涉及    register的函数 -->

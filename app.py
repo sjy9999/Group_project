@@ -1,6 +1,6 @@
-from flask import Flask, request, render_template, redirect, url_for, session
+from flask import Flask, request, render_template, redirect, url_for, session,make_response
 import sqlite3
-# 项目启动
+# 项目启动       student.html 这是主界面
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # 用于保持会话安全
 
@@ -12,7 +12,7 @@ def create_student():
 
 
 
-# 添加学生的路由，支持POST和GET请求    @app.route('/addstudent/')     http://127.0.0.1:5000/addstudent/
+# 先留着    添加学生的路由，支持POST和GET请求    @app.route('/addstudent/')     http://127.0.0.1:5000/addstudent/
 @app.route('/addstudent/',methods = ['POST', 'GET'])
 def add_student():
     try:
@@ -21,13 +21,10 @@ def add_student():
         addr = request.form['add']
         city = request.form['city']
         pin = request.form['pin']
-        #连接    建立与database.db数据库的连接
         with sqlite3.connect("database.db") as con:  
-           cur = con.cursor()    #获取游标
-           #添加数据，执行单条的sql语句
-        #    cur.execute("IN INTO students (name,addr,city,pin) VALUES (?,?,?,?)",(nm,addr,city,pin) )   
+           cur = con.cursor()     
            cur.execute("INSERT INTO students (name,addr,city,pin) VALUES (?,?,?,?)",(nm,addr,city,pin) )                
-           con.commit()     #提交事务
+           con.commit()    
            msg = "添加这个新的学生   成功"
     except:
         con.rollback()
@@ -45,7 +42,7 @@ def add_student():
         return redirect(url_for('show_student'))
 
 
-# http://127.0.0.1:5000    返回这个   form action    register    http://127.0.0.1:5000/register/
+# 注册     http://127.0.0.1:5000    返回这个   form action    register    http://127.0.0.1:5000/register/
 # register比login复杂    GET 请求通常用于从服务器获取数据或者显示一个页面 POST 请求通常用于当用户提交表单数据到服务器
 @app.route('/register/', methods=['POST', 'GET'])
 def register():
@@ -55,12 +52,10 @@ def register():
             username = request.form['name']
             password = request.form['password']
             email = request.form['email']
-            # 连接数据库
             with sqlite3.connect("database.db") as con:
-                cur = con.cursor()  # 获取游标
-                # 添加用户数据，执行单条的SQL语句
+                cur = con.cursor()  
                 cur.execute("INSERT INTO users (name, password, email) VALUES (?, ?, ?)", (username, password, email))
-                con.commit()  # 提交事务
+                con.commit()  
                 msg = "注册成功"
         except Exception as e:
             # 如果执行到这里，说明 'con' 已经被定义了，我们在 'with' 语句内部
@@ -79,7 +74,7 @@ def register():
 
 
 
-# http://127.0.0.1:5000    返回这个   form action   login    http://127.0.0.1:5000/login/
+# 登录    http://127.0.0.1:5000    返回这个   form action   login    http://127.0.0.1:5000/login/
 @app.route('/login/', methods=['POST', 'GET'])
 def login():
     # 默认情况下，假设没有错误消息
@@ -88,11 +83,9 @@ def login():
         username = request.form['username']
         password = request.form['password']
         try:
-            # 连接数据库
             with sqlite3.connect("database.db") as con:
                 con.row_factory = sqlite3.Row
                 cur = con.cursor()
-                # 修改查询语句中的列名为实际的列名
                 cur.execute("SELECT * FROM users WHERE name = ? AND password = ?", (username, password))
 
                 user = cur.fetchone()
@@ -103,7 +96,7 @@ def login():
                     msg = '登录成功！'
                     # 登录成功后   保存   测试
                     session['username'] = username  # 假设这是登录视图函数中的代码
-                    # login   登录成功     重定向到主界面或其他页面，取决于你的应用逻辑
+                    # login   登录成功     
                     return render_template('main.html', msg=msg)
                     # return redirect(url_for('main'))
                 else:
@@ -166,7 +159,7 @@ def login():
 
 
 
-# 这个甚至     可能不需要吧
+# 先留着       这个甚至     可能不需要吧 
 @app.route('/logout/')
 def logout():
     # 移除会话中的用户信息
@@ -175,13 +168,13 @@ def logout():
     return redirect(url_for('login'))
 
 
-# 显示所有学生的路由   显示出来    这个是为了检查  好看    http://127.0.0.1:5000/show/ 
+# 先留着           显示所有学生的路由   显示出来    这个是为了检查  好看    http://127.0.0.1:5000/show/ 
 @app.route('/show/')
 def show_student():
-    con = sqlite3.connect("database.db")  #建立数据库连接
+    con = sqlite3.connect("database.db")  
     con.row_factory = sqlite3.Row      #设置row_factory,对查询到的数据，通过字段名获取列数据
-    cur = con.cursor()        #获取游标
-    cur.execute("select * from students")   #执行sql语句选择数据表
+    cur = con.cursor()        
+    cur.execute("select * from students")   
     rows = cur.fetchall()      #获取多条记录数据   
     return render_template("show.html",rows = rows)  #渲染show.html模板并传递rows值
 
@@ -195,7 +188,7 @@ def regi_login():
     return render_template('student.html')
 
 
-# http://127.0.0.1:5000/errorPage/
+# 先留着       http://127.0.0.1:5000/errorPage/
 @app.route('/errorPage')
 def errorPage():
     # 这里可以展示错误信息或提供错误反馈
@@ -233,13 +226,21 @@ def errorPage():
 
 
 
-# 剩余3个view    和后端息息相关
+# 剩余几个view    和后端息息相关
 # http://127.0.0.1:5000/main/
 @app.route('/main')
 def main():
+    #  如果没有用户名就不显示错误信息，并且不执行需要登录的操作
+# 这是最开始  没问题的
     return render_template('main.html')
+    # username = session.get('username', None)
+    # if not username:
+    #     # 如果用户没有登录，可以选择渲染一个不同的页面或者不需要登录的主页版本
+    #     return render_template('login.html')  # 假设这是登录页面
+    # # 如果用户已登录，继续正常操作
+    # return render_template('main.html')
 
-# http://127.0.0.1:5000/createRequest/
+# 发起帖子        http://127.0.0.1:5000/createRequest/
 @app.route('/createRequest', methods=['GET', 'POST'])
 def createRequest():
     if request.method == 'POST':  
@@ -249,80 +250,194 @@ def createRequest():
             description = request.form['description']
             # 从会话中获取username
             username = session.get('username')
-            # 确保在登录后才能创建请求
+            # 确保在登录后才能创建请求    这个更严谨
             # if not username:
             #     # 可能需要重定向到登录页面或显示错误消息
             #     return redirect(url_for('login'))
-
-            # 连接数据库
             with sqlite3.connect("database.db") as con:
                 cur = con.cursor()  # 获取游标
                 # 将请求信息添加到数据库，包括用户名
                 cur.execute("INSERT INTO requests (title, description, username) VALUES (?, ?, ?)", (title, description, username))
-                con.commit()  # 提交事务
-                # 操作成功，这里你有两个重定向，只需要一个
-                # 重定向到查找请求的页面或回到主页
+                con.commit()  
+                # 操作成功，这里有两个重定向，只需要一个    重定向到查找请求的页面或回到主页
+                return redirect(url_for('main'))
                 return render_template('main.html')
                 return redirect(url_for('findRequest'))  # 假设你有一个叫做findRequest的视图函数来显示所有请求
         except Exception as e:
             print(f"创建请求失败，错误: {e}")
+            return redirect(url_for('main', error=str(e)))
             return render_template('main.html', error=str(e))
             return render_template('errorPage.html', error=str(e))
-             
-        try:
-            # 从表单请求中获取标题和描述的数据
-            title = request.form['title']
-            description = request.form['description']
-            # 连接数据库
-            with sqlite3.connect("database.db") as con:
-                cur = con.cursor()  # 获取游标
-                # requests        将请求信息添加到数据库
-                cur.execute("INSERT INTO requests (title, description) VALUES (?, ?)", (title, description))
-                con.commit()  # 提交事务
-                # 操作成功，重定向到查找请求的页面
-                return render_template('main.html')
-                return redirect(url_for('findRequest'))
-        except Exception as e:
-            # 如果操作失败，可能是数据库连接问题或执行SQL语句有误
-            print(f"创建请求失败，错误: {e}")  # 打印错误信息，实际应用中应考虑记录日志
-            # 操作失败，也可以选择重定向到某个页面，或返回错误信息
-            return render_template('main.html')
-            return redirect(url_for('errorPage'))  # 假设有一个显示错误的页面
+        
     else:
         # 如果不是POST请求，则渲染创建请求的页面
+        # response = make_response(render_template('createRequest.html'))
+        # # Prevent caching the form page to avoid resubmission issues
+        # response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+        # response.headers['Pragma'] = 'no-cache'  # HTTP 1.0 compatibility
+        # response.headers['Expires'] = '0'  # Proxies
+        # return response
+        
         return render_template('createRequest.html')
 
 
-# http://127.0.0.1:5000/main/
+
+
+
+#  搜索帖子       http://127.0.0.1:5000/main/          @app.route('/findRequest')
 @app.route('/findRequest')
 def findRequest():
     search_queryFR = request.args.get('searchQueryFR', '').strip()
-    # search_query = request.args.get('searchQuery', '')  # 获取搜索关键词
     rows = []
-    message = ''  # 初始化消息为空字符串
+    message = ''
 
     if search_queryFR:
         try:
             with sqlite3.connect("database.db") as con:
-                con.row_factory = sqlite3.Row  # 使行为字典
+                con.row_factory = sqlite3.Row
                 cur = con.cursor()
-                # 只根据标题搜索requests表
                 cur.execute("SELECT * FROM requests WHERE title LIKE ?", ('%'+search_queryFR+'%',))
-                rows = cur.fetchall()  # 获取所有查询结果
-                if not rows:  # 如果没有找到任何行
-                    message = '未找到匹配的请求。'  # 设置消息为“未找到”
+                rows = [dict(row) for row in cur.fetchall()]
+
+                for row in rows:
+                    cur.execute("SELECT * FROM replies WHERE request_id=?", (row["id"],))
+                    row["replies"] = [dict(reply) for reply in cur.fetchall()]
+
+                if not rows:
+                    message = '未找到匹配的请求。'
         except Exception as e:
-            message = '搜索过程中出现问题。'  # 如果出现异常，设置一个通用消息
-            print(f"搜索请求失败，错误: {e}")  # 可以选择在服务器日志中记录真实的错误
+            message = '搜索过程中出现问题。'
+            print(f"搜索请求失败，错误: {e}")
 
-    # 渲染页面，将查询结果和消息传递给模板
-    return render_template('findRequest.html', rows=rows, message=message)
+    # 注意这里将 search_queryFR 变量回传给模板
+    return render_template('findRequest.html', rows=rows, message=message, search_queryFR=search_queryFR)
+# def findRequest():
+#     search_queryFR = request.args.get('searchQueryFR', '').strip()
+#     rows = []
+#     message = ''  # 初始化消息为空字符串
+#     # search_queryFR   筛选框   有内容
+#     if search_queryFR:
+#         try:
+#             with sqlite3.connect("database.db") as con:
+#                 con.row_factory = sqlite3.Row  # 使行     为字典
+#                 cur = con.cursor()
+#                 # 找到这个帖子             只根据标题   搜索requests表     
+#                 cur.execute("SELECT * FROM requests WHERE title LIKE ?", ('%'+search_queryFR+'%',))
+#                 rows = cur.fetchall()
+#                 # rows是全部   这些帖子
+                
+#                 # row是    对于每个帖子   查询其所有回答
+#                 for row in rows:
+#                     row = dict(row)  # row 是每个帖子     确保row是字典格式以便我们可以修改它
+#                     cur.execute("SELECT * FROM replies WHERE request_id=?", (row["id"],))
+#                     replies = cur.fetchall()
+#                     row["replies"] = [dict(reply) for reply in replies] if replies else []  # 如果没有回答，确保是空列表[]
+#                     print(row["replies"])
+#                     # for reply in replies:
+#                     #     print(dict(reply))
+#                     #回答 [<sqlite3.Row object at 0x0000029965FBAB60>]
+
+#                 if not rows:
+#                     message = '未找到匹配的请求。'
 
 
-    return render_template('findRequests.html', rows=rows)
-    # 在这里实现搜索逻辑
-    # return "这是查找请求的页面"
-    return render_template('findRequest.html')
+
+#                 # back
+#                 # con.row_factory = sqlite3.Row  # 使行为字典
+#                 # cur = con.cursor()
+#                 # # 只根据标题搜索requests表
+#                 # cur.execute("SELECT * FROM requests WHERE title LIKE ?", ('%'+search_queryFR+'%',))
+#                 # rows = cur.fetchall()  # 获取所有查询结果
+#                 # if not rows:  # 如果没有找到任何行
+#                 #     message = '未找到匹配的请求。'  # 设置消息为“未找到”
+#         except Exception as e:
+#             message = '搜索过程中出现问题。'  # 如果出现异常，设置一个通用消息
+#             print(f"搜索请求失败，错误: {e}")  # 可以选择在服务器日志中记录真实的错误
+#     return render_template('findRequest.html', rows=rows, message=message)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 回复 帖子                 请求的路由（示例）
+# @app.route('/replyRequest/<int:request_id>', methods=['GET', 'POST'])
+# def replyRequest(request_id):
+#     if request.method == 'POST':
+#         # 这里应该处理回复逻辑，比如保存回复到数据库   假设有一个replies表用来保存回复
+#         reply_content = request.form['reply']
+#         responderName = session['username']
+#         # 只有当reply_content不为空时，才处理回复逻辑
+#         if reply_content:  # 检查reply_content  不是空
+#             with sqlite3.connect("database.db") as con:
+#                 cur = con.cursor()
+#                 # 向replies表中插入数据：request_id, reply_content, 和 answerName
+#                 cur.execute("INSERT INTO replies (request_id, reply_content, answerName) VALUES (?, ?, ?)",
+#                             (request_id, reply_content, responderName))
+#                 con.commit()
+#             return redirect(url_for('findRequest'))
+#         else:
+#             # reply_content为空  重新渲染回复表单的页面   可以选择传递一个错误消息到页面，告知用户需要输入回复内容   这里埋了雷
+#             return render_template('findRequest.html', request_id=request_id, error="回复内容不能为空。")
+#     else:
+#         # 啥也没有回复     对于GET请求，渲染回复表单的页面
+#         return render_template('findRequest.html', request_id=request_id)
+
+# 这个reply   还不完善
+@app.route('/replyRequest', methods=['GET', 'POST'])
+def replyRequest():
+    if request.method == 'POST':
+        reply_content = request.form['reply']
+        responderName = session['username']
+        # 假设 'search_queryFR' 是表单字段，用户提交的是请求的标题
+        request_title = request.form.get('search_queryFR')
+
+        if reply_content:
+            with sqlite3.connect("database.db") as con:
+                cur = con.cursor()
+                # 首先根据标题找到请求的 ID
+                # cur.execute("SELECT id FROM requests WHERE title = ?", (request_title,))   这是完全匹配   不完善
+                cur.execute("SELECT id FROM requests WHERE title LIKE ?", ('%' + request_title + '%',))
+                result = cur.fetchone()  #  没有回复   是none
+
+                # 检查是否找到了对应的请求
+                if result:
+                    request_id = result[0]
+
+                    # 然后像之前一样处理回复逻辑
+                    cur.execute("INSERT INTO replies (request_id, reply_content, answerName) VALUES (?, ?, ?)",
+                                (request_id, reply_content, responderName))
+                    con.commit()
+
+                    return redirect(url_for('findRequest'))
+                else:
+                    # 如果根据标题找不到请求，返回错误消息
+                    return render_template('findRequest.html', error="未找到指定的请求，请检查标题是否正确。")
+        else:
+            return render_template('findRequest.html', error="回复内容不能为空。")
+    else:
+        # 对于 GET 请求，从 URL 参数中获取标题
+        # 注意：这里的参数名应该与POST请求中表单字段的名称保持一致
+        request_title = request.args.get('search_queryFR')
+        return render_template('findRequest.html', request_title=request_title)
+
 
 
 
@@ -338,28 +453,30 @@ def findRequest():
 #         rows = cur.fetchall()
 #     return render_template('findRequests.html', rows=rows)
 
-
-
-# 处理回复请求的路由（示例）
-@app.route('/reply_request/<int:request_id>', methods=['GET', 'POST'])
-def reply_request(request_id):
-    if request.method == 'POST':
-        # 这里应该处理回复逻辑，比如保存回复到数据库
-        reply_content = request.form['reply']
-        # 假设有一个replies表用来保存回复
-        with sqlite3.connect("database.db") as con:
-            cur = con.cursor()
-            cur.execute("INSERT INTO replies (request_id, content) VALUES (?, ?)", (request_id, reply_content))
-            con.commit()
-        return redirect(url_for('findRequest'))
-    else:
-        # 对于GET请求，渲染回复表单的页面
-        return render_template('replyRequest.html', request_id=request_id)
+# @app.route('/requests')
+# def show_requests():
+#     # 连接数据库
+#     conn = sqlite3.connect('database.db')
+#     conn.row_factory = sqlite3.Row  # 这样可以让我们通过列名称访问数据
+#     cur = conn.cursor()
     
+#     # 查询所有请求
+#     cur.execute('SELECT * FROM requests')
+#     rows = cur.fetchall()
 
+#     # 对于每个请求，查询其所有回答
+#     for row in rows:
+#         request_id = row['id']
+#         cur.execute('SELECT * FROM replies WHERE request_id=?', (request_id,))
+#         replies = cur.fetchall()
+#         # 将回答列表添加到请求对象中
+#         row['replies'] = replies
+    
+#     # 关闭数据库连接
+#     conn.close()
 
-
-
+#     # 将请求和它们的回答传递给模板
+#     return render_template('requests.html', rows=rows)
 
 
 
