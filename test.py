@@ -1,4 +1,5 @@
 import sqlite3
+# 创建新表
 # 运行test.py可以发现在项目目录中创建了一个名为database的数据库
 conn = sqlite3.connect('database.db')  #建立database.db数据库连接
 # this is ori
@@ -42,8 +43,15 @@ CREATE TABLE IF NOT EXISTS requests (
 
 
 
-
-
+# request_id    reply_content   回答者
+conn.execute('''
+CREATE TABLE IF NOT EXISTS replies (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    request_id TEXT NOT NULL,
+    reply_content TEXT,
+    answerName TEXT
+)
+''') #执行单条sql语句
 
 
 
@@ -109,9 +117,22 @@ conn.close()       #关闭连接
 
 
 
-# users  requests                    students
-# requests
+# 我目前使用   这些表          users  requests        students
+
+
+
+
+# requests表 
 # id  title  description  username  created_at
 # --  -----  -----------  --------  -------------------
 # 1   1      1                      2024-03-26 11:37:10
 # 2   1      1                      2024-03-26 11:40:37
+
+
+
+# replies表
+# id是主键
+# id  request_id  reply_content  answerName
+# --  ----------  -------------  ----------
+# 1   1           aaa            1
+# 2   4           bbb            1
