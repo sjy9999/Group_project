@@ -8,7 +8,7 @@ app.secret_key = 'your_secret_key'  # 用于保持会话安全
 # 先打开   这个界面   注册学生账号       这是   http://127.0.0.1:5000/create/
 @app.route('/create/')
 def create_student():
-    return render_template('student.html')  #渲染student.html模板
+    return render_template('student.html')    #渲染student.html模板
 
 
 

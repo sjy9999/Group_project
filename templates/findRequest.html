@@ -14,6 +14,8 @@
                 <label for="searchQuery">Search Requests:</label>
                 <input type="text" name="searchQueryFR" placeholder="Enter keywords of requests" value="{{ search_queryFR }}">
                 <!-- <input type="text" class="form-control" id="searchQuery" name="searchQueryFR" placeholder="Enter keywords of requests"> -->
+                <input type="text" name="searchQueryFR" placeholder="Enter keywords of requests" value="{{ search_queryFR }}">
+                <!-- <input type="text" class="form-control" id="searchQuery" name="searchQueryFR" placeholder="Enter keywords of requests"> -->
             </div>
             <button type="submit" class="btn btn-primary">Search</button>
             <a href="{{ url_for('main') }}" class="btn btn-success">Back to Main Page</a>
@@ -26,8 +28,15 @@
         {% endfor %} -->
 
 
+        <!-- {% for row in rows %}
+            <!- 直接打印出 row.replies 来检查 ->
+            {{ row.replies }}  
+        {% endfor %} -->
+
+
         {% for row in rows %}
         <div class="card mt-3">
+            <div class="card-body">           
             <div class="card-body">           
                 <h5 class="card-title">{{ row.title }}</h5>
                 <p class="card-text">{{ row.description }}</p>
