@@ -9,6 +9,8 @@
 <body>
     <div class="container mt-5">
         <h2>Find Requests</h2>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-info mb-3">Dashboard</a>
+
         <form action="{{ url_for('findRequest') }}" method="get">
             <div class="form-group">
                 <label for="searchQuery">Search Requests:</label>

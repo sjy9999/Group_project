@@ -93,6 +93,7 @@ def login():
                     # 用户验证成功，设置用户会话
                     session['loggedin'] = True
                     session['username'] = user['name']
+                    session['email'] = user['email']
                     msg = '登录成功！'
                     # 登录成功后   保存   测试
                     session['username'] = username  # 假设这是登录视图函数中的代码
@@ -110,6 +111,21 @@ def login():
     # 如果不是POST请求，或者出现其他情况，重定向到登录页面
     return redirect(url_for('login'))
 
+
+@app.route('/dashboard/')
+def dashboard():
+    if 'loggedin' in session:
+        return render_template('dashboard.html', username=session['username'], email=session['email'])
+    else:
+        return redirect(url_for('login'))
+
+
+@app.route('/logout/', endpoint='logout1')
+def logout():
+    session.pop('loggedin', None)
+    session.pop('username', None)
+    session.pop('email', None)
+    return redirect(url_for('login'))
 
 
 
