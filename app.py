@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, url_for, session,make_response
+from flask import Flask, request, render_template, redirect, url_for, session,make_response,flash
 import sqlite3
 # 项目启动       student.html 这是主界面
 app = Flask(__name__)
@@ -125,7 +125,45 @@ def logout():
     session.pop('loggedin', None)
     session.pop('username', None)
     session.pop('email', None)
-    return redirect(url_for('login'))
+    return redirect(url_for('register'))
+
+@app.route('/update_email', methods=['POST'])
+def update_email():
+    if 'loggedin' in session:
+        new_email = request.form['email']
+        try:
+            with sqlite3.connect("database.db") as con:
+                cur = con.cursor()
+                cur.execute("UPDATE users SET email = ? WHERE name = ?", (new_email, session['username']))
+                con.commit()
+                session['email'] = new_email  # Update session data
+                flash('Email updated successfully!', 'success')
+                return redirect(url_for('dashboard'))
+        except sqlite3.Error as e:
+            return f"An error occurred: {e}", 500
+    else:
+        return redirect(url_for('login'))
+
+@app.route('/update_password', methods=['POST'])
+def update_password():
+    if 'loggedin' in session:
+        new_password = request.form['password']
+        # Ideally, you should hash this password before storing
+        try:
+            with sqlite3.connect("database.db") as con:
+                cur = con.cursor()
+                cur.execute("UPDATE users SET password = ? WHERE name = ?", (new_password, session['username']))
+                con.commit()
+                flash('Password updated successfully!', 'success')
+                return redirect(url_for('dashboard'))
+                
+        except sqlite3.Error as e:
+            return f"An error occurred: {e}", 500
+    else:
+        flash('You are not logged in.', 'error')
+        return redirect(url_for('login'))
+
+
 
 
 
