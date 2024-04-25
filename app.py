@@ -1,6 +1,6 @@
 from flask import Flask, request, render_template, redirect, url_for, session,make_response
 import sqlite3
-# 项目启动       student.html 这是主界面
+# 项目启动       student.html 这是主界面  名字没事
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # 用于保持会话安全
 
