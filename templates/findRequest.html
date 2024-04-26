@@ -1,3 +1,4 @@
+<!-- Find Requests   回复帖子的html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +7,7 @@
     <title>Find Requests</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
+<!-- url_for 函数 findRequest  main   replyRequest-->
 <body>
     <div class="container mt-5">
         <h2>Find Requests</h2>
@@ -14,11 +16,10 @@
                 <label for="searchQuery">Search Requests:</label>
                 <input type="text" name="searchQueryFR" placeholder="Enter keywords of requests" value="{{ search_queryFR }}">
                 <!-- <input type="text" class="form-control" id="searchQuery" name="searchQueryFR" placeholder="Enter keywords of requests"> -->
-                <input type="text" name="searchQueryFR" placeholder="Enter keywords of requests" value="{{ search_queryFR }}">
-                <!-- <input type="text" class="form-control" id="searchQuery" name="searchQueryFR" placeholder="Enter keywords of requests"> -->
             </div>
             <button type="submit" class="btn btn-primary">Search</button>
-            <a href="{{ url_for('main') }}" class="btn btn-success">Back to Main Page</a>
+            <!-- success -->
+            <a href="{{ url_for('main') }}" class="btn btn-primary">Back to Main Page</a>
         </form>
 
         
@@ -37,7 +38,8 @@
         {% for row in rows %}
         <div class="card mt-3">
             <div class="card-body">           
-            <div class="card-body">           
+            <div class="card-body"> 
+                <!-- 显示     问的问题 -->  
                 <h5 class="card-title">{{ row.title }}</h5>
                 <p class="card-text">{{ row.description }}</p>
                 <p class="card-text"><small class="text-muted">Posted by {{ row.username }} on {{ row.created_at }}</small></p>
@@ -55,12 +57,12 @@
                     <p>No replies.</p>
                 {% endif %}
 
-                <!-- 回复表单 -->
+                <!--replyRequest   回复表单 -->
                 <form action="{{ url_for('replyRequest', request_id=row.id) }}" method="post">
                     <div class="form-group">
                         <textarea name="reply" class="form-control" rows="3" placeholder="Enter your reply here"></textarea>
                     </div>
-                    <!-- 隐藏字段保留当前的搜索查询 -->
+                    <!-- ??      隐藏字段保留当前的搜索查询 -->
                     <input type="hidden" name="search_queryFR" value="{{ request.args.get('searchQueryFR', '') }}">
                     <!-- 也需要传递当前帖子的ID -->
                     <input type="hidden" name="request_id" value="{{ row.id }}">

@@ -4,6 +4,7 @@ from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 import sqlite3
 
 class PasswordResetService:
+    # ini
     @staticmethod
     def generate_reset_token(email):
         serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
@@ -14,10 +15,10 @@ class PasswordResetService:
         token = PasswordResetService.generate_reset_token(user_email)
         reset_url = url_for('reset_password', token=token, _external=True)
         # reset_url = url_for('change_password', token=token, _external=True)
-        # 这是   给我的邮箱   发送的内容
+        # 这是   给我的邮箱   发送的内容     reset_password  url
         msg = Message("Password Reset Requested",
                       recipients=[user_email])
-        msg.body = f'To reset your password, visit the following link: {reset_url}'
+        msg.body = f'This is from the cits5505 project, to reset your password, please visit the following link: {reset_url}'
         from app import mail
         mail.send(msg)
 

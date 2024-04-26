@@ -1,3 +1,4 @@
+<!-- Create Requests   创建帖子的html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +7,7 @@
     <title>Create Requests</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
+<!-- url_for 函数createRequest  main -->
 <body>
     <div class="container mt-5">
         <h2>Create Request</h2>
@@ -20,8 +22,8 @@
                 <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
             </div>
 
-            <button type="submit" class="btn btn-success">Submit Request</button>
-            <a href="{{ url_for('main') }}" class="btn btn-success">Back to Main Page</a>
+            <button type="submit" class="btn btn-primary">Submit Request</button>
+            <a href="{{ url_for('main') }}" class="btn btn-primary">Back to Main Page</a>
 
         </form>
     </div>

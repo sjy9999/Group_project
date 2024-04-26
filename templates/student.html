@@ -1,10 +1,11 @@
+<!-- regi login 登录  注册界面  -->
 <!DOCTYPE html>
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>标题</title>
+    <title>FirstPage标题</title>
     <!-- 引入Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
@@ -19,59 +20,74 @@
             width: auto;
         }
         .img-full-width {
-        max-width: 100%;
-        /* auto */
-        height: 100vh;
+            max-width: 100%;
+            height: 100vh;
+        }
+        /* Centering the form vertically and horizontally */
+        .form-container {
+            height: 100%; /* Full height */
+            display: flex;
+            justify-content: center; /* Center horizontally */
+            align-items: center; /* Center vertically */
+        }
+        .form-inner-container {
+            width: 80%; /* 占用80%宽度 */
+            height: 80%; /* 新增：高度占80% */
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* 垂直居中内容 */
+            overflow: auto; /* 如果内容超出，允许滚动 */
+            max-width: 500px; /* 最大宽度限制，防止过宽 */
         }
     </style>
 </head>
 <body>
 
-<div class="container-fluid full-height">
-    <div class="row full-height">
-        <!-- 图片部分 -->
-        <div class="col-md-6 d-flex align-items-center justify-content-center">
-            <img src="/static/img/zaha3.jpg" class="img-full-width" alt="Ice">
-        </div>
-        <!-- 表单部分 -->
-        <div class="col-md-6">
-            <div class="container">
-                <h2 class="mb-4">Register 注册</h2>
-                <form action="{{ url_for('register') }}" method="POST" class="needs-validation" novalidate>
-                    <div class="form-group">
-                        <label for="name">Username 用户名</label>
-                        <input type="text" class="form-control" id="name" name="name" required>
+    <div class="container-fluid full-height">
+        <div class="row full-height">
+            <!-- 左面 图片部分 -->
+            <div class="col-md-6 d-flex align-items-center justify-content-center">
+                <img src="/static/img/zaha3.jpg" class="img-full-width" alt="Ice">
+            </div>
+            <!-- 表单部分  url  register  login-->
+            <div class="col-md-6">
+                <div class="form-container">
+                    <div class="container">
+                        <h2 class="mb-4">Register</h2>
+                        <form action="{{ url_for('register') }}" method="POST" class="needs-validation" novalidate>
+                            <div class="form-group">
+                                <label for="name">Username</label>
+                                <input type="text" class="form-control" id="name" name="name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="password">Password</label>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" class="form-control" id="email" name="email">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Register</button>
+                        </form>
+                        
+                        <h2 class="mb-4 mt-5">Login</h2>
+                        <form action="{{ url_for('login') }}" method="POST" class="needs-validation" novalidate>
+                            <div class="form-group">
+                                <label for="username">Username</label>
+                                <input type="text" class="form-control" id="username" name="username" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="passwordLogin">Password</label>
+                                <input type="password" class="form-control" id="passwordLogin" name="password" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Login</button>
+                            <a href="{{ url_for('forgot_password') }}" class="btn btn-primary">Forget my password</a>
+                        </form>
                     </div>
-                    <div class="form-group">
-                        <label for="password">Password 密码</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Email 邮箱</label>
-                        <input type="email" class="form-control" id="email" name="email">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Register 注册</button>
-                </form>
-                
-                <h2 class="mb-4 mt-5">Login 登录</h2>
-                <form action="{{ url_for('login') }}" method="POST" class="needs-validation" novalidate>
-                    <div class="form-group">
-                        <label for="username">Username 用户名</label>
-                        <input type="text" class="form-control" id="username" name="username" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="passwordLogin">Password 密码</label>
-                        <input type="password" class="form-control" id="passwordLogin" name="password" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Login 登录</button>
-                    <!-- <button type="submit" class="btn btn-primary">Forget my password</button> 这个button url_for('forgot_password')-->
-                    <a href="{{ url_for('forgot_password') }}" class="btn btn-secondary">Forget my password</a>
-                </form>
-                
+                </div>
             </div>
         </div>
     </div>
-</div>
 
 <!-- 引入Bootstrap的JS和依赖 -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
@@ -79,3 +95,7 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
+
+
+
+<!-- Bootstrap   btn-primary 通常表示主要按钮样式，而 btn-secondary 表示次要按钮样式 -->
