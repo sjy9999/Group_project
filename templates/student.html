@@ -64,7 +64,10 @@
                         <input type="password" class="form-control" id="passwordLogin" name="password" required>
                     </div>
                     <button type="submit" class="btn btn-primary">Login 登录</button>
+                    <!-- <button type="submit" class="btn btn-primary">Forget my password</button> 这个button url_for('forgot_password')-->
+                    <a href="{{ url_for('forgot_password') }}" class="btn btn-secondary">Forget my password</a>
                 </form>
+                
             </div>
         </div>
     </div>

@@ -1,9 +1,25 @@
-from flask import Flask, request, render_template, redirect, url_for, session,make_response
+from flask import Flask, request, render_template, redirect, url_for, session,make_response, flash
 import sqlite3
+from passwordReset import PasswordResetService
+from flask_mail import Mail
+import os
+from routes import UserViews
+
+
 # 项目启动       student.html 这是主界面  名字没事
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # 用于保持会话安全
+app.config['SECRET_KEY'] = '8f42a73054b1749f8f58848be5e6502c'
+app.config['SECURITY_PASSWORD_SALT'] = '3243f6a8885a308d313198a2e0370734'
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'  # Gmail的SMTP服务器  smtp.sina.com       smtp.gmail.com
+app.config['MAIL_PORT'] = 587  # 邮件发送端口
+app.config['MAIL_USE_TLS'] = True  # 启用传输层安全性协议
+app.config['MAIL_USERNAME'] = 's395615470@gmail.com'
+app.config['MAIL_PASSWORD'] = 'johgpueksgsakecj'  # 你的Gmail密码或应用密码
+app.config['MAIL_DEFAULT_SENDER'] = 's395615470@gmail.com'  # 默认的发件人邮箱地址
 
+mail = Mail(app)
+app.register_blueprint(UserViews.bp)
 
 # 先打开   这个界面   注册学生账号       这是   http://127.0.0.1:5000/create/
 @app.route('/create/')
@@ -437,6 +453,158 @@ def replyRequest():
         # 注意：这里的参数名应该与POST请求中表单字段的名称保持一致
         request_title = request.args.get('search_queryFR')
         return render_template('findRequest.html', request_title=request_title)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 这里是对的    user和email   需要匹配   点击Forget my password  仅仅跳转界面 
+@app.route('/forgot_password')
+def forgot_password():
+    # 渲染忘记密码的 HTML 表单
+    return render_template('forgotPassword.html')
+# @app.route('/forgotPassword', methods=['GET', 'POST'])
+# def forgot_password():
+#     if request.method == 'POST':
+#         email = request.form['email']
+#         con = sqlite3.connect("database.db")
+#         cur = con.cursor()
+#         cur.execute("SELECT * FROM users WHERE email = ?", (email,))
+#         user = cur.fetchone()
+#         if user:
+#             PasswordResetService.sendUpdatePassword(email)
+#             return render_template('notification.html', message="重置邮件已发送，请检查您的邮箱")
+#         else:
+#             return render_template('forgotPassword.html', error="未找到该邮箱对应的用户")
+#     return render_template('forgotPassword.html')
+
+# button   仅仅发送邮件     比如发送到我qq邮箱
+@app.route('/send_link', methods=['POST'])
+def sendLink():
+    if request.method == 'POST':
+        email = request.form['email']
+        con = sqlite3.connect("database.db")
+        cur = con.cursor()
+        cur.execute("SELECT * FROM users WHERE email = ?", (email,))
+        user = cur.fetchone()
+        # 根据这个email     查询到  user存在    PasswordResetService类    
+        if user:
+            PasswordResetService.sendUpdatePassword(email)
+            return render_template('notification.html', message="重置邮件已发送，请检查您的邮箱")
+        else:
+            return render_template('forgotPassword.html', error="未找到该邮箱对应的用户")
+    return render_template('forgotPassword.html')
+
+
+# qq邮箱  打开链接                                        delete  输入新的密码       点击   reset  email
+@app.route('/reset_password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    if request.method == 'GET':
+        # If it's a GET request, just render the reset_password.html template with the token
+        return render_template('reset_password.html', token=token)
+
+    # If it's a POST request, process the form submission
+    new_password = request.form['new_password']
+    if not new_password:
+        flash('No new password provided.', 'error')
+        return redirect(url_for('reset_password', token=token))  # Redirect back to the same page
+
+    email = PasswordResetService.verify_reset_token(token)
+    if email is None:
+        flash('The reset token is invalid or has expired.', 'error')
+        return redirect(url_for('reset_request'))  # Redirect to the request reset page
+
+    # At this point, we have a valid email and new password
+    PasswordResetService.update_password(email, new_password)
+    flash('Your password has been updated!', 'success')
+    return redirect(url_for('user_views.user'))
+
+    return redirect(url_for('student'))
+    return redirect(url_for('login'))  # Redirect to the login page after success
+
+
+
+# 2
+    token = request.args.get('token')  # 或者从表单中获取 token，如果它是以隐藏字段传递的
+    new_password = request.form['new_password']
+    if not new_password:
+        flash('No new password provided.', 'error')  # 没有提供新密码
+        return redirect(url_for('reset_request'))  # 重定向回重置请求页面
+
+    email = PasswordResetService.verify_reset_token(token)
+    if email is None:
+        flash('The reset token is invalid or has expired.', 'error')
+        return redirect(url_for('reset_request'))  # 重定向回重置请求页面
+
+    if not email:  # 这是一个额外的检查，以防 email 为空字符串
+        flash('The email is invalid.', 'error')
+        return redirect(url_for('reset_request'))  # 重定向回重置请求页面
+
+    # 在这里，我们已经验证了 email 不是 None 也不是空字符串
+    PasswordResetService.update_password(email, new_password)
+    flash('Your password has been updated!', 'success')
+    return redirect(url_for('login'))
+
+
+# 1
+    if request.method == 'POST':
+        new_password = request.form['new_password']
+        email = PasswordResetService.verify_reset_token(token)
+        if email:
+            PasswordResetService.update_password(email, new_password)
+            return redirect(url_for('login'))
+        else:
+            return '重置链接无效或已过期'
+    if request.method == 'GET':
+            return render_template('reset_password.html', token=token)
+        # 如果是 POST 请求，处理密码更改逻辑        
+    return render_template('reset_password.html', token=token)
+
+
+
+# qq邮箱  打开网页   输入新的密码   submit
+@app.route('/change_password', methods=['POST'])
+def change_password():
+    token = request.args.get('token')  # 或者从表单中获取 token，如果它是以隐藏字段传递的
+    new_password = request.form['new_password']
+    if not new_password:
+        flash('No new password provided.', 'error')  # 没有提供新密码
+        return redirect(url_for('reset_request'))  # 重定向回重置请求页面
+
+    email = PasswordResetService.verify_reset_token(token)
+    if email is None:
+        flash('The reset token is invalid or has expired.', 'error')
+        return redirect(url_for('reset_request'))  # 重定向回重置请求页面
+
+    if not email:  # 这是一个额外的检查，以防 email 为空字符串
+        flash('The email is invalid.', 'error')
+        return redirect(url_for('reset_request'))  # 重定向回重置请求页面
+
+    # 在这里，我们已经验证了 email 不是 None 也不是空字符串
+    PasswordResetService.update_password(email, new_password)
+    flash('Your password has been updated!', 'success')
+    return redirect(url_for('login'))
+
+
+
+
+
+
+
+
+
+
+
 
 
 
