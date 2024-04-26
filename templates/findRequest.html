@@ -43,17 +43,23 @@
                 <p class="card-text"><small class="text-muted">Posted by {{ row.username }} on {{ row.created_at }}</small></p>
                 
                 <!-- 只是显示     回答 -->
-
                 {% if row.replies %}
-                    {% for reply in row.replies %}
-                        <div class="reply mt-2">
-                            <p class="reply-text">{{ reply.reply_content }}</p>
-                            <p class="reply-info"><small class="text-muted">Replied by {{ reply.answerName }}</small></p>
-                        </div>
-                    {% endfor %}
-                {% else %}
-                    <p>No replies.</p>
-                {% endif %}
+                {% for reply in row.replies %}
+                <div class="reply mt-2">
+                    <!-- 回复者信息 -->
+                 
+                    <p class="card-text"><small class="text-muted">Replied by {{ reply.answerName }}</small></p>
+                    <!-- 回复内容和点赞部分在同一行 -->
+                    <div class="d-flex align-items-center justify-content-start">
+                        <p class="mb-0 mr-2">{{ reply.reply_content }}</p>
+                        <span class="like-emoji" role="button" data-reply-id="{{ reply.id }}" style="cursor: pointer;">👍</span>
+                        <span id="like-count-{{ reply.id }}">0</span>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>No replies.</p>
+            {% endif %}
 
                 <!-- 回复表单 -->
                 <form action="{{ url_for('replyRequest', request_id=row.id) }}" method="post">
@@ -66,13 +72,14 @@
                     <input type="hidden" name="request_id" value="{{ row.id }}">
                     <button type="submit" class="btn btn-primary">Submit Reply</button>
                     
+                </form> 
 
                     
                     <!-- <div class="form-group">
                         <textarea name="reply" class="form-control" rows="3" placeholder="Enter your reply here"></textarea>
                     </div>
                     <button type="submit" class="btn btn-primary">Submit Reply</button> -->
-                </form>
+                
             </div>
         </div>
         {% else %}
