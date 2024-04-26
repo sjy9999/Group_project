@@ -51,8 +51,31 @@ CREATE TABLE IF NOT EXISTS replies (
     reply_content TEXT,
     answerName TEXT
 )
-''') #执行单条sql语句
+''')
+ #执行单条sql语句
 
+
+from flask_sqlalchemy import SQLAlchemy
+from flask import Flask
+from datetime import datetime
+
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
+
+class Like(db.Model):
+    __tablename__ = 'likes'
+    id = db.Column(db.Integer, primary_key=True)
+    post_id = db.Column(db.Integer, nullable=False)
+    post_type = db.Column(db.String, nullable=False)  # 'request' 或 'reply'
+    username = db.Column(db.String, nullable=False)  # 点赞用户的用户名
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+# 初始化数据库和模型
+with app.app_context():
+    db.create_all()
+    print("Tables created!")
 
 
 conn.close()       #关闭连接
