@@ -1,7 +1,7 @@
 import sqlite3
 # 创建新表
 # 运行test.py可以发现在项目目录中创建了一个名为database的数据库
-conn = sqlite3.connect('database.db')  #建立database.db数据库连接
+conn = sqlite3.connect('instance/database.db')  #建立database.db数据库连接
 # this is ori
 # conn.execute('CREATE TABLE students (name TEXT, addr TEXT, city TEXT, pin TEXT)') #执行单条sql语句
 
@@ -55,8 +55,8 @@ CREATE TABLE IF NOT EXISTS replies (
  #执行单条sql语句
 
 
-from flask_sqlalchemy import SQLAlchemy
-from flask import Flask
+from flask_sqlalchemy import SQLAlchemy # type: ignore
+from flask import Flask # type: ignore
 from datetime import datetime
 
 app = Flask(__name__)
