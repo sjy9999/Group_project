@@ -28,6 +28,11 @@ CREATE TABLE IF NOT EXISTS users (
 )
 ''') #执行单条sql语句
 
+# 为用户表添加 avatar_url 列
+conn.execute('''
+ALTER TABLE users ADD COLUMN avatar_url TEXT;
+''')
+
 
 
 conn.execute('''

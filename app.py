@@ -112,12 +112,7 @@ def login():
     return redirect(url_for('login'))
 
 
-@app.route('/dashboard/')
-def dashboard():
-    if 'loggedin' in session:
-        return render_template('dashboard.html', username=session['username'], email=session['email'])
-    else:
-        return redirect(url_for('login'))
+
 
 
 @app.route('/logout/', endpoint='logout1')
@@ -162,7 +157,98 @@ def update_password():
     else:
         flash('You are not logged in.', 'error')
         return redirect(url_for('login'))
+    
 
+import hashlib
+
+def generate_gravatar_url(email, size=80):
+    """Generate a Gravatar URL from an email."""
+    email = email.lower().encode('utf-8')  # Ensure the email is in lowercase and encoded to bytes
+    gravatar_id = hashlib.md5(email).hexdigest()
+    return f"https://www.gravatar.com/avatar/{gravatar_id}?d=identicon&s={size}"
+
+@app.route('/dashboard/')
+def dashboard():
+    if 'loggedin' in session:
+        username = session['username']
+        email = session['email']
+
+        # Fetch the avatar URL
+        avatar_url = generate_gravatar_url(email, 128)
+
+        # Fetch user's requests from the database
+        with sqlite3.connect("database.db") as con:
+            con.row_factory = sqlite3.Row
+            cur = con.cursor()
+            cur.execute("SELECT * FROM requests WHERE username = ?", (username,))
+            user_requests = cur.fetchall()
+        
+        # Fetch replies for each request
+            requests_with_replies = []
+            for request in user_requests:
+                cur.execute("SELECT * FROM replies WHERE request_id = ?", (request['id'],))
+                replies = cur.fetchall()
+                requests_with_replies.append(dict(request, replies=replies))
+            
+        return render_template('dashboard.html', username=username, email=email, avatar_url=avatar_url, user_requests=requests_with_replies)
+    else:
+        flash("Please log in to access the dashboard.", "warning")
+        return redirect(url_for('login'))
+    
+
+@app.route('/request/<int:request_id>')
+def specific_request(request_id):
+    if 'loggedin' not in session:
+        return redirect(url_for('login'))
+
+    with sqlite3.connect("database.db") as con:
+        con.row_factory = sqlite3.Row
+        cur = con.cursor()
+
+        # Fetch the specific request and its replies
+        cur.execute("SELECT * FROM requests WHERE id = ?", (request_id,))
+        request_details = cur.fetchone()
+        
+        cur.execute("SELECT * FROM replies WHERE request_id = ?", (request_id,))
+        replies = cur.fetchall()
+
+    if request_details:
+        return render_template('specific_request.html', request=request_details, replies=replies)
+    else:
+        flash('Request not found.', 'warning')
+        return redirect(url_for('dashboard'))
+
+from datetime import datetime
+
+@app.template_filter()
+def dateformat(value, format='%Y-%m-%d %H:%M'):
+    """Format a datetime string to a more readable format. Handle None values gracefully."""
+    if not value:  # This checks for None or empty strings
+        return "No date provided"  # You can return an empty string or a placeholder
+    try:
+        return datetime.strptime(value, '%Y-%m-%d %H:%M:%S').strftime(format)
+    except ValueError:
+        return value  # Return the original value if formatting fails
+
+
+@app.route('/delete_request/<int:request_id>', methods=['POST'])
+def delete_request(request_id):
+    if 'loggedin' not in session:
+        return redirect(url_for('login'))
+
+    with sqlite3.connect("database.db") as con:
+        cur = con.cursor()
+        # Ensure that the current user is the owner of the request before deleting
+        cur.execute("SELECT * FROM requests WHERE id = ? AND username = ?", (request_id, session['username']))
+        request = cur.fetchone()
+        if request:
+            cur.execute("DELETE FROM requests WHERE id = ?", (request_id,))
+            con.commit()
+            flash('Request deleted successfully.', 'success')
+        else:
+            flash('Request not found or you do not have permission to delete it.', 'error')
+
+    return redirect(url_for('dashboard'))
 
 
 

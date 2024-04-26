@@ -60,7 +60,12 @@
     <div class="container mt-5">
         <div class="header-area text-center mb-4">
             <h2>User Dashboard</h2>
+            <img src="{{ avatar_url }}" alt="User Avatar" style="border-radius: 50%; width: 128px; height: 128px;">
+
         </div>
+
+       
+
         
         <!-- Display Flash Messages -->
         {% with messages = get_flashed_messages(with_categories=True) %}
@@ -75,6 +80,7 @@
                 {% endfor %}
             {% endif %}
         {% endwith %}
+        
         
         <div class="card custom-card">
             <div class="card-body">
@@ -107,6 +113,19 @@
                             </div>
                         </form>
                     </div>
+                </div>
+
+                <div class="mt-5">
+                    <h3>Your Requests</h3>
+                    <ul class="list-group">
+                        {% for req in user_requests %}
+                            <li class="list-group-item">
+                                <a href="{{ url_for('specific_request', request_id=req['id']) }}">{{ req['title'] }}</a>
+                            </li>
+                        {% else %}
+                            <li class="list-group-item">No requests found.</li>
+                        {% endfor %}
+                    </ul>
                 </div>
             </div>
         </div>
