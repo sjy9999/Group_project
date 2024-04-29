@@ -2,6 +2,8 @@ from flask import current_app, url_for
 from flask_mail import Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 import sqlite3
+from models import User  # 确保导入了 User 模型
+# from app import db
 
 class PasswordResetService:
     # ini
@@ -35,10 +37,27 @@ class PasswordResetService:
             return None
         return email
 
+    # @staticmethod
+    # def update_password(email, new_password):
+    #     con = sqlite3.connect("database.db")
+    #     cur = con.cursor()
+    #     cur.execute("UPDATE users SET password = ? WHERE email = ?", (new_password, email))
+    #     con.commit()
+    #     con.close()
+    # @staticmethod
+    # def update_password(email, new_password):
+    #     # 使用 SQLAlchemy 查询用户
+    #     from app import db  # 这个导入移到了函数内部
+    #     user = User.query.filter_by(email=email).first()
+        
+    #     # 如果找到用户，则更新密码
+    #     if user:
+    #         user.password = new_password  # 假设这里密码已经过哈希处理
+    #         db.session.commit()
     @staticmethod
     def update_password(email, new_password):
-        con = sqlite3.connect("database.db")
-        cur = con.cursor()
-        cur.execute("UPDATE users SET password = ? WHERE email = ?", (new_password, email))
-        con.commit()
-        con.close()
+        from app import db
+        user = User.query.filter_by(email=email).first()
+        if user:
+            user.password = new_password
+            db.session.commit()            

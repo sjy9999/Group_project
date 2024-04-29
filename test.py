@@ -82,7 +82,7 @@ conn.close()       #关闭连接
 
 
 
-
+# 改!!!!!!!!!!!!       sqlite3 instance/database.db
 
 # 我想查看数据   方式1
 # sqlite3 database.db
