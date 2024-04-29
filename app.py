@@ -654,7 +654,7 @@ def create_app():
 #     db.create_all()
 #     app.run(debug=True)
 from app import app, db
-from models import User,Request,Reply
+from models import User,Request,Reply,Like
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()

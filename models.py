@@ -1,6 +1,7 @@
 # from flask import Flask, request, render_template
 # from flask_sqlalchemy import SQLAlchemy
 from app import db
+from datetime import datetime
 
 # app = Flask(__name__)
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
@@ -32,3 +33,24 @@ class Reply(db.Model):
     responderName = db.Column(db.String(255))
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+    
+class Like(db.Model):
+    __tablename__ = 'likes'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)  # 点赞用户的ID
+    reply_id = db.Column(db.Integer, db.ForeignKey('replies.id'), nullable=False)  # 点赞的回复ID
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)  # 点赞的时间
+
+    # 关系定义
+    user = db.relationship('User', backref=db.backref('likes', lazy='dynamic'))
+    reply = db.relationship('Reply', backref=db.backref('likes', lazy='dynamic'))
+
+    # 保证每个用户对每个回复只能点赞一次
+    __table_args__ = (db.UniqueConstraint('user_id', 'reply_id', name='unique_user_reply'),)
+    
+
+
+
+def create_bd():
+    db.create_all()
+
