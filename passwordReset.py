@@ -5,6 +5,7 @@ import sqlite3
 from models import User  # 确保导入了 User 模型
 # from app import db
 
+
 class PasswordResetService:
     # ini
     @staticmethod

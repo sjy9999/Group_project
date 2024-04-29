@@ -5,6 +5,7 @@ from flask_mail import Mail
 import os
 from routes import UserViews
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 # from models import User  # 确保从 models.py 导入了 User
 # from app import app, db
 
@@ -16,6 +17,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
+Migrate = Migrate(app,db)
 app.secret_key = 'your_secret_key'  # 用于保持会话安全
 app.config['SECRET_KEY'] = '8f42a73054b1749f8f58848be5e6502c'
 app.config['SECURITY_PASSWORD_SALT'] = '3243f6a8885a308d313198a2e0370734'
