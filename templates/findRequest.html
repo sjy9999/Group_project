@@ -37,12 +37,13 @@
 
         {% for row in rows %}
         <div class="card mt-3">
-            <div class="card-body">           
+            <!-- <div class="card-body">            -->
             <div class="card-body"> 
                 <!-- 显示     问的问题 -->  
                 <h5 class="card-title">{{ row.title }}</h5>
                 <p class="card-text">{{ row.description }}</p>
-                <p class="card-text"><small class="text-muted">Posted by {{ row.username }} on {{ row.created_at }}</small></p>
+                <p class="card-text"><small class="text-muted">Posted by {{ row.username }} </small></p>
+                <!-- <p class="card-text"><small class="text-muted">Posted by {{ row.username }} on {{ row.created_at }}</small></p> -->
                 
                 <!-- 只是显示     回答 -->
 
@@ -50,7 +51,9 @@
                     {% for reply in row.replies %}
                         <div class="reply mt-2">
                             <p class="reply-text">{{ reply.reply_content }}</p>
-                            <p class="reply-info"><small class="text-muted">Replied by {{ reply.answerName }}</small></p>
+                            <!-- <p class="reply-info"><small class="text-muted">Replied by {{ reply.answerName }}</small></p> -->
+                            <p class="reply-info"><small class="text-muted">Replied by {{ reply.responderName }}</small></p>
+                            
                         </div>
                     {% endfor %}
                 {% else %}
