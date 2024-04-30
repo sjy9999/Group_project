@@ -392,6 +392,14 @@ def findRequest():
         except Exception as e:
             message = 'An issue occurred during the search process.'
             print(f"Search request failed, error: {e}")
+    else:
+        # 如果没有提供搜索查询，直接加载前五个请求
+        rows = Request.query.order_by(Request.title).limit(5).all()
+        rows = [r.as_dict() for r in rows]
+        # 对这五个请求也获取相关回复
+        for row in rows:
+            replies = Reply.query.filter_by(request_id=row['id']).all()
+            row['replies'] = [reply.as_dict() for reply in replies]
 
     return render_template('findRequest.html', rows=rows, message=message, search_queryFR=search_queryFR)
 # def findRequest():
