@@ -9,6 +9,8 @@
 </head>
 <!-- url_for 函数 findRequest  main   replyRequest-->
 <body>
+
+
     <div class="container mt-5">
         <h2>Find Requests</h2>
         <form action="{{ url_for('findRequest') }}" method="get">
@@ -55,7 +57,7 @@
                             <div class="d-flex align-items-center justify-content-start">
                                 <p class="mb-0 mr-2">{{ reply.reply_content }}</p>
                                 <span class="like-emoji" role="button" data-reply-id="{{ reply.id }}" style="cursor: pointer;">👍</span>
-                                <span id="like-count-{{ reply.id }}">0</span>
+                                <span id="like-count-{{ reply.id }}">{{ reply.like_count }}</span>
                             </div>
                         </div>
                     {% endfor %}
@@ -87,5 +89,6 @@
         <p>No requests found.</p>
         {% endfor %}
     </div>
+    <script src="static/js/like.js"></script>
 </body>
 </html>

@@ -39,7 +39,7 @@ class Like(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)  # 点赞用户的ID
     reply_id = db.Column(db.Integer, db.ForeignKey('replies.id'), nullable=False)  # 点赞的回复ID
-    
+    status = db.Column(db.String(10), default='active', nullable=False)  # 点赞状态，'active' 或 'revoked'
 
     # 关系定义
     user = db.relationship('User', backref=db.backref('likes', lazy='dynamic'))

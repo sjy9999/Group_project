@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, url_for, session,make_response, flash
+from flask import Flask, request, render_template, redirect, url_for, session,make_response, flash,jsonify
 import sqlite3
 # from passwordReset import PasswordResetService
 from flask_mail import Mail
@@ -6,6 +6,7 @@ import os
 from routes import UserViews
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+
 # from models import User  # 确保从 models.py 导入了 User
 # from app import app, db
 
@@ -18,6 +19,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 Migrate = Migrate(app,db)
+
 app.secret_key = 'your_secret_key'  # 用于保持会话安全
 app.config['SECRET_KEY'] = '8f42a73054b1749f8f58848be5e6502c'
 app.config['SECURITY_PASSWORD_SALT'] = '3243f6a8885a308d313198a2e0370734'
@@ -386,7 +388,12 @@ def findRequest():
             for row in rows:
                 replies = Reply.query.filter_by(request_id=row['id']).all()
                 row['replies'] = [reply.as_dict() for reply in replies]
+                for Replies in row['replies']:
 
+
+                    like_count = Like.query.filter_by(reply_id=Replies['id']).count()
+                    Replies['like_count'] = like_count
+        
             if not rows:
                 message = 'No matching requests found.'
 
@@ -394,7 +401,7 @@ def findRequest():
         except Exception as e:
             message = 'An issue occurred during the search process.'
             print(f"Search request failed, error: {e}")
-
+    
     return render_template('findRequest.html', rows=rows, message=message, search_queryFR=search_queryFR)
 # def findRequest():
 #     search_queryFR = request.args.get('searchQueryFR', '').strip()
@@ -635,6 +642,46 @@ def create_app():
 
 
 
+# like
+
+
+from flask import session, jsonify, request
+from models import Like, User
+
+@app.route('/like', methods=['POST'])
+def like():
+    if 'username' in session:  # 检查用户是否登录
+        username = session['username']
+        user = User.query.filter_by(name=username).first()
+        if not user:
+            return jsonify({'message': 'User not found'}), 404
+
+        reply_id = request.json.get('reply_id')
+        user_id = user.id  # 从数据库获取用户ID
+
+        existing_like = Like.query.filter_by(user_id=user_id, reply_id=reply_id).first()
+        if existing_like:
+            return jsonify({'message': 'Already liked'}), 400
+
+        new_like = Like(user_id=user_id, reply_id=reply_id)
+        db.session.add(new_like)
+        try:
+            db.session.commit()
+            # 这里我们获取更新后的点赞总数
+            like_count = Like.query.filter_by(reply_id=reply_id).count()
+            return jsonify({'message': 'Like successful', 'like_count': like_count}), 200
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'message': str(e)}), 500
+    else:
+        return jsonify({'message': 'Unauthorized'}), 401
+
+
+#get count-likes
+
+
+
+
 
 
 
@@ -656,7 +703,7 @@ def create_app():
 #     db.create_all()
 #     app.run(debug=True)
 from app import app, db
-from models import User,Request,Reply,Like
+from models import User,Request,Reply
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
