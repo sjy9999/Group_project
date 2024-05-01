@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ranking Board</title>
+    <link rel="stylesheet" href="/static/css/ranking.css"> <!-- 如果有CSS文件，确保路径正确 -->
+</head>
+<body>
+    <h1>User Rankings</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>User ID</th>
+                <th>Name</th>
+                <th>Score</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for rank, user_id, name, score in rankings %}
+            <tr>
+                <td>{{ rank }}</td>
+                <td>{{ user_id }}</td>
+                <td>{{ name }}</td>
+                <td>{{ score }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+</body>
+</html>
