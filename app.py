@@ -450,24 +450,32 @@ def findRequest():
 
 
 
-# reply          回复 帖子                 请求的路由（示例）
+# reply          回复 帖子       点击submit reply的button            请求的路由（示例）
 @app.route('/replyRequest', methods=['GET', 'POST'])
 def replyRequest():
     if request.method == 'POST':
         reply_content = request.form['reply']
         responderName = session.get('username')
         request_title = request.form.get('search_queryFR')
+        request_id = request.form.get('request_id')
 
         if not responderName:
             # 用户未登录或会话已过期
             return redirect(url_for('login'))
-
-        if reply_content and request_title:
-            # 使用 SQLAlchemy 查询请求
-            matching_request = Request.query.filter(Request.title.like('%' + request_title + '%')).first()
+        
+        if reply_content and request_title and request_id:
+                    # 使用request_title和request_id同时进行查询，确保精确匹配
+            matching_request = Request.query.filter(
+                        Request.title.like('%' + request_title + '%'),
+                        Request.id == request_id  # 确保ID也匹配
+                    ).first()
+        # if reply_content and request_title:
+        #     # 使用 SQLAlchemy 查询请求
+        #     matching_request = Request.query.filter(Request.title.like('%' + request_title + '%')).first()
             
             if matching_request:
                 # 创建回复
+                # new_reply = Reply(request_id=matching_request.id, reply_content=reply_content, responderName=responderName)
                 new_reply = Reply(request_id=matching_request.id, reply_content=reply_content, responderName=responderName)
                 db.session.add(new_reply)
                 db.session.commit()
