@@ -9,6 +9,15 @@ from flask_sqlalchemy import SQLAlchemy
 # from app import app, db
 
 
+#要求
+from flask_login import LoginManager, login_user, logout_user, login_required
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField
+from flask_wtf.csrf import CSRFProtect
+from wtforms.validators import InputRequired, Email
+from wtforms.validators import DataRequired
+from wtforms import StringField, TextAreaField
+
 # 项目启动       student.html 这是主界面  名字没事
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
@@ -16,7 +25,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
-app.secret_key = 'your_secret_key'  # 用于保持会话安全
+app.secret_key = 'JunyiSun_secret_key'  # 用于保持会话安全
+# app.secret_key = 'your_secret_key'  # 用于保持会话安全
 app.config['SECRET_KEY'] = '8f42a73054b1749f8f58848be5e6502c'
 app.config['SECURITY_PASSWORD_SALT'] = '3243f6a8885a308d313198a2e0370734'
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'  # Gmail的SMTP服务器  smtp.sina.com       smtp.gmail.com
@@ -31,6 +41,22 @@ app.register_blueprint(UserViews.bp)
 
 with app.app_context():
     db.create_all()
+
+# WTForms  CSRFProtect
+csrf = CSRFProtect(app)
+login_manager = LoginManager(app)
+
+class LoginForm(FlaskForm):
+    username = StringField('Username', validators=[InputRequired()])
+    password = PasswordField('Password', validators=[InputRequired()])
+
+class RegisterForm(FlaskForm):
+    username = StringField('Username', validators=[InputRequired()])
+    password = PasswordField('Password', validators=[InputRequired()])
+    email = StringField('Email', validators=[Email()])
+
+
+
 # 先留着    先打开   这个界面   注册 登录账号       这是   http://127.0.0.1:5000/create/
 # @app.route('/create/')
 # def create_student():
@@ -60,117 +86,156 @@ with app.app_context():
 #         # 改url_for       而不是返回html
 #         return redirect(url_for('show_student'))
 
+@app.route('/', methods=['GET', 'POST'])
+@app.route('/access/', methods=['GET', 'POST'])
+def access():
+    login_form = LoginForm()
+    register_form = RegisterForm()
+
+    if 'login' in request.form and login_form.validate_on_submit():
+        # 处理登录逻辑
+        username = login_form.username.data
+        password = login_form.password.data
+        user = User.query.filter_by(name=username).first()
+        if user and user.check_password(password):
+            login_user(user)
+            session['loggedin'] = True
+            session['username'] = user.name
+            return redirect(url_for('main'))  # 主页或成功页
+        else:
+            return render_template('result.html', login_form=login_form, register_form=register_form, login_msg='Incorrect username or password!')
+
+    elif 'register' in request.form and register_form.validate_on_submit():
+        # 处理注册逻辑
+        try:
+            username = register_form.username.data
+            password = register_form.password.data
+            email = register_form.email.data
+            new_user = User(name=username, email=email)
+            new_user.set_password(password)
+            db.session.add(new_user)
+            db.session.commit()
+            return redirect(url_for('main'))  # 主页或成功页
+        except Exception as e:
+            db.session.rollback()
+            return render_template('result.html', login_form=login_form, register_form=register_form, register_msg=f'Registration failed, error: {str(e)}')
+
+    return render_template('student.html', login_form=login_form, register_form=register_form)
 
 # back
 # register 注册   http://127.0.0.1:5000  应该也返回这个       http://127.0.0.1:5000/register/
 # register比login复杂    GET 请求通常用于从服务器获取数据或者显示一个页面 POST 请求通常用于当用户提交表单数据到服务器
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    print("Register function called")  # 调试语句
+    register_form = RegisterForm()
+    
+    if register_form.validate_on_submit():
+        try:
+            username = register_form.username.data
+            password = register_form.password.data
+            email = register_form.email.data
+            new_user = User(name=username, email=email)
+            new_user.set_password(password)
+            db.session.add(new_user)
+            db.session.commit()
+            return redirect(url_for('some_success_page'))
+        except Exception as e:
+            db.session.rollback()
+            return render_template("error.html", message=f"Registration failed, error: {str(e)}")
+
+    return render_template("student.html", register_form=register_form)
+
+
+
 # @app.route('/register/', methods=['POST', 'GET'])
 # def register():
+#     register_form = RegisterForm()
+    
+#     if register_form.validate_on_submit():  # 检查是否是POST请求并且是否通过验证
+#         try:
+#             username = register_form.username.data
+#             password = register_form.password.data
+#             email = register_form.email.data
+
+#             new_user = User(name=username, email=email)
+#             new_user.set_password(password)  # 假设你有一个设置密码的方法，它也应该处理密码散列
+#             db.session.add(new_user)
+#             db.session.commit()
+#             return render_template("result.html", msg="Registration successful")
+#         except Exception as e:
+#             db.session.rollback()
+#             return render_template("result.html", msg=f"Registration failed, error: {str(e)}")
+
+#     return render_template("student.html", register_form=register_form)
+
+# def register():
+#     # from models import User
 #     if request.method == 'POST':
 #         try:
-#             # form get   从表单请求中获取用户名、密码和邮箱的数据
 #             username = request.form['name']
 #             password = request.form['password']
 #             email = request.form['email']
-#             with sqlite3.connect("database.db") as con:
-#                 cur = con.cursor()  
-#                 cur.execute("INSERT INTO users (name, password, email) VALUES (?, ?, ?)", (username, password, email))
-#                 con.commit()  
-#                 msg = "Registration successful"
+
+#             new_user = User(name=username, password=password, email=email)
+#             new_user.set_password(password)  # 设置哈希密码
+#             db.session.add(new_user)
+#             db.session.commit()
+#             msg = "Registration successful"
 #         except Exception as e:
-#             # 如果执行到这里，说明 'con' 已经被定义了，我们在 'with' 语句内部
-#             msg = f"Registration failed, error: {str(e)}"  # 设置错误消息
-#             return render_template("result.html", msg=msg)  # 使用同一个结果页面来显示错误消息
-#         # 成功的情况下也返回结果页面，并传递成功消息
+#             db.session.rollback()
+#             msg = f"Registration failed, error: {str(e)}"
+#             return render_template("result.html", msg=msg)
 #         return render_template("result.html", msg=msg)
 #     else:
-#         # 如果不是POST请求，则渲染注册表单的页面
-#         # 用户首次访问你的注册页面，他们还没有提交任何信息。在这种情况下，他们是通过 GET 请求来访问页面的。
-#         # 这时候，你的代码中的 else 部分会执行，并显示注册表单，允许用户输入他们的信息
 #         return render_template("student.html")
-#         # return render_template("register.html")
-
-@app.route('/register/', methods=['POST', 'GET'])
-def register():
-    # from models import User
-    if request.method == 'POST':
-        try:
-            username = request.form['name']
-            password = request.form['password']
-            email = request.form['email']
-
-            new_user = User(name=username, password=password, email=email)
-            db.session.add(new_user)
-            db.session.commit()
-            msg = "Registration successful"
-        except Exception as e:
-            db.session.rollback()
-            msg = f"Registration failed, error: {str(e)}"
-            return render_template("result.html", msg=msg)
-        return render_template("result.html", msg=msg)
-    else:
-        return render_template("student.html")
 
 
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return db.session.query(User).get(int(user_id))
 
 
 
 # login   登录    http://127.0.0.1:5000  应该也返回这个    login    http://127.0.0.1:5000/login/
 @app.route('/login/', methods=['POST', 'GET'])
 def login():
-    msg = ''
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        user = User.query.filter_by(name=username, password=password).first()
-        if user:
-            # 用户验证成功，设置用户会话
+    login_form = LoginForm()
+    if login_form.validate_on_submit():
+        username = login_form.username.data
+        password = login_form.password.data
+        user = User.query.filter_by(name=username).first()
+        if user and user.check_password(password):
+            login_user(user)
             session['loggedin'] = True
             session['username'] = user.name
-            msg = 'Login successful!'
-            # 登录成功后重定向到主页面
-            return render_template('main.html', msg=msg)
+            return render_template('main.html', msg='Login successful!')  
+            # return redirect(url_for('index'))  # 假设你有一个名为 'index' 的视图函数
         else:
-            # 登录失败，设置错误消息
-            msg = 'Incorrect username or password！'
-        # 登录失败时返回登录页面，并显示错误信息
-        return render_template("result.html", msg=msg)  # 确保你有一个 login.html 模板
-    # 如果不是POST请求，渲染登录表单页面
-    return redirect(url_for('login'))
-    # return render_template("login.html", msg=msg)
-# @app.route('/login/', methods=['POST', 'GET'])
+            return render_template('result.html', form=login_form, msg='Incorrect username or password！')
+    return render_template('login.html', login_form=login_form)
 # def login():
-#     # 默认情况下，假设没有错误消息
 #     msg = ''
 #     if request.method == 'POST':
 #         username = request.form['username']
 #         password = request.form['password']
-#         try:
-#             with sqlite3.connect("database.db") as con:
-#                 con.row_factory = sqlite3.Row
-#                 cur = con.cursor()
-#                 cur.execute("SELECT * FROM users WHERE name = ? AND password = ?", (username, password))
-
-#                 user = cur.fetchone()
-#                 if user:
-#                     # 用户验证成功，设置用户会话
-#                     session['loggedin'] = True
-#                     session['username'] = user['name']
-#                     msg = 'Login successful!'
-#                     # 登录成功后   保存   测试
-#                     session['username'] = username  # 假设这是登录视图函数中的代码
-#                     # login   登录成功     
-#                     return render_template('main.html', msg=msg)
-#                     # return redirect(url_for('main'))
-#                 else:
-#                     # 登录失败，设置错误消息
-#                     msg = 'Incorrect username or password！'
-#         except Exception as e:
-#             # 处理异常，设置错误消息
-#             msg = f"Error: {str(e)}"
-#         # 登录失败或发生异常，使用同一个结果页面来显示错误消息
-#         return render_template("result.html", msg=msg)
-#     # 如果不是POST请求，或者出现其他情况，重定向到登录页面
+#         user = User.query.filter_by(name=username).first()
+#         # user = User.query.filter_by(name=username, password=password).first()
+#         if user and user.check_password(password):
+#             login_user(user)  # 使用 Flask-Login 登录用户
+#             session['loggedin'] = True  # 设置 session 中的登录标记
+#             session['username'] = user.name  # 保存用户的用户名到 session
+#             return render_template('main.html', msg='Login successful!')        
+#         else:
+#             # 登录失败，设置错误消息
+#             msg = 'Incorrect username or password！'
+#         # 登录失败时返回登录页面，并显示错误信息
+#         return render_template("result.html", msg=msg)  # 确保你有一个 login.html 模板
+#     # 如果不是POST请求，渲染登录表单页面
 #     return redirect(url_for('login'))
 
 
@@ -229,7 +294,6 @@ def login():
 #     session.pop('loggedin', None)
 #     session.pop('username', None)
 #     return redirect(url_for('login'))
-
 
 # 先留着           显示所有学生的路由   显示出来    这个是为了检查  好看    http://127.0.0.1:5000/show/ 
 # @app.route('/show/')
@@ -296,112 +360,148 @@ def main():
     #  如果没有用户名就不显示错误信息，并且不执行需要登录的操作            这是最开始  没问题的
     return render_template('main.html')
 
+class RequestForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired()])
+    description = TextAreaField('Description', validators=[DataRequired()])
+
 # 发起帖子        http://127.0.0.1:5000/createRequest/
 @app.route('/createRequest', methods=['GET', 'POST'])
 def createRequest():
-    if request.method == 'POST':
-        try:
-            title = request.form['title']
-            description = request.form['description']
-            username = session.get('username')
+    form = RequestForm()
+    if form.validate_on_submit():
+        title = form.title.data
+        description = form.description.data
+        username = session.get('username')
 
-            # 检查用户是否登录
-            if not username:
-                return redirect(url_for('login'))
+        if not username:
+            return redirect(url_for('login'))
 
-            # 创建一个新的请求实例
-            new_request = Request(title=title, description=description, username=username)
-            db.session.add(new_request)  # 添加到数据库会话
-            db.session.commit()  # 提交更改
+        new_request = Request(title=title, description=description, username=username)
+        db.session.add(new_request)
+        db.session.commit()
+        return redirect(url_for('main'))
+    return render_template('createRequest.html', form=form)
 
-            # 操作成功，重定向到查找请求的页面或回到主页
-            return redirect(url_for('main'))  # 只需要一个重定向
-
-        except Exception as e:
-            # 处理异常，可以记录到日志，并向用户显示错误信息
-            print(f"Failed to create request, error: {e}")
-            return render_template('errorPage.html', error=str(e))
-    else:
-        # 如果不是POST请求，则渲染创建请求的页面
-        return render_template('createRequest.html')
 # def createRequest():
-#     if request.method == 'POST':  
+#     if request.method == 'POST':
 #         try:
-#             # 从表单请求中获取标题和描述的数据
 #             title = request.form['title']
 #             description = request.form['description']
-#             # 从会话中获取username
 #             username = session.get('username')
-#             # 确保在登录后才能创建请求    这个更严谨
-#             # if not username:
-#             #     # 可能需要重定向到登录页面或显示错误消息
-#             #     return redirect(url_for('login'))
-#             with sqlite3.connect("database.db") as con:
-#                 cur = con.cursor()  # 获取游标
-#                 # 将请求信息添加到数据库，包括用户名
-#                 cur.execute("INSERT INTO requests (title, description, username) VALUES (?, ?, ?)", (title, description, username))
-#                 con.commit()  
-#                 # 操作成功，这里有两个重定向，只需要一个    重定向到查找请求的页面或回到主页
-#                 return redirect(url_for('main'))
-#                 return render_template('main.html')
-#                 return redirect(url_for('findRequest'))  # 假设你有一个叫做findRequest的视图函数来显示所有请求
+
+#             # 检查用户是否登录
+#             if not username:
+#                 return redirect(url_for('login'))
+
+#             # 创建一个新的请求实例
+#             new_request = Request(title=title, description=description, username=username)
+#             db.session.add(new_request)  # 添加到数据库会话
+#             db.session.commit()  # 提交更改
+
+#             # 操作成功，重定向到查找请求的页面或回到主页
+#             return redirect(url_for('main'))  # 只需要一个重定向
+
 #         except Exception as e:
+#             # 处理异常，可以记录到日志，并向用户显示错误信息
 #             print(f"Failed to create request, error: {e}")
-#             return redirect(url_for('main', error=str(e)))
-#             return render_template('main.html', error=str(e))
 #             return render_template('errorPage.html', error=str(e))
-        
 #     else:
-#         # 啥有没干
 #         # 如果不是POST请求，则渲染创建请求的页面
-#         # response = make_response(render_template('createRequest.html'))
-#         # # Prevent caching the form page to avoid resubmission issues
-#         # response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
-#         # response.headers['Pragma'] = 'no-cache'  # HTTP 1.0 compatibility
-#         # response.headers['Expires'] = '0'  # Proxies
-#         # return response
-        
 #         return render_template('createRequest.html')
 
 
+def model_to_dict(model):
+    return {column.name: getattr(model, column.name) for column in model.__table__.columns}
 
-
+class ReplyForm(FlaskForm):
+    reply = TextAreaField('Reply', validators=[DataRequired()])
 
 #  搜索帖子       http://127.0.0.1:5000/main/          @app.route('/findRequest')
 @app.route('/findRequest')
 def findRequest():
+    # print("Request object:", request)
     search_queryFR = request.args.get('searchQueryFR', '').strip()
     rows = []
     message = ''
-
     if search_queryFR:
         try:
-            # 使用SQLAlchemy ORM进行模糊搜索
             matched_requests = Request.query.filter(Request.title.like('%' + search_queryFR + '%')).all()
-            rows = [r.as_dict() for r in matched_requests]  # 假设 Request 模型有 as_dict 方法来转换对象为字典
-
-            # 对每个匹配的请求，获取相关回复
+            rows = [r.as_dict() for r in matched_requests]
             for row in rows:
-                replies = Reply.query.filter_by(request_id=row['id']).all()
-                row['replies'] = [reply.as_dict() for reply in replies]
-
+                form = ReplyForm()  # 为每个请求创建一个回复表单实例
+                row['form'] = form
             if not rows:
                 message = 'No matching requests found.'
-
-
         except Exception as e:
             message = 'An issue occurred during the search process.'
             print(f"Search request failed, error: {e}")
     else:
-        # 如果没有提供搜索查询，直接加载前五个请求
-        rows = Request.query.order_by(Request.title).limit(5).all()
-        rows = [r.as_dict() for r in rows]
-        # 对这五个请求也获取相关回复
-        for row in rows:
-            replies = Reply.query.filter_by(request_id=row['id']).all()
-            row['replies'] = [reply.as_dict() for reply in replies]
+        requests  = Request.query.order_by(Request.title).limit(5).all()
+        # rows = [r.as_dict() for r in rows]
+        rows = []
+        for req in requests:  # 改变变量名以避免覆盖全局 request 对象
+            row = model_to_dict(req)
+            # 获取与此请求相关的所有回复
+            replies = Reply.query.filter_by(request_id=req.id).all()
+            row['replies'] = [model_to_dict(reply) for reply in replies]
 
+            # 为此请求实例化一个回复表单
+            row['form'] = ReplyForm()
+
+            # 添加到结果列表
+            rows.append(row)
+
+        # for request in requests :
+        #     row = model_to_dict(row)
+        #     # 获取与此请求相关的所有回复
+        #     replies = Reply.query.filter_by(request_id=request.id).all()
+        #     row['replies'] = [model_to_dict(reply) for reply in replies]
+
+        #     # 为此请求实例化一个回复表单
+        #     row['form'] = ReplyForm()
+
+        #     # 添加到结果列表
+        #     rows.append(row)
+
+        #     # form = ReplyForm()
+        #     # row['form'] = form
     return render_template('findRequest.html', rows=rows, message=message, search_queryFR=search_queryFR)
+
+
+
+# def findRequest():
+#     search_queryFR = request.args.get('searchQueryFR', '').strip()
+#     rows = []
+#     message = ''
+
+#     if search_queryFR:
+#         try:
+#             # 使用SQLAlchemy ORM进行模糊搜索
+#             matched_requests = Request.query.filter(Request.title.like('%' + search_queryFR + '%')).all()
+#             rows = [r.as_dict() for r in matched_requests]  # 假设 Request 模型有 as_dict 方法来转换对象为字典
+
+#             # 对每个匹配的请求，获取相关回复
+#             for row in rows:
+#                 replies = Reply.query.filter_by(request_id=row['id']).all()
+#                 row['replies'] = [reply.as_dict() for reply in replies]
+
+#             if not rows:
+#                 message = 'No matching requests found.'
+
+
+#         except Exception as e:
+#             message = 'An issue occurred during the search process.'
+#             print(f"Search request failed, error: {e}")
+#     else:
+#         # 如果没有提供搜索查询，直接加载前五个请求
+#         rows = Request.query.order_by(Request.title).limit(5).all()
+#         rows = [r.as_dict() for r in rows]
+#         # 对这五个请求也获取相关回复
+#         for row in rows:
+#             replies = Reply.query.filter_by(request_id=row['id']).all()
+#             row['replies'] = [reply.as_dict() for reply in replies]
+#     return render_template('findRequest.html', rows=rows, message=message, search_queryFR=search_queryFR)
+
 # def findRequest():
 #     search_queryFR = request.args.get('searchQueryFR', '').strip()
 #     rows = []
@@ -464,6 +564,7 @@ def replyRequest():
             return redirect(url_for('login'))
         
         if reply_content and request_title and request_id:
+        # if reply_content and request_id:
                     # 使用request_title和request_id同时进行查询，确保精确匹配
             matching_request = Request.query.filter(
                         Request.title.like('%' + request_title + '%'),
