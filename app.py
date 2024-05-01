@@ -678,6 +678,52 @@ def like():
 
 
 #get count-likes
+from models import User, Request, Reply, Like  # 确保正确导入模型
+from sqlalchemy import func, distinct
+
+@app.route('/Ranking')
+def ranking():
+    query = db.session.query(
+        User.id,
+        User.name,
+        (func.count(distinct(Request.id)) +
+         func.count(distinct(Reply.id)) +
+         5 * func.count(distinct(Like.id))).label('score')
+    ).outerjoin(Request, User.name == Request.username
+    ).outerjoin(Reply, User.name == Reply.responderName
+    ).outerjoin(Like, User.id == Like.user_id
+    ).group_by(User.id, User.name
+    ).order_by(db.desc('score'))
+
+    results = query.all()
+
+    # 手动添加排名
+    rankings = []
+    rank = 1
+    current_score = None
+    for index, result in enumerate(results):
+        # 转换 result 为元组
+        user_id, name, score = result
+        if score != current_score:
+            rank = index + 1
+            current_score = score
+        rankings.append((rank, user_id, name, score))  # 直接创建一个新的元组，包含排名和数据
+
+    return render_template('Ranking.html', rankings=rankings)
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
 
 
 
