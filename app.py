@@ -683,33 +683,68 @@ from sqlalchemy import func, distinct
 
 @app.route('/Ranking')
 def ranking():
-    query = db.session.query(
+    # 发帖得分
+    post_scores = db.session.query(
+        User.id.label('user_id'),
+        (5 * func.count(Request.id)).label('score')
+    ).join(Request, User.name == Request.username
+    ).group_by(User.id).subquery()
+
+    # 回帖得分
+    reply_scores = db.session.query(
+        User.id.label('user_id'),
+        (3 * func.count(Reply.id)).label('score')
+    ).join(Reply, User.name == Reply.responderName
+    ).group_by(User.id).subquery()
+
+    # 点赞得分（给别人的回复点赞）
+    like_scores = db.session.query(
+        User.id.label('user_id'),
+        func.count(Like.id).label('score')
+    ).join(Like, User.id == Like.user_id
+    ).group_by(User.id).subquery()
+
+    # 被点赞得分（自己的回帖被别人点赞）
+    received_like_scores = db.session.query(
+        User.id.label('user_id'),
+        (2 * func.count(Like.id)).label('score')
+    ).join(Reply, Reply.responderName == User.name
+    ).join(Like, Reply.id == Like.reply_id
+    ).group_by(User.id).subquery()
+
+    # 汇总得分，显式设置查询起始表为 User
+    final_scores = db.session.query(
         User.id,
         User.name,
-        (func.count(distinct(Request.id)) +
-         func.count(distinct(Reply.id)) +
-         5 * func.count(distinct(Like.id))).label('score')
-    ).outerjoin(Request, User.name == Request.username
-    ).outerjoin(Reply, User.name == Reply.responderName
-    ).outerjoin(Like, User.id == Like.user_id
+        (func.coalesce(post_scores.c.score, 0) +
+         func.coalesce(reply_scores.c.score, 0) +
+         func.coalesce(like_scores.c.score, 0) +
+         func.coalesce(received_like_scores.c.score, 0)).label('score')
+    ).select_from(User
+    ).outerjoin(post_scores, User.id == post_scores.c.user_id
+    ).outerjoin(reply_scores, User.id == reply_scores.c.user_id
+    ).outerjoin(like_scores, User.id == like_scores.c.user_id
+    ).outerjoin(received_like_scores, User.id == received_like_scores.c.user_id
     ).group_by(User.id, User.name
     ).order_by(db.desc('score'))
 
-    results = query.all()
+    results = final_scores.all()
 
     # 手动添加排名
     rankings = []
     rank = 1
     current_score = None
     for index, result in enumerate(results):
-        # 转换 result 为元组
         user_id, name, score = result
         if score != current_score:
             rank = index + 1
             current_score = score
-        rankings.append((rank, user_id, name, score))  # 直接创建一个新的元组，包含排名和数据
+        rankings.append((rank, user_id, name, score))
 
     return render_template('Ranking.html', rankings=rankings)
+
+
+
 
 
 
