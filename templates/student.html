@@ -131,8 +131,10 @@
                         </div>
                     </div>
                     <button type="submit" name="login" class="btn btn-primary">Login</button>
-                    <a href="{{ url_for('forgot_password') }}" class="btn btn-primary">Forget my password</a>
+                    <!-- <a href="{{ url_for('forgot_password') }}" class="btn btn-primary">Forget my password</a> -->
                 </form>
+                <!-- 将忘记密码链接移出表单 -->
+                <a href="{{ url_for('forgot_password') }}" class="btn btn-primary">Forget my password</a>
 
                 
         

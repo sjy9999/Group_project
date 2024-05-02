@@ -67,6 +67,18 @@ class PasswordResetService:
     def update_password(email, new_password):
         from app import db
         user = User.query.filter_by(email=email).first()
+        if user is None:
+            # print("No user found with the provided email.")  # 或使用其他日志记录方法
+            return False
+
+        hashed_password = generate_password_hash(new_password)  # 生成哈希密码
+        user.password = hashed_password  # 更新为哈希密码
+        db.session.commit()
+        return True
+
+
+        from app import db
+        user = User.query.filter_by(email=email).first()
         if user:
             hashed_password = generate_password_hash(new_password)  # 生成哈希密码
             user.password = hashed_password  # 更新为哈希密码

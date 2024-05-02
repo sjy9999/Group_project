@@ -12,11 +12,11 @@ from flask_sqlalchemy import SQLAlchemy
 #要求
 from flask_login import LoginManager, login_user, logout_user, login_required
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField
-from flask_wtf.csrf import CSRFProtect
+from wtforms import StringField, PasswordField, TextAreaField, SubmitField
+from flask_wtf.csrf import CSRFProtect,generate_csrf
 from wtforms.validators import InputRequired, Email
 from wtforms.validators import DataRequired
-from wtforms import StringField, TextAreaField
+
 
 # 项目启动       student.html 这是主界面  名字没事
 app = Flask(__name__)
@@ -426,10 +426,25 @@ def findRequest():
     if search_queryFR:
         try:
             matched_requests = Request.query.filter(Request.title.like('%' + search_queryFR + '%')).all()
-            rows = [r.as_dict() for r in matched_requests]
-            for row in rows:
-                form = ReplyForm()  # 为每个请求创建一个回复表单实例
-                row['form'] = form
+            rows = []
+            for req in matched_requests:
+                row = model_to_dict(req)  # 将每个请求转换为字典
+                # 获取与此请求相关的所有回复
+                replies = Reply.query.filter_by(request_id=req.id).all()
+                row['replies'] = [model_to_dict(reply) for reply in replies]
+
+                # 为此请求实例化一个回复表单
+                row['form'] = ReplyForm()
+
+                # 添加到结果列表
+                rows.append(row)
+
+            # matched_requests = Request.query.filter(Request.title.like('%' + search_queryFR + '%')).all()
+            # rows = [r.as_dict() for r in matched_requests]
+            # for row in rows:
+            #     form = ReplyForm()  # 为每个请求创建一个回复表单实例
+            #     row['form'] = form
+
             if not rows:
                 message = 'No matching requests found.'
         except Exception as e:
@@ -635,75 +650,170 @@ def replyRequest():
 
 
 
+@app.route('/student')
+def student():
+    register_form = RegisterForm()
+    login_form = LoginForm()  # 创建登录表单实例
+    # 确保将 login_form 也传递给模板
+    return render_template('student.html', register_form=register_form, login_form=login_form)
 
 
 
-
+class ForgotPasswordForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    submit = SubmitField('Send Reset Link')
 
 # 这里是对的    user和email   需要匹配   点击Forget my password  仅仅跳转界面 
 @app.route('/forgot_password')
+@app.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
-    # 渲染忘记密码的 HTML 表单
-    return render_template('forgotPassword.html')
+    form = ForgotPasswordForm()
+    return render_template('forgotPassword.html', form=form)
+
+# def forgot_password():
+#     # 渲染忘记密码的 HTML 表单
+#     return render_template('forgotPassword.html')
 
 
 # button   仅仅发送邮件     比如发送到我qq邮箱   检查这个邮箱   是不是在数据库里面
 @app.route('/send_link', methods=['POST'])
 def sendLink():
-    if request.method == 'POST':
-        email = request.form['email']
-
-        # Use SQLAlchemy ORM to query the user
+    form = ForgotPasswordForm()
+    if form.validate_on_submit():
+        email = form.email.data
         user = User.query.filter_by(email=email).first()
-
-        # Check if the user exists and send the password reset email
         if user:
             from passwordReset import PasswordResetService
             PasswordResetService.sendUpdatePassword(email)
-            return render_template('student.html', message="Send the email, please check personal email")
+            flash("Send the email, please check personal email", 'success')
+            return redirect(url_for('student'))
         else:
-            return render_template('forgotPassword.html', error="This email is not in Database")
-            
-    return render_template('forgotPassword.html')
+            flash("This email is not in Database", 'danger')
+            return render_template('forgotPassword.html', form=form)
+    return render_template('forgotPassword.html', form=form) 
+
+# def sendLink():
+#     email = request.form['email']
+#     user = User.query.filter_by(email=email).first()
+
+#     if user:
+#         from passwordReset import PasswordResetService
+#         PasswordResetService.sendUpdatePassword(email)
+#         return render_template('student.html', message="Send the email, please check personal email")
+#     else:
+#         return render_template('forgotPassword.html', error="This email is not in Database")
+    
 # def sendLink():
 #     if request.method == 'POST':
 #         email = request.form['email']
-#         con = sqlite3.connect("database.db")
-#         cur = con.cursor()
-#         cur.execute("SELECT * FROM users WHERE email = ?", (email,))
-#         user = cur.fetchone()
-#         # 根据这个email     查询到  user存在    PasswordResetService类    
+
+#         # Use SQLAlchemy ORM to query the user
+#         user = User.query.filter_by(email=email).first()
+
+#         # Check if the user exists and send the password reset email
 #         if user:
+#             from passwordReset import PasswordResetService
 #             PasswordResetService.sendUpdatePassword(email)
 #             return render_template('student.html', message="Send the email, please check personal email")
-#         # 只跳转到student.html  避免有困惑 return render_template('notification.html', message="重置邮件发送，检查邮箱")
 #         else:
 #             return render_template('forgotPassword.html', error="This email is not in Database")
+            
 #     return render_template('forgotPassword.html')
 
 
-# qq邮箱  打开链接                                        delete  输入新的密码       点击   reset button  新密码替换
+class ResetPasswordForm(FlaskForm):
+    new_password = PasswordField('New Password', validators=[DataRequired()])
+    submit = SubmitField('Submit')
+
+
+# 使用9    qq邮箱
 @app.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
-    if request.method == 'GET':
-        # If it's a GET request, just render the reset_password.html template with the token
-        return render_template('reset_password.html', token=token)
+    form = ResetPasswordForm()
+    register_form = RegisterForm()
+    login_form = LoginForm()
+    if form.validate_on_submit():
+        new_password = form.new_password.data
+        from passwordReset import PasswordResetService  # 确保导入路径正确
+        email = PasswordResetService.verify_reset_token(token)
+        if email is None:
+            flash('The reset token is invalid or has expired.', 'error')
+            return redirect(url_for('reset_request'))
+        PasswordResetService.update_password(email, new_password)
+        flash('Your password has been updated!', 'success')
+        return redirect(url_for('student'))
+    return render_template('reset_password.html', form=form, register_form=register_form, login_form=login_form, token=token)
 
-    # 输入新的密码        If it's a POST request, process the form submission
-    new_password = request.form['new_password']
-    if not new_password:
-        flash('No new password provided.', 'error')
-        return redirect(url_for('reset_password', token=token))  # Redirect back to the same page
-    from passwordReset import PasswordResetService
-    email = PasswordResetService.verify_reset_token(token)
-    if email is None:
-        flash('The reset token is invalid or has expired.', 'error')
-        return redirect(url_for('reset_request'))  # Redirect to the request reset page
 
-    # 更新      At this point, we have a valid email and new password
-    PasswordResetService.update_password(email, new_password)
-    flash('Your password has been updated!', 'success')
-    return redirect(url_for('user_views.user'))
+    # # register_form = RegisterForm()
+    # # login_form = LoginForm()
+    # form = ResetPasswordForm()  # 使用新的表单类
+    # if form.validate_on_submit():  # 处理表单提交
+    #     new_password = form.new_password.data
+    #     from passwordReset import PasswordResetService
+    #     email = PasswordResetService.verify_reset_token(token)
+    #     if email is None:
+    #         flash('The reset token is invalid or has expired.', 'error')
+    #         return redirect(url_for('reset_request'))
+    #     PasswordResetService.update_password(email, new_password)
+    #     flash('Your password has been updated!', 'success')
+    #     return redirect(url_for('user_views.user'))
+    # return render_template('reset_password.html', form=form, token=token)
+
+# @app.route('/reset_password/<token>', methods=['GET', 'POST'])
+# def reset_password(token):
+#     register_form = RegisterForm()
+#     login_form = LoginForm()
+#     if request.method == 'GET':
+#         # 仅 GET 请求需要渲染表单
+#         return render_template('reset_password.html', token=token, register_form=register_form, login_form=login_form)
+    
+#     # if request.method == 'GET':
+#     #     # 正确地生成 CSRF 令牌并传递到模板
+#     #     return render_template('reset_password.html', token=token, csrf_token=generate_csrf())
+
+#     # 处理 POST 请求，提交新密码
+#     new_password = request.form.get('new_password')
+#     if not new_password:
+#         flash('No new password provided.', 'error')
+#         return redirect(url_for('reset_password', token=token, register_form=register_form, login_form=login_form))
+#         # return redirect(url_for('reset_password', token=token))  # 确保使用正确的重定向
+
+#     from passwordReset import PasswordResetService
+#     email = PasswordResetService.verify_reset_token(token)
+#     if email is None:
+#         flash('The reset token is invalid or has expired.', 'error')
+#         return redirect(url_for('reset_request'))  # 确保重定向到请求重置页面
+
+#     # 更新密码
+#     PasswordResetService.update_password(email, new_password)
+#     flash('Your password has been updated!', 'success')
+#     return redirect(url_for('user_views.user'))  # 确保 user_views.user 是正确的端点
+
+
+# 在qq邮箱里面     打开链接                         delete  输入新的密码       点击   reset button  新密码替换
+# @app.route('/reset_password/<token>', methods=['GET', 'POST'])
+# def reset_password(token):
+#     if request.method == 'GET':
+#         # If it's a GET request, just render the reset_password.html template with the token
+#         return render_template('reset_password.html', token=token, csrf_token=generate_csrf())
+#         return render_template('reset_password.html', token=token)
+
+#     # 输入新的密码        If it's a POST request, process the form submission
+#     new_password = request.form['new_password']
+#     if not new_password:
+#         flash('No new password provided.', 'error')
+#         return redirect(url_for('reset_password', token=token))  # Redirect back to the same page
+#     from passwordReset import PasswordResetService
+#     email = PasswordResetService.verify_reset_token(token)
+#     if email is None:
+#         flash('The reset token is invalid or has expired.', 'error')
+#         return redirect(url_for('reset_request'))  # Redirect to the request reset page
+
+#     # 更新      At this point, we have a valid email and new password
+#     PasswordResetService.update_password(email, new_password)
+#     flash('Your password has been updated!', 'success')
+#     return redirect(url_for('user_views.user'))
 # Redirect to the login page after success
 
 
