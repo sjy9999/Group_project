@@ -92,70 +92,62 @@
         <div class="col-md-4">
             <div class="container">
                 <h2 class="mb-4">Register</h2>
-                <form action="{{ url_for('register') }}" method="POST" class="needs-validation" novalidate>
+                <form action="{{ url_for('access') }}" method="POST" class="needs-validation" novalidate>
+                    {{ register_form.hidden_tag() }}
                     <div class="form-group">
-                        <label for="name">Username</label>
-                        <input type="text" class="form-control" id="name" name="name" required>
+                        <label for="username">Username</label>
+                        {{ register_form.username(class="form-control", id="username", required=True) }}
                     </div>
                     <div class="form-group">
                         <label for="password">Password</label>
-
                         <div class="input-group">
-                            <input type="password" class="form-control" id="password" name="password" required>
-                            <!-- <div class="input-group-append">
-                                <button class="btn btn-outline-secondary toggle-password" type="button">
-                                    <i class="fa fa-eye" aria-hidden="true"></i>
-                                </button>
-                            </div> -->
+                            {{ register_form.password(class="form-control", id="password", required=True) }}
                             <div class="input-group-append">
                                 <button class="btn btn-outline-secondary toggle-register-password" type="button"><i class="fa fa-eye"></i></button>
                             </div>
                         </div>
-                        
-                        
-                        <!-- <input type="password" class="form-control" id="password" name="password" required> -->
                     </div>
                     <div class="form-group">
                         <label for="email">Email</label>
-                        <input type="email" class="form-control" id="email" name="email">
+                        {{ register_form.email(class="form-control", id="email") }}
                     </div>
-                    <button type="submit" class="btn btn-primary">Register</button>
-                    <div class="or-separator">
-                        <span>—————— or ——————</span>
-                    </div>
+                    <button type="submit" name="register" class="btn btn-primary">Register</button>
                 </form>
-                
-                <h2 class="mb-4 mt-5">Login</h2>
-                <form action="{{ url_for('login') }}" method="POST" class="needs-validation" novalidate>
+
+                <h2 class="mb-4 mt-5">Login</h2>access
+                <form action="{{ url_for('access') }}" method="POST" class="needs-validation" novalidate>
+                    {{ login_form.hidden_tag() }}
                     <div class="form-group">
                         <label for="username">Username</label>
-                        <input type="text" class="form-control" id="username" name="username" required>
+                        {{ login_form.username(class="form-control", id="username", required=True) }}
                     </div>
                     <div class="form-group">
                         <label for="passwordLogin">Password</label>
                         <div class="input-group">
-                            <input type="password" class="form-control" id="passwordLogin" name="password" required>
-                            <!-- <div class="input-group-append">
-                                <button class="btn btn-outline-secondary toggle-password" type="button"><i class="fa fa-eye"></i></button>
-                            </div> -->
+                            {{ login_form.password(class="form-control", id="passwordLogin", required=True) }}
                             <div class="input-group-append">
                                 <button class="btn btn-outline-secondary toggle-login-password" type="button"><i class="fa fa-eye"></i></button>
                             </div>
                         </div>
-
-                        <!-- <label for="passwordLogin">Password</label>
-                        <input type="password" class="form-control" id="passwordLogin" name="password" required> -->
                     </div>
-                    <button type="submit" class="btn btn-primary">Login</button>
-                    <!-- <button type="submit" class="btn btn-primary">Forget my password</button> 这个button url_for('forgot_password')-->
-                    <a href="{{ url_for('forgot_password') }}" class="btn btn-primary">Forget my password</a>
+                    <button type="submit" name="login" class="btn btn-primary">Login</button>
+                    <!-- <a href="{{ url_for('forgot_password') }}" class="btn btn-primary">Forget my password</a> -->
                 </form>
+                <!-- 将忘记密码链接移出表单 -->
+                <a href="{{ url_for('forgot_password') }}" class="btn btn-primary">Forget my password</a>
+
+                
+        
+
+
                 
             </div>
         </div>
+        
     </div>
 </div>
 <script>
+    // login       action="{{ url_for('register') }}"
 document.addEventListener("DOMContentLoaded", function() {
     // 用于登录表单的密码切换
     var toggleLoginPassword = document.querySelector(".toggle-login-password"); // 确保这个类名在HTML中是唯一的

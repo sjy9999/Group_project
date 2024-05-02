@@ -1,4 +1,4 @@
-<!-- Find Requests   回复帖子的html -->
+<!-- Find Requests   回复帖子的html     reset_password.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,74 +15,53 @@
             <div class="form-group">
                 <label for="searchQuery">Search Requests:</label>
                 <input type="text" name="searchQueryFR" placeholder="Enter keywords of requests" value="{{ search_queryFR }}">
-                <!-- <input type="text" class="form-control" id="searchQuery" name="searchQueryFR" placeholder="Enter keywords of requests"> -->
             </div>
             <button type="submit" class="btn btn-primary">Search</button>
-            <!-- success -->
             <a href="{{ url_for('main') }}" class="btn btn-primary">Back to Main Page</a>
         </form>
-
-        
-        <!-- {% for row in rows %}
-            <!- 直接打印出 row.replies 来检查 ->
-            {{ row.replies }}  
-        {% endfor %} -->
-
-
-        <!-- {% for row in rows %}
-            <!- 直接打印出 row.replies 来检查 ->
-            {{ row.replies }}  
-        {% endfor %} -->
-
-
+    
         {% for row in rows %}
         <div class="card mt-3">
-            <!-- <div class="card-body">            -->
             <div class="card-body"> 
-                <!-- 显示     问的问题 -->  
                 <h5 class="card-title">{{ row.title }}</h5>
                 <p class="card-text">{{ row.description }}</p>
                 <p class="card-text"><small class="text-muted">Posted by {{ row.username }} </small></p>
-                <!-- <p class="card-text"><small class="text-muted">Posted by {{ row.username }} on {{ row.created_at }}</small></p> -->
-                
-                <!-- 只是显示     回答 -->
-
+                <p>Replies count: {{ row.replies|length }}</p> <!-- 显示回复数量 -->
                 {% if row.replies %}
                     {% for reply in row.replies %}
                         <div class="reply mt-2">
                             <p class="reply-text">{{ reply.reply_content }}</p>
-                            <!-- <p class="reply-info"><small class="text-muted">Replied by {{ reply.answerName }}</small></p> -->
                             <p class="reply-info"><small class="text-muted">Replied by {{ reply.responderName }}</small></p>
-                            
                         </div>
                     {% endfor %}
                 {% else %}
                     <p>No replies.</p>
                 {% endif %}
-
-                <!--replyRequest   回复表单 -->
-                <form action="{{ url_for('replyRequest', request_id=row.id) }}" method="post">
+    
+                <!-- <form action="{{ url_for('replyRequest', request_id=row.id) }}" method="post">
+                    {{ row.form.hidden_tag() }}
                     <div class="form-group">
-                        <textarea name="reply" class="form-control" rows="3" placeholder="Enter your reply here"></textarea>
+                        {{ row.form.reply(class="form-control", rows=3, placeholder="Enter your reply here") }}
                     </div>
-                    <!-- ??      隐藏字段保留当前的搜索查询 -->
-                    <input type="hidden" name="search_queryFR" value="{{ request.args.get('searchQueryFR', '') }}">
-                    <!-- 也需要传递当前帖子的ID -->
-                    <input type="hidden" name="request_id" value="{{ row.id }}">
                     <button type="submit" class="btn btn-primary">Submit Reply</button>
-                    
+                </form> -->
 
-                    
-                    <!-- <div class="form-group">
-                        <textarea name="reply" class="form-control" rows="3" placeholder="Enter your reply here"></textarea>
+                <form action="{{ url_for('replyRequest', request_id=row.id) }}" method="post">
+                    {{ row.form.hidden_tag() }}
+                    <input type="hidden" name="request_id" value="{{ row.id }}">
+                    <input type="hidden" name="search_queryFR" value="{{ request.args.get('searchQueryFR', '') }}">
+                    <div class="form-group">
+                        {{ row.form.reply(class="form-control", rows=3, placeholder="Enter your reply here") }}
                     </div>
-                    <button type="submit" class="btn btn-primary">Submit Reply</button> -->
+                    <button type="submit" class="btn btn-primary">Submit Reply</button>
                 </form>
+                
             </div>
         </div>
         {% else %}
         <p>No requests found.</p>
         {% endfor %}
     </div>
+    
 </body>
 </html>

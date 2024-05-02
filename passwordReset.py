@@ -3,6 +3,7 @@ from flask_mail import Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 import sqlite3
 from models import User  # 确保导入了 User 模型
+from werkzeug.security import generate_password_hash
 # from app import db
 
 class PasswordResetService:
@@ -54,10 +55,31 @@ class PasswordResetService:
     #     if user:
     #         user.password = new_password  # 假设这里密码已经过哈希处理
     #         db.session.commit()
+    # @staticmethod
+    # def update_password(email, new_password):
+    #     from app import db
+    #     user = User.query.filter_by(email=email).first()
+    #     if user:
+    #         user.password = new_password
+    #         db.session.commit() 
+
     @staticmethod
     def update_password(email, new_password):
         from app import db
         user = User.query.filter_by(email=email).first()
+        if user is None:
+            # print("No user found with the provided email.")  # 或使用其他日志记录方法
+            return False
+
+        hashed_password = generate_password_hash(new_password)  # 生成哈希密码
+        user.password = hashed_password  # 更新为哈希密码
+        db.session.commit()
+        return True
+
+
+        from app import db
+        user = User.query.filter_by(email=email).first()
         if user:
-            user.password = new_password
-            db.session.commit()            
+            hashed_password = generate_password_hash(new_password)  # 生成哈希密码
+            user.password = hashed_password  # 更新为哈希密码
+            db.session.commit()          
