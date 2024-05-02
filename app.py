@@ -52,6 +52,7 @@ def register():
             username = request.form['name']
             password = request.form['password']
             email = request.form['email']
+           
             with sqlite3.connect("database.db") as con:
                 cur = con.cursor()  
                 cur.execute("INSERT INTO users (name, password, email) VALUES (?, ?, ?)", (username, password, email))
@@ -94,10 +95,14 @@ def login():
                     session['loggedin'] = True
                     session['username'] = user['name']
                     session['email'] = user['email']
-                    msg = '登录成功！'
                     # 登录成功后   保存   测试
-                    session['username'] = username  # 假设这是登录视图函数中的代码
-                    # login   登录成功     
+
+                    current_user_avatar = generate_gravatar_url(user['email'], size=128)
+                    session['avatar_url'] = current_user_avatar  # Store in session for use throughout the session
+
+                    # login   登录成功
+                    msg = '登录成功！'
+     
                     return render_template('main.html', msg=msg)
                     # return redirect(url_for('main'))
                 else:
@@ -112,6 +117,13 @@ def login():
     return redirect(url_for('login'))
 
 
+def get_posts_with_avatars():
+    posts = get_all_posts()  # Your function to fetch posts
+    for post in posts:
+        post['user_avatar'] = generate_gravatar_url(post['user_email'], size=64)
+        for reply in post['replies']:
+            reply['user_avatar'] = generate_gravatar_url(reply['user_email'], size=48)
+    return posts
 
 
 
@@ -160,12 +172,14 @@ def update_password():
     
 
 import hashlib
+import time
 
 def generate_gravatar_url(email, size=80):
-    """Generate a Gravatar URL from an email."""
+    """Generate a Gravatar URL from an email with cache busting."""
     email = email.lower().encode('utf-8')  # Ensure the email is in lowercase and encoded to bytes
     gravatar_id = hashlib.md5(email).hexdigest()
-    return f"https://www.gravatar.com/avatar/{gravatar_id}?d=identicon&s={size}"
+    timestamp = int(time.time())  # Current time as a cache buster
+    return f"https://www.gravatar.com/avatar/{gravatar_id}?s={size}&d=identicon&r=g&{timestamp}"
 
 @app.route('/dashboard/')
 def dashboard():
@@ -250,9 +264,77 @@ def delete_request(request_id):
 
     return redirect(url_for('dashboard'))
 
+@app.route('/update_name', methods=['POST'])
+def update_name():
+    # Check if the user is logged in
+    if 'loggedin' in session:
+        new_name = request.form['name']  # Get the new name from form data
+        try:
+            # Establish a database connection
+            with sqlite3.connect("database.db") as con:
+                cur = con.cursor()
+                # Update the user's name in the database
+                cur.execute("UPDATE users SET name = ? WHERE name = ?", (new_name, session['username']))
+                con.commit()
+                session['username'] = new_name  # Update the username in the session if it's also the name
+                flash('Name updated successfully!', 'success')
+        except sqlite3.Error as e:
+            # Handle database errors
+            flash('An error occurred: ' + str(e), 'error')
+            return redirect(url_for('dashboard'))
+        
+        return redirect(url_for('dashboard'))
+    else:
+        # If the user is not logged in, redirect to the login page
+        flash('You must be logged in to update your name.', 'info')
+        return redirect(url_for('login'))
+
+#from werkzeug.utils import secure_filename
+# import os
+
+# UPLOAD_FOLDER = 'C:/Users/Ge/Desktop/Group_project/UPLOAD_FOLDER'
+# ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+# app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
 
+
+# def allowed_file(filename):
+#     return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg', 'gif'}
+
+# @app.route('/upload_avatar', methods=['POST'])
+# def upload_avatar():
+#     if 'avatar' not in request.files:
+#         flash('No file part')
+#         return redirect(request.url)
+#     file = request.files['avatar']
+#     if file.filename == '':
+#         flash('No selected file')
+#         return redirect(request.url)
+#     if file and allowed_file(file.filename):
+#         filename = secure_filename(file.filename)
+#         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+#         try:
+#             file.save(file_path)  # Save the file
+#             update_user_avatar_url(file_path)  # Update the database
+#             flash('Avatar uploaded successfully')
+#         except Exception as e:
+#             flash(f'Error saving file: {str(e)}')
+#             return redirect(request.url)
+#         return redirect(url_for('dashboard'))
+#     flash('File not allowed')
+#     return redirect(request.url)
+
+# def update_user_avatar_url(file_path):
+#     username = session.get('username')
+#     try:
+#         with sqlite3.connect("C:/Users/Ge/Desktop/Group_project/database.db") as con:
+#             cur = con.cursor()
+#             cur.execute("UPDATE users SET avatar_url = ? WHERE username = ?", (file_path, username))
+#             con.commit()
+#             flash('Avatar updated successfully.')
+#     except sqlite3.Error as error:
+#         flash(f"Error updating avatar: {str(error)}") 
 
     
 
@@ -436,13 +518,30 @@ def findRequest():
             with sqlite3.connect("database.db") as con:
                 con.row_factory = sqlite3.Row
                 cur = con.cursor()
-                cur.execute("SELECT * FROM requests WHERE title LIKE ?", ('%'+search_queryFR+'%',))
+                # Joining requests with users to fetch email for avatar
+                cur.execute("""
+                    SELECT requests.*, users.email 
+                    FROM requests 
+                    JOIN users ON requests.username = users.name 
+                    WHERE requests.title LIKE ?
+                    """, ('%' + search_queryFR + '%',))
                 rows = [dict(row) for row in cur.fetchall()]
 
                 for row in rows:
-                    cur.execute("SELECT * FROM replies WHERE request_id=?", (row["id"],))
-                    row["replies"] = [dict(reply) for reply in cur.fetchall()]
-
+                    # Generate Gravatar URL for each request
+                    row['user_avatar'] = generate_gravatar_url(row['email'], size=64)
+                    # Fetching replies and joining with users to get emails for avatars
+                    cur.execute("""
+                        SELECT replies.*, users.email AS reply_email 
+                        FROM replies 
+                        JOIN users ON replies.answerName = users.name 
+                        WHERE replies.request_id = ?
+                        """, (row["id"],))
+                    replies = [dict(reply) for reply in cur.fetchall()]
+                    for reply in replies:
+                        # Generate Gravatar URL for each reply
+                        reply['user_avatar'] = generate_gravatar_url(reply['reply_email'], size=48)
+                    row["replies"] = replies
                 if not rows:
                     message = '未找到匹配的请求。'
         except Exception as e:

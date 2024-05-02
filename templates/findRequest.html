@@ -39,7 +39,9 @@
         {% for row in rows %}
         <div class="card mt-3">
             <div class="card-body">           
-            <div class="card-body">           
+            <div class="card-body">  
+                <img src="{{ row.user_avatar }}" alt="User Avatar" style="border-radius: 50%; width: 64px; height: 64px; float: left; margin-right: 15px;">
+         
                 <h5 class="card-title">{{ row.title }}</h5>
                 <p class="card-text">{{ row.description }}</p>
                 <p class="card-text"><small class="text-muted">Posted by {{ row.username }} on {{ row.created_at }}</small></p>
@@ -49,6 +51,8 @@
                 {% if row.replies %}
                     {% for reply in row.replies %}
                         <div class="reply mt-2">
+                            <img src="{{ reply.user_avatar }}" alt="User Avatar" style="border-radius: 50%; width: 48px; height: 48px; float: left; margin-right: 10px;">
+
                             <p class="reply-text">{{ reply.reply_content }}</p>
                             <p class="reply-info"><small class="text-muted">Replied by {{ reply.answerName }}</small></p>
                         </div>
