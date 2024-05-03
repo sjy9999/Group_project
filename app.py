@@ -1,50 +1,67 @@
-from flask import Flask, request, render_template, redirect, url_for, session,make_response, flash
+from flask import Flask, request, render_template, redirect, url_for, session,make_response, flash,jsonify
 import sqlite3
 # from passwordReset import PasswordResetService
 from flask_mail import Mail
 import os
 from routes import UserViews
-from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 # from models import User  # 确保从 models.py 导入了 User
 # from app import app, db
+import logging
 
 
 #要求
+from models import db
 from flask_login import LoginManager, login_user, logout_user, login_required
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, TextAreaField, SubmitField
-from flask_wtf.csrf import CSRFProtect,generate_csrf
+from flask_wtf.csrf import CSRFProtect, generate_csrf
 from wtforms.validators import InputRequired, Email
 from wtforms.validators import DataRequired
 
 
-# 项目启动       student.html 这是主界面  名字没事
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///instance/database.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-db = SQLAlchemy(app)
-app.secret_key = 'JunyiSun_secret_key'  # 用于保持会话安全
-# app.secret_key = 'your_secret_key'  # 用于保持会话安全
-app.config['SECRET_KEY'] = '8f42a73054b1749f8f58848be5e6502c'
-app.config['SECURITY_PASSWORD_SALT'] = '3243f6a8885a308d313198a2e0370734'
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'  # Gmail的SMTP服务器  smtp.sina.com       smtp.gmail.com
-app.config['MAIL_PORT'] = 587  # 邮件发送端口
-app.config['MAIL_USE_TLS'] = True  # 启用传输层安全性协议
-app.config['MAIL_USERNAME'] = 's395615470@gmail.com'
-app.config['MAIL_PASSWORD'] = 'johgpueksgsakecj'  # 你的Gmail密码或应用密码
-app.config['MAIL_DEFAULT_SENDER'] = 's395615470@gmail.com'  # 默认的发件人邮箱地址
+def create_app():
+    # 项目启动       student.html 这是主界面  名字没事
+    app = Flask(__name__)
 
-mail = Mail(app)
-app.register_blueprint(UserViews.bp)
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+    # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///instance/database.db'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.secret_key = 'JunyiSun_secret_key'  # 用于保持会话安全
+    # app.secret_key = 'your_secret_key'  # 用于保持会话安全
+    app.config['SECRET_KEY'] = '8f42a73054b1749f8f58848be5e6502c'
+    app.config['SECURITY_PASSWORD_SALT'] = '3243f6a8885a308d313198a2e0370734'
+    app.config['MAIL_SERVER'] = 'smtp.gmail.com'  # Gmail的SMTP服务器  smtp.sina.com       smtp.gmail.com
+    app.config['MAIL_PORT'] = 587  # 邮件发送端口
+    app.config['MAIL_USE_TLS'] = True  # 启用传输层安全性协议
+    app.config['MAIL_USERNAME'] = 's395615470@gmail.com'
+    app.config['MAIL_PASSWORD'] = 'johgpueksgsakecj'  # 你的Gmail密码或应用密码
+    app.config['MAIL_DEFAULT_SENDER'] = 's395615470@gmail.com'  # 默认的发件人邮箱地址
 
-with app.app_context():
-    db.create_all()
+    migrate = Migrate()
+    csrf = CSRFProtect()
+    login_manager = LoginManager()
+    mail = Mail()
+    
+    csrf.init_app(app)
+    db.init_app(app)
+    migrate.init_app(app, db)
+    login_manager.init_app(app)
+    mail.init_app(app)
 
-# WTForms  CSRFProtect
-csrf = CSRFProtect(app)
-login_manager = LoginManager(app)
+    app.register_blueprint(UserViews.bp)
+
+    with app.app_context():
+        db.create_all()
+
+    from passwordReset import PasswordResetService
+    app.password_reset_service = PasswordResetService()
+
+    return app
+
+
+app = create_app()
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[InputRequired()])
@@ -432,7 +449,9 @@ def findRequest():
                 # 获取与此请求相关的所有回复
                 replies = Reply.query.filter_by(request_id=req.id).all()
                 row['replies'] = [model_to_dict(reply) for reply in replies]
-
+                for Replies in row['replies']:
+                    like_count = Like.query.filter_by(reply_id=Replies['id']).count()
+                    Replies['like_count'] = like_count
                 # 为此请求实例化一个回复表单
                 row['form'] = ReplyForm()
 
@@ -459,6 +478,9 @@ def findRequest():
             # 获取与此请求相关的所有回复
             replies = Reply.query.filter_by(request_id=req.id).all()
             row['replies'] = [model_to_dict(reply) for reply in replies]
+            for Replies in row['replies']:
+                like_count = Like.query.filter_by(reply_id=Replies['id']).count()
+                Replies['like_count'] = like_count
 
             # 为此请求实例化一个回复表单
             row['form'] = ReplyForm()
@@ -843,49 +865,103 @@ def change_password():
     flash('Your password has been updated!', 'success')
     return redirect(url_for('login'))
 
-def create_app():
-    app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///instance/database.db'
+#like
+from flask_login import current_user, login_required
+from flask import session, jsonify, request
+from models import Like, User
 
-    db.init_app(app)
+@app.route('/like', methods=['POST'])
+@login_required
+def like():
+    reply_id = request.json.get('reply_id')
 
-    with app.app_context():
-        db.create_all()
+    existing_like = Like.query.filter_by(user_id=current_user.id, reply_id=reply_id).first()
+    if existing_like:
+        return jsonify({'replay_id':reply_id, 'message': 'Already liked'}), 400
 
-    from passwordReset import PasswordResetService
-    app.password_reset_service = PasswordResetService()
-
-    return app
-
-
-
-
-
-
-
-
+    new_like = Like(user_id=current_user.id, reply_id=reply_id)
+    db.session.add(new_like)
+    try:
+        db.session.commit()
+        like_count = Like.query.filter_by(reply_id=reply_id).count()
+        return jsonify({'message': 'Like successful', 'like_count': like_count}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'message': str(e)}), 500
 
 
+
+
+#get count-likes
+from models import User, Request, Reply, Like  # 确保正确导入模型
+from sqlalchemy import func, distinct
+
+@app.route('/Ranking')
+def ranking():
+    # 发帖得分
+    post_scores = db.session.query(
+        User.id.label('user_id'),
+        (5 * func.count(Request.id)).label('score')
+    ).join(Request, User.name == Request.username
+    ).group_by(User.id).subquery()
+
+    # 回帖得分
+    reply_scores = db.session.query(
+        User.id.label('user_id'),
+        (3 * func.count(Reply.id)).label('score')
+    ).join(Reply, User.name == Reply.responderName
+    ).group_by(User.id).subquery()
+
+    # 点赞得分（给别人的回复点赞）
+    like_scores = db.session.query(
+        User.id.label('user_id'),
+        func.count(Like.id).label('score')
+    ).join(Like, User.id == Like.user_id
+    ).group_by(User.id).subquery()
+
+    # 被点赞得分（自己的回帖被别人点赞）
+    received_like_scores = db.session.query(
+        User.id.label('user_id'),
+        (2 * func.count(Like.id)).label('score')
+    ).join(Reply, Reply.responderName == User.name
+    ).join(Like, Reply.id == Like.reply_id
+    ).group_by(User.id).subquery()
+
+    # 汇总得分，显式设置查询起始表为 User
+    final_scores = db.session.query(
+        User.id,
+        User.name,
+        (func.coalesce(post_scores.c.score, 0) +
+         func.coalesce(reply_scores.c.score, 0) +
+         func.coalesce(like_scores.c.score, 0) +
+         func.coalesce(received_like_scores.c.score, 0)).label('score')
+    ).select_from(User
+    ).outerjoin(post_scores, User.id == post_scores.c.user_id
+    ).outerjoin(reply_scores, User.id == reply_scores.c.user_id
+    ).outerjoin(like_scores, User.id == like_scores.c.user_id
+    ).outerjoin(received_like_scores, User.id == received_like_scores.c.user_id
+    ).group_by(User.id, User.name
+    ).order_by(db.desc('score'))
+
+    results = final_scores.all()
+
+    # 手动添加排名
+    rankings = []
+    rank = 1
+    current_score = None
+    for index, result in enumerate(results):
+        user_id, name, score = result
+        if score != current_score:
+            rank = index + 1
+            current_score = score
+        rankings.append((rank, user_id, name, score))
+
+    return render_template('Ranking.html', rankings=rankings)
 
 
 
 # back   可能要用部分
-
-
-
-
-# if __name__ == "__main__":
-#     # print(app.url_map)     这是一个测试     打印出来  app.url_map  print(app.url_map+'999')
-#     # app.run(debug=True)
-#     from models import *
-#     db.create_all()
-#     app.run(debug=True)
-from app import app, db
-from models import User,Request,Reply
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
     app.run(debug=True)
-# # app.py 的末尾
-# from views import *  # 或者具体的视图函数
-
