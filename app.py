@@ -42,7 +42,7 @@ app.register_blueprint(UserViews.bp)
 with app.app_context():
     db.create_all()
 
-# WTForms  CSRFProtect
+# this is WTForms  CSRFProtect
 csrf = CSRFProtect(app)
 login_manager = LoginManager(app)
 
@@ -91,7 +91,6 @@ class RegisterForm(FlaskForm):
 def access():
     login_form = LoginForm()
     register_form = RegisterForm()
-
     if 'login' in request.form and login_form.validate_on_submit():
         # 处理登录逻辑
         username = login_form.username.data
