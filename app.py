@@ -10,7 +10,7 @@ from flask_migrate import Migrate
 import logging
 
 
-#要求
+#要求  import
 from models import db
 from flask_login import LoginManager, login_user, logout_user, login_required
 from flask_wtf import FlaskForm
