@@ -1,0 +1,54 @@
+/* 设置整体页面背景和文字颜色 */
+body {
+    background-color: black; /* 页面背景色 */
+    color: #39FF14; /* 荧光绿色文字 */
+    font-family: 'Arial', sans-serif; /* 字体 */
+    margin: 0;
+    padding: 20px; /* 页面内边距 */
+}
+
+h1 {
+    text-align: center; /* 标题居中 */
+}
+
+table {
+    width: 80%; /* 表格宽度 */
+    margin: 20px auto; /* 表格居中显示 */
+    border-collapse: collapse; /* 边框合并 */
+}
+
+th, td {
+    border: 1px solid #39FF14; /* 设置表格边框颜色 */
+    padding: 10px; /* 单元格内边距 */
+    text-align: left; /* 文字对齐 */
+}
+
+th {
+    background-color: #282828; /* 表头背景色 */
+    color: #39FF14; /* 表头文字颜色 */
+}
+
+td {
+    background-color: #121212; /* 单元格背景色 */
+    color: #39FF14; /* 单元格文字颜色 */
+}
+
+/* 鼠标悬停时单元格效果 */
+tr:hover {
+    background-color: #1e1e1e;
+}
+
+/* 增加一些表格边框的光泽效果 */
+table, th, td {
+    box-shadow: 0 0 15px #39FF14;
+}
+
+/* 链接样式 */
+a {
+    color: #39FF14;
+    text-decoration: none; /* 去除下划线 */
+}
+
+a:hover {
+    text-decoration: underline; /* 悬停时显示下划线 */
+}

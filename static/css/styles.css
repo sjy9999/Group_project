@@ -1,0 +1,9 @@
+#sidebar .button {
+    display: block; /* Make each button take the full width of the sidebar */
+    margin-bottom: 10px; /* Add space below each button */
+}
+
+/* Optionally, remove the margin from the last button */
+#sidebar .button:last-child {
+    margin-bottom: 0;
+}

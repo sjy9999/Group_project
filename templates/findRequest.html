@@ -1,11 +1,14 @@
+<!-- Find Requests   回复帖子的html     reset_password.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Find Requests</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
+<!-- url_for 函数 findRequest  main   replyRequest-->
 <body>
     <div class="container mt-5">
         <h2>Find Requests</h2>
@@ -15,75 +18,59 @@
             <div class="form-group">
                 <label for="searchQuery">Search Requests:</label>
                 <input type="text" name="searchQueryFR" placeholder="Enter keywords of requests" value="{{ search_queryFR }}">
-                <!-- <input type="text" class="form-control" id="searchQuery" name="searchQueryFR" placeholder="Enter keywords of requests"> -->
-                <input type="text" name="searchQueryFR" placeholder="Enter keywords of requests" value="{{ search_queryFR }}">
-                <!-- <input type="text" class="form-control" id="searchQuery" name="searchQueryFR" placeholder="Enter keywords of requests"> -->
             </div>
             <button type="submit" class="btn btn-primary">Search</button>
-            <a href="{{ url_for('main') }}" class="btn btn-success">Back to Main Page</a>
+            <a href="{{ url_for('main') }}" class="btn btn-primary">Back to Main Page</a>
         </form>
-
-        
-        <!-- {% for row in rows %}
-            <!- 直接打印出 row.replies 来检查 ->
-            {{ row.replies }}  
-        {% endfor %} -->
-
-
-        <!-- {% for row in rows %}
-            <!- 直接打印出 row.replies 来检查 ->
-            {{ row.replies }}  
-        {% endfor %} -->
-
-
+    
         {% for row in rows %}
         <div class="card mt-3">
-            <div class="card-body">           
-            <div class="card-body">  
-                <img src="{{ row.user_avatar }}" alt="User Avatar" style="border-radius: 50%; width: 64px; height: 64px; float: left; margin-right: 15px;">
-         
+            <div class="card-body"> 
                 <h5 class="card-title">{{ row.title }}</h5>
                 <p class="card-text">{{ row.description }}</p>
-                <p class="card-text"><small class="text-muted">Posted by {{ row.username }} on {{ row.created_at }}</small></p>
-                
-                <!-- 只是显示     回答 -->
-
+                <p class="card-text"><small class="text-muted">Posted by {{ row.username }} </small></p>
+                <p>Replies count: {{ row.replies|length }}</p> <!-- 显示回复数量 -->
                 {% if row.replies %}
                     {% for reply in row.replies %}
-                        <div class="reply mt-2">
-                            <img src="{{ reply.user_avatar }}" alt="User Avatar" style="border-radius: 50%; width: 48px; height: 48px; float: left; margin-right: 10px;">
-
-                            <p class="reply-text">{{ reply.reply_content }}</p>
-                            <p class="reply-info"><small class="text-muted">Replied by {{ reply.answerName }}</small></p>
+                  
+                    <div class="reply mt-2">
+                        <!-- <p class="reply-info"><small class="text-muted">Replied by {{ reply.answerName }}</small></p> -->
+                        <p class="reply-info"><small class="text-muted">Replied by {{ reply.responderName }}</small></p>
+                        <div class="d-flex align-items-center justify-content-start">
+                            <p class="mb-0 mr-2">{{ reply.reply_content }}</p>
+                            <span class="like-emoji" role="button" data-reply-id="{{ reply.id }}" style="cursor: pointer;">👍</span>
+                            <span id="like-count-{{ reply.id }}">{{ reply.like_count }}</span>
                         </div>
+                    </div>
                     {% endfor %}
                 {% else %}
                     <p>No replies.</p>
                 {% endif %}
-
-                <!-- 回复表单 -->
-                <form action="{{ url_for('replyRequest', request_id=row.id) }}" method="post">
+    
+                <!-- <form action="{{ url_for('replyRequest', request_id=row.id) }}" method="post">
+                    {{ row.form.hidden_tag() }}
                     <div class="form-group">
-                        <textarea name="reply" class="form-control" rows="3" placeholder="Enter your reply here"></textarea>
+                        {{ row.form.reply(class="form-control", rows=3, placeholder="Enter your reply here") }}
                     </div>
-                    <!-- 隐藏字段保留当前的搜索查询 -->
-                    <input type="hidden" name="search_queryFR" value="{{ request.args.get('searchQueryFR', '') }}">
-                    <!-- 也需要传递当前帖子的ID -->
-                    <input type="hidden" name="request_id" value="{{ row.id }}">
                     <button type="submit" class="btn btn-primary">Submit Reply</button>
-                    
+                </form> -->
 
-                    
-                    <!-- <div class="form-group">
-                        <textarea name="reply" class="form-control" rows="3" placeholder="Enter your reply here"></textarea>
+                <form action="{{ url_for('replyRequest', request_id=row.id) }}" method="post">
+                    {{ row.form.hidden_tag() }}
+                    <input type="hidden" name="request_id" value="{{ row.id }}">
+                    <input type="hidden" name="search_queryFR" value="{{ request.args.get('searchQueryFR', '') }}">
+                    <div class="form-group">
+                        {{ row.form.reply(class="form-control", rows=3, placeholder="Enter your reply here") }}
                     </div>
-                    <button type="submit" class="btn btn-primary">Submit Reply</button> -->
+                    <button type="submit" class="btn btn-primary">Submit Reply</button>
                 </form>
+                
             </div>
         </div>
         {% else %}
         <p>No requests found.</p>
         {% endfor %}
     </div>
+    <script src="static/js/like.js"></script>
 </body>
 </html>

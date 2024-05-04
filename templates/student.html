@@ -1,78 +1,204 @@
+<!-- regi login 登录  注册界面  -->
 <!DOCTYPE html>
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>标题</title>
+    <title>FirstPage标题</title>
     <!-- 引入Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet">
     <style>
-        .container {
+        /* .container {
             padding-top: 20px;
-        }
+        } */
+        .container {
+            max-height: 100vh;
+    display: flex;          /* 启用Flexbox */
+    flex-direction: column; /* 子元素垂直排列 */
+    justify-content: center; /* 垂直居中 */
+    height: 100%;            /* 设置高度为100% */
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
         .full-height {
             height: 100vh; /* Use full height of the screen */
         }
+
         .img-full-height {
             max-height: 100%;
             width: auto;
         }
         .img-full-width {
-        max-width: 100%;
-        /* auto */
-        height: 100vh;
+            max-width: 100%;
+            /* auto 左侧图片*/
+            height: 100vh;
         }
+        .or-separator {
+            text-align: center; /* 居中文本 */
+            margin: 20px 0; /* 上下边距，增加一些间隔 */
+            font-size: 16px; /* 字体大小 */
+            color: #333; /* 字体颜色，可以根据需要调整 */
+        }
+        .container h2 {
+    font-size: 36px; /* 设置更大的字体大小 */
+    font-weight: bold; /* 使文字加粗 */
+    color: #000000; /* 设置字体颜色，这里使用了Bootstrap的主题蓝色 */
+    margin-bottom: 20px; /* 增加下边距，保持视觉分隔 */
+}
+
+.container .form-group {
+    margin-bottom: 10px; /* 默认可能是15px或更多 */
+}
+
+.container input, .container button {
+    padding: 5px 5px; /* 根据需要减小填充 */
+}
+
+
     </style>
 </head>
 <body>
 
 <div class="container-fluid full-height">
     <div class="row full-height">
-        <!-- 图片部分 -->
-        <div class="col-md-6 d-flex align-items-center justify-content-center">
-            <img src="/static/img/zaha3.jpg" class="img-full-width" alt="Ice">
-        </div>
-        <!-- 表单部分 -->
-        <div class="col-md-6">
-            <div class="container">
-                <h2 class="mb-4">Register 注册</h2>
-                <form action="{{ url_for('register') }}" method="POST" class="needs-validation" novalidate>
-                    <div class="form-group">
-                        <label for="name">Username 用户名</label>
-                        <input type="text" class="form-control" id="name" name="name" required>
+        <!-- 左侧图片轮播部分 -->
+        <div class="col-md-8">
+            <div id="carouselExample" class="carousel slide full-height" data-ride="carousel">
+                <div class="carousel-inner full-height">
+                    <div class="carousel-item active full-height">
+                        <img src="/static/img/s1.jpg" class="d-block w-100 img-full-height" alt="s1">
                     </div>
-                    <div class="form-group">
-                        <label for="password">Password 密码</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
+                    <div class="carousel-item full-height">
+                        <img src="/static/img/s2.jpg" class="d-block w-100 img-full-height" alt="s2">
                     </div>
-                    <div class="form-group">
-                        <label for="email">Email 邮箱</label>
-                        <input type="email" class="form-control" id="email" name="email">
+                    <div class="carousel-item full-height">
+                        <img src="/static/img/s3.jpg" class="d-block w-100 img-full-height" alt="s3">
                     </div>
-                    <button type="submit" class="btn btn-primary">Register 注册</button>
-                </form>
-                
-                <h2 class="mb-4 mt-5">Login 登录</h2>
-                <form action="{{ url_for('login') }}" method="POST" class="needs-validation" novalidate>
-                    <div class="form-group">
-                        <label for="username">Username 用户名</label>
-                        <input type="text" class="form-control" id="username" name="username" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="passwordLogin">Password 密码</label>
-                        <input type="password" class="form-control" id="passwordLogin" name="password" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Login 登录</button>
-                </form>
+                </div>
+                <a class="carousel-control-prev" href="#carouselExample" role="button" data-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Previous</span>
+                </a>
+                <a class="carousel-control-next" href="#carouselExample" role="button" data-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Next</span>
+                </a>
             </div>
         </div>
+        <!-- 右侧   表单部分 -->
+        <div class="col-md-4">
+            <div class="container">
+                <h2 class="mb-4">Register</h2>
+                <form action="{{ url_for('access') }}" method="POST" class="needs-validation" novalidate>
+                    {{ register_form.hidden_tag() }}
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        {{ register_form.username(class="form-control", id="username", required=True) }}
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="input-group">
+                            {{ register_form.password(class="form-control", id="password", required=True) }}
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary toggle-register-password" type="button"><i class="fa fa-eye"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        {{ register_form.email(class="form-control", id="email") }}
+                    </div>
+                    <button type="submit" name="register" class="btn btn-primary">Register</button>
+                </form>
+
+                <h2 class="mb-4 mt-5">Login</h2>access
+                <form action="{{ url_for('access') }}" method="POST" class="needs-validation" novalidate>
+                    {{ login_form.hidden_tag() }}
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        {{ login_form.username(class="form-control", id="username", required=True) }}
+                    </div>
+                    <div class="form-group">
+                        <label for="passwordLogin">Password</label>
+                        <div class="input-group">
+                            {{ login_form.password(class="form-control", id="passwordLogin", required=True) }}
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary toggle-login-password" type="button"><i class="fa fa-eye"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" name="login" class="btn btn-primary">Login</button>
+                    <!-- <a href="{{ url_for('forgot_password') }}" class="btn btn-primary">Forget my password</a> -->
+                </form>
+                <!-- 将忘记密码链接移出表单 -->
+                <a href="{{ url_for('forgot_password') }}" class="btn btn-primary">Forget my password</a>
+
+                
+        
+
+
+                
+            </div>
+        </div>
+        
     </div>
 </div>
+<script>
+    // login       action="{{ url_for('register') }}"
+document.addEventListener("DOMContentLoaded", function() {
+    // 用于登录表单的密码切换
+    var toggleLoginPassword = document.querySelector(".toggle-login-password"); // 确保这个类名在HTML中是唯一的
+    toggleLoginPassword.addEventListener('click', function() {
+        var loginPasswordInput = document.getElementById('passwordLogin');
+        if (loginPasswordInput.type === 'password') {
+            loginPasswordInput.type = 'text';
+            toggleLoginPassword.innerHTML = '<i class="fa fa-eye-slash" aria-hidden="true"></i>'; // 密码可见时的图标
+        } else {
+            loginPasswordInput.type = 'password';
+            toggleLoginPassword.innerHTML = '<i class="fa fa-eye" aria-hidden="true"></i>'; // 密码隐藏时的图标
+        }
+    });
 
+    // 用于注册表单的密码切换
+    var toggleRegisterPassword = document.querySelector(".toggle-register-password"); // 确保这个类名在HTML中是唯一的
+    toggleRegisterPassword.addEventListener('click', function() {
+        var registerPasswordInput = document.getElementById('password');
+        if (registerPasswordInput.type === 'password') {
+            registerPasswordInput.type = 'text';
+            toggleRegisterPassword.innerHTML = '<i class="fa fa-eye-slash" aria-hidden="true"></i>'; // 密码可见时的图标
+        } else {
+            registerPasswordInput.type = 'password';
+            toggleRegisterPassword.innerHTML = '<i class="fa fa-eye" aria-hidden="true"></i>'; // 密码隐藏时的图标
+        }
+    });
+});
+
+    // document.addEventListener("DOMContentLoaded", function() {
+    //     var togglePasswordButton = document.querySelector('.toggle-password');
+    //     togglePasswordButton.addEventListener('click', function(e) {
+    //         var passwordInput = document.getElementById('password');
+    //         if (passwordInput.type === 'password') {
+    //             passwordInput.type = 'text';
+    //             togglePasswordButton.innerHTML = '<i class="fa fa-eye-slash" aria-hidden="true"></i>';
+    //         } else {
+    //             passwordInput.type = 'password';
+    //             togglePasswordButton.innerHTML = '<i class="fa fa-eye" aria-hidden="true"></i>';
+    //         }
+    //     });
+    // });
+
+</script>
+    
 <!-- 引入Bootstrap的JS和依赖 -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.9/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
+
+
+
+<!-- Bootstrap   btn-primary 通常表示主要按钮样式，而 btn-secondary 表示次要按钮样式 -->
