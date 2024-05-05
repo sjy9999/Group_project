@@ -1,5 +1,4 @@
-from flask import Flask, request, render_template, redirect, url_for, session,make_response, flash,jsonify
-from flask import Flask, request, render_template, redirect, url_for, session,make_response,flash
+from flask import Flask, request, render_template, redirect, url_for, session,make_response, flash,jsonify,flash
 import sqlite3
 # from passwordReset import PasswordResetService
 from flask_mail import Mail
@@ -11,10 +10,11 @@ from flask_migrate import Migrate
 import logging
 
 
+
 #要求  import
 from models import db
 from flask_login import LoginManager, login_user, logout_user, login_required
-from flask_wtf import FlaskForm
+from flask_wtf import FlaskForm,CSRFProtect
 from wtforms import StringField, PasswordField, TextAreaField, SubmitField
 from flask_wtf.csrf import CSRFProtect, generate_csrf
 from wtforms.validators import InputRequired, Email
@@ -25,6 +25,8 @@ from wtforms.validators import DataRequired
 def create_app():
     # 项目启动       student.html 这是主界面  名字没事
     app = Flask(__name__)
+    
+    
 
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
     # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///instance/database.db'
@@ -51,6 +53,7 @@ def create_app():
     login_manager.init_app(app)
     mail.init_app(app)
 
+
     app.register_blueprint(UserViews.bp)
 
     with app.app_context():
@@ -74,35 +77,6 @@ class RegisterForm(FlaskForm):
     email = StringField('Email', validators=[Email()])
 
 
-
-# 先留着    先打开   这个界面   注册 登录账号       这是   http://127.0.0.1:5000/create/
-# @app.route('/create/')
-# def create_student():
-#     return render_template('student.html')    #渲染student.html模板
-
-# 先留着    添加学生的路由，支持POST和GET请求    @app.route('/addstudent/')     http://127.0.0.1:5000/addstudent/
-# @app.route('/addstudent/',methods = ['POST', 'GET'])
-# def add_student():
-#     try:
-#         #获取请求中的nm、add、city、pin的数据
-#         nm = request.form['nm']
-#         addr = request.form['add']
-#         city = request.form['city']
-#         pin = request.form['pin']
-#         with sqlite3.connect("database.db") as con:  
-#            cur = con.cursor()     
-#            cur.execute("INSERT INTO students (name,addr,city,pin) VALUES (?,?,?,?)",(nm,addr,city,pin) )                
-#            con.commit()    
-#            msg = "添加这个新的学生   成功"
-#     except:
-#         con.rollback()
-#         msg = "添加这个新的学生   失败"
-#     finally:
-#         # 这个才是对的
-#         if con:
-#             con.close()
-#         # 改url_for       而不是返回html
-#         return redirect(url_for('show_student'))
 
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/access/', methods=['GET', 'POST'])
@@ -142,27 +116,29 @@ def access():
 # back
 # register 注册   http://127.0.0.1:5000  应该也返回这个       http://127.0.0.1:5000/register/
 # register比login复杂    GET 请求通常用于从服务器获取数据或者显示一个页面 POST 请求通常用于当用户提交表单数据到服务器
+
+
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    if request.method == 'POST':
+    print("Register function called")  # 调试语句
+    register_form = RegisterForm()
+    
+    if register_form.validate_on_submit():
         try:
-            # 从表单请求中获取用户名、密码和邮箱的数据
-            username = request.form['name']
-            password = request.form['password']
-            email = request.form['email']
-           
-            with sqlite3.connect("database.db") as con:
-                cur = con.cursor()  
-                cur.execute("INSERT INTO users (name, password, email) VALUES (?, ?, ?)", (username, password, email))
-                con.commit()  
-                msg = "注册成功"
+            username = register_form.username.data
+            password = register_form.password.data
+            email = register_form.email.data
+            new_user = User(name=username, email=email)
+            new_user.set_password(password)
+            db.session.add(new_user)
+            db.session.commit()
+            return redirect(url_for('some_success_page'))
         except Exception as e:
             db.session.rollback()
             return render_template("error.html", message=f"Registration failed, error: {str(e)}")
 
     return render_template("student.html", register_form=register_form)
-
-
 
 # @app.route('/register/', methods=['POST', 'GET'])
 # def register():
@@ -217,47 +193,22 @@ def load_user(user_id):
 
 
 
-# login   登录    http://127.0.0.1:5000  应该也返回这个    login    http://127.0.0.1:5000/login/
 @app.route('/login/', methods=['POST', 'GET'])
 def login():
-    # 默认情况下，假设没有错误消息
-    msg = ''
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        try:
-            with sqlite3.connect("database.db") as con:
-                con.row_factory = sqlite3.Row
-                cur = con.cursor()
-                cur.execute("SELECT * FROM users WHERE name = ? AND password = ?", (username, password))
-
-                user = cur.fetchone()
-                if user:
-                    # 用户验证成功，设置用户会话
-                    session['loggedin'] = True
-                    session['username'] = user['name']
-                    session['email'] = user['email']
-                    # 登录成功后   保存   测试
-
-                    current_user_avatar = generate_gravatar_url(user['email'], size=128)
-                    session['avatar_url'] = current_user_avatar  # Store in session for use throughout the session
-
-                    # login   登录成功
-                    msg = '登录成功！'
-     
-                    return render_template('main.html', msg=msg)
-                    # return redirect(url_for('main'))
-                else:
-                    # 登录失败，设置错误消息
-                    msg = '用户名或密码错误！'
-        except Exception as e:
-            # 处理异常，设置错误消息
-            msg = f"错误: {str(e)}"
-        # 登录失败或发生异常，使用同一个结果页面来显示错误消息
-        return render_template("result.html", msg=msg)
-    # 如果不是POST请求，或者出现其他情况，重定向到登录页面
-    return redirect(url_for('login'))
-
+    login_form = LoginForm()
+    if login_form.validate_on_submit():
+        username = login_form.username.data
+        password = login_form.password.data
+        user = User.query.filter_by(name=username).first()
+        if user and user.check_password(password):
+            login_user(user)
+            session['loggedin'] = True
+            session['username'] = user.name
+            return render_template('main.html', msg='Login successful!')  
+            # return redirect(url_for('index'))  # 假设你有一个名为 'index' 的视图函数
+        else:
+            return render_template('result.html', form=login_form, msg='Incorrect username or password！')
+    return render_template('login.html', login_form=login_form)
 
 def get_posts_with_avatars():
     posts = get_all_posts()  # Your function to fetch posts
@@ -267,169 +218,95 @@ def get_posts_with_avatars():
             reply['user_avatar'] = generate_gravatar_url(reply['user_email'], size=48)
     return posts
 
+from werkzeug.security import generate_password_hash
+
+@app.route('/update_profile', methods=['POST'])
+
+
 
 
 @app.route('/logout/', endpoint='logout1')
 def logout():
-    session.pop('loggedin', None)
-    session.pop('username', None)
-    session.pop('email', None)
-    return redirect(url_for('register'))
+    logout_user()
+
+    return redirect(url_for('student'))
+
+@app.route('/update_name', methods=['POST'])
+@login_required
+def update_name():
+    current_user.name = request.form['name']
+    db.session.commit()
+    flash('Your name has been updated.')
+    return redirect(url_for('dashboard'))
 
 @app.route('/update_email', methods=['POST'])
+@login_required
 def update_email():
-    if 'loggedin' in session:
-        new_email = request.form['email']
-        try:
-            with sqlite3.connect("database.db") as con:
-                cur = con.cursor()
-                cur.execute("UPDATE users SET email = ? WHERE name = ?", (new_email, session['username']))
-                con.commit()
-                session['email'] = new_email  # Update session data
-                flash('Email updated successfully!', 'success')
-                return redirect(url_for('dashboard'))
-        except sqlite3.Error as e:
-            return f"An error occurred: {e}", 500
-    else:
-        return redirect(url_for('login'))
+    current_user.email = request.form['email']
+    db.session.commit()
+    flash('Your email has been updated.')
+    return redirect(url_for('dashboard'))
 
 @app.route('/update_password', methods=['POST'])
+@login_required
 def update_password():
-    if 'loggedin' in session:
-        new_password = request.form['password']
-        # Ideally, you should hash this password before storing
-        try:
-            with sqlite3.connect("database.db") as con:
-                cur = con.cursor()
-                cur.execute("UPDATE users SET password = ? WHERE name = ?", (new_password, session['username']))
-                con.commit()
-                flash('Password updated successfully!', 'success')
-                return redirect(url_for('dashboard'))
-                
-        except sqlite3.Error as e:
-            return f"An error occurred: {e}", 500
+    if 'password' in request.form and request.form['password']:
+        # Update the user's password
+        hashed_password = generate_password_hash(request.form['password'])
+        current_user.password = hashed_password
+        db.session.commit()
+        flash('Password update successful. Redirecting to student page in 10 seconds...', 'success')
     else:
-        flash('You are not logged in.', 'error')
-        return redirect(url_for('login'))
+        flash('Please enter a new password.', 'error')
     
-
+    # Redirect back to the dashboard page
+    return redirect(url_for('dashboard'))
 import hashlib
 import time
 
-def generate_gravatar_url(email, size=80):
-    """Generate a Gravatar URL from an email with cache busting."""
-    email = email.lower().encode('utf-8')  # Ensure the email is in lowercase and encoded to bytes
-    gravatar_id = hashlib.md5(email).hexdigest()
-    timestamp = int(time.time())  # Current time as a cache buster
-    return f"https://www.gravatar.com/avatar/{gravatar_id}?s={size}&d=identicon&r=g&{timestamp}"
+def gravatar_url(email, size=100, default='retro', rating='g'):
+    """Generate a gravatar URL based on the email provided."""
+    hash = hashlib.md5(email.lower().encode('utf-8')).hexdigest()
+    url = f"https://www.gravatar.com/avatar/{hash}?s={size}&d={default}&r={rating}"
+    return url
 
-@app.route('/dashboard/')
+from flask import render_template, redirect, url_for, flash, session
+from flask_login import login_required, current_user
+
+from flask import render_template
+
+@app.route('/dashboard')
+@login_required
 def dashboard():
-    if 'loggedin' in session:
-        username = session['username']
-        email = session['email']
+    user = current_user
+    requests = user.get_requests(user.name)
+    avatar = gravatar_url(user.email)
+  # Directly access the requests, assuming the relationship is defined in the User model
+    return render_template('dashboard.html', user=user, requests=requests,avatar=avatar)
 
-        # Fetch the avatar URL
-        avatar_url = generate_gravatar_url(email, 128)
-
-        # Fetch user's requests from the database
-        with sqlite3.connect("database.db") as con:
-            con.row_factory = sqlite3.Row
-            cur = con.cursor()
-            cur.execute("SELECT * FROM requests WHERE username = ?", (username,))
-            user_requests = cur.fetchall()
-        
-        # Fetch replies for each request
-            requests_with_replies = []
-            for request in user_requests:
-                cur.execute("SELECT * FROM replies WHERE request_id = ?", (request['id'],))
-                replies = cur.fetchall()
-                requests_with_replies.append(dict(request, replies=replies))
-            
-        return render_template('dashboard.html', username=username, email=email, avatar_url=avatar_url, user_requests=requests_with_replies)
-    else:
-        flash("Please log in to access the dashboard.", "warning")
-        return redirect(url_for('login'))
-    
 
 @app.route('/request/<int:request_id>')
+@login_required
 def specific_request(request_id):
-    if 'loggedin' not in session:
-        return redirect(url_for('login'))
-
-    with sqlite3.connect("database.db") as con:
-        con.row_factory = sqlite3.Row
-        cur = con.cursor()
-
-        # Fetch the specific request and its replies
-        cur.execute("SELECT * FROM requests WHERE id = ?", (request_id,))
-        request_details = cur.fetchone()
-        
-        cur.execute("SELECT * FROM replies WHERE request_id = ?", (request_id,))
-        replies = cur.fetchall()
-
-    if request_details:
-        return render_template('specific_request.html', request=request_details, replies=replies)
-    else:
-        flash('Request not found.', 'warning')
-        return redirect(url_for('dashboard'))
-
-from datetime import datetime
-
-@app.template_filter()
-def dateformat(value, format='%Y-%m-%d %H:%M'):
-    """Format a datetime string to a more readable format. Handle None values gracefully."""
-    if not value:  # This checks for None or empty strings
-        return "No date provided"  # You can return an empty string or a placeholder
-    try:
-        return datetime.strptime(value, '%Y-%m-%d %H:%M:%S').strftime(format)
-    except ValueError:
-        return value  # Return the original value if formatting fails
-
+    request = Request.query.get_or_404(request_id)
+    print("Request Description:", request.description) 
+    return render_template('specific_request.html', request=request)
 
 @app.route('/delete_request/<int:request_id>', methods=['POST'])
+@login_required
 def delete_request(request_id):
-    if 'loggedin' not in session:
-        return redirect(url_for('login'))
-
-    with sqlite3.connect("database.db") as con:
-        cur = con.cursor()
-        # Ensure that the current user is the owner of the request before deleting
-        cur.execute("SELECT * FROM requests WHERE id = ? AND username = ?", (request_id, session['username']))
-        request = cur.fetchone()
-        if request:
-            cur.execute("DELETE FROM requests WHERE id = ?", (request_id,))
-            con.commit()
-            flash('Request deleted successfully.', 'success')
-        else:
-            flash('Request not found or you do not have permission to delete it.', 'error')
-
+    request = Request.query.get_or_404(request_id)
+    if request.user != current_user:
+        abort(403)  # Prevent deleting requests not owned by the user
+    db.session.delete(request)
+    db.session.commit()
+    flash('Request deleted successfully!', 'success')
     return redirect(url_for('dashboard'))
 
-@app.route('/update_name', methods=['POST'])
-def update_name():
-    # Check if the user is logged in
-    if 'loggedin' in session:
-        new_name = request.form['name']  # Get the new name from form data
-        try:
-            # Establish a database connection
-            with sqlite3.connect("database.db") as con:
-                cur = con.cursor()
-                # Update the user's name in the database
-                cur.execute("UPDATE users SET name = ? WHERE name = ?", (new_name, session['username']))
-                con.commit()
-                session['username'] = new_name  # Update the username in the session if it's also the name
-                flash('Name updated successfully!', 'success')
-        except sqlite3.Error as e:
-            # Handle database errors
-            flash('An error occurred: ' + str(e), 'error')
-            return redirect(url_for('dashboard'))
-        
-        return redirect(url_for('dashboard'))
-    else:
-        # If the user is not logged in, redirect to the login page
-        flash('You must be logged in to update your name.', 'info')
-        return redirect(url_for('login'))
+
+
+
+
 
 #from werkzeug.utils import secure_filename
 # import os
@@ -645,9 +522,23 @@ def createRequest():
 #         # 如果不是POST请求，则渲染创建请求的页面
 #         return render_template('createRequest.html')
 
+def model_to_dict(model, with_avatar=False):
+    data = {column.name: getattr(model, column.name) for column in model.__table__.columns}
+    
+    # Check if avatar is needed and model has 'username' or 'responderName'
+    if with_avatar:
+        user = None
+        if hasattr(model, 'username'):
+            user = User.query.filter_by(name=model.username).first()
+        elif hasattr(model, 'responderName'):
+            user = User.query.filter_by(name=model.responderName).first()
 
-def model_to_dict(model):
-    return {column.name: getattr(model, column.name) for column in model.__table__.columns}
+        if user:
+            # If user is found, append their email and avatar URL
+            data['email'] = user.email
+            data['avatar_url'] = user.gravatar_url()
+    return data
+
 
 class ReplyForm(FlaskForm):
     reply = TextAreaField('Reply', validators=[DataRequired()])
@@ -658,38 +549,37 @@ def findRequest():
     # print("Request object:", request)
     search_queryFR = request.args.get('searchQueryFR', '').strip()
     rows = []
-    message = ''
+    message = 'No matching requests found.' if search_queryFR else 'Recent requests:'
     if search_queryFR:
         try:
-            with sqlite3.connect("database.db") as con:
-                con.row_factory = sqlite3.Row
-                cur = con.cursor()
-                # Joining requests with users to fetch email for avatar
-                cur.execute("""
-                    SELECT requests.*, users.email 
-                    FROM requests 
-                    JOIN users ON requests.username = users.name 
-                    WHERE requests.title LIKE ?
-                    """, ('%' + search_queryFR + '%',))
-                rows = [dict(row) for row in cur.fetchall()]
+            matched_requests = Request.query.filter(Request.title.like('%' + search_queryFR + '%')).all()
+            rows = []
+            for req in matched_requests:
+                row = model_to_dict(req, with_avatar=True)  # Convert request to dictionary with avatar
+                
 
-                for row in rows:
-                    # Generate Gravatar URL for each request
-                    row['user_avatar'] = generate_gravatar_url(row['email'], size=64)
-                    # Fetching replies and joining with users to get emails for avatars
-                    cur.execute("""
-                        SELECT replies.*, users.email AS reply_email 
-                        FROM replies 
-                        JOIN users ON replies.answerName = users.name 
-                        WHERE replies.request_id = ?
-                        """, (row["id"],))
-                    replies = [dict(reply) for reply in cur.fetchall()]
-                    for reply in replies:
-                        # Generate Gravatar URL for each reply
-                        reply['user_avatar'] = generate_gravatar_url(reply['reply_email'], size=48)
-                    row["replies"] = replies
-                if not rows:
-                    message = '未找到匹配的请求。'
+
+                # 获取与此请求相关的所有回复
+                replies = Reply.query.filter_by(request_id=req.id).all()
+                row['replies'] = [model_to_dict(reply, with_avatar=True) for reply in replies]  # Ensure avatars for replies
+                for Replies in row['replies']:
+                    like_count = Like.query.filter_by(reply_id=Replies['id']).count()
+                    Replies['like_count'] = like_count
+                    print("Reply with avatar:", row)  # Debug print
+                   
+                row['form'] = ReplyForm()
+
+                # 添加到结果列表
+                rows.append(row)
+
+            # matched_requests = Request.query.filter(Request.title.like('%' + search_queryFR + '%')).all()
+            # rows = [r.as_dict() for r in matched_requests]
+            # for row in rows:
+            #     form = ReplyForm()  # 为每个请求创建一个回复表单实例
+            #     row['form'] = form
+
+            if not rows:
+                message = 'No matching requests found.'
         except Exception as e:
             message = 'An issue occurred during the search process.'
             print(f"Search request failed, error: {e}")
@@ -698,13 +588,18 @@ def findRequest():
         # rows = [r.as_dict() for r in rows]
         rows = []
         for req in requests:  # 改变变量名以避免覆盖全局 request 对象
-            row = model_to_dict(req)
+            row = model_to_dict(req, with_avatar=True)  # Ensure avatars for requests
+           
+
+
             # 获取与此请求相关的所有回复
             replies = Reply.query.filter_by(request_id=req.id).all()
-            row['replies'] = [model_to_dict(reply) for reply in replies]
+            row['replies'] = [model_to_dict(reply, with_avatar=True) for reply in replies]  # Ensure avatars for replies
             for Replies in row['replies']:
                 like_count = Like.query.filter_by(reply_id=Replies['id']).count()
                 Replies['like_count'] = like_count
+              
+                 # Check the first row's data specifically
 
             # 为此请求实例化一个回复表单
             row['form'] = ReplyForm()
@@ -712,20 +607,6 @@ def findRequest():
             # 添加到结果列表
             rows.append(row)
 
-        # for request in requests :
-        #     row = model_to_dict(row)
-        #     # 获取与此请求相关的所有回复
-        #     replies = Reply.query.filter_by(request_id=request.id).all()
-        #     row['replies'] = [model_to_dict(reply) for reply in replies]
-
-        #     # 为此请求实例化一个回复表单
-        #     row['form'] = ReplyForm()
-
-        #     # 添加到结果列表
-        #     rows.append(row)
-
-        #     # form = ReplyForm()
-        #     # row['form'] = form
     return render_template('findRequest.html', rows=rows, message=message, search_queryFR=search_queryFR)
 
 
