@@ -69,13 +69,34 @@
                 <h2>Your Details</h2>
                 <p><strong>Name:</strong> {{ user.name }}</p>
                 <p><strong>Email:</strong> {{ user.email }}</p>
+
             </section>
 
             <!-- User Rank and Score Section -->
+            
             <section class="form-section">
                 <h2>Your Ranking</h2>
                 <p><strong>Rank:</strong> {{ user_rank }}</p>
+                {% if user_rank == 1 %}
+                <img src="/static/img/gold.png" alt="Gold Medal" style="width: 60px; height: auto;"  />
                 <p><strong>Score:</strong> {{ user_score }}</p>
+
+                    <p>Congratulations! You're in first place!</p>
+                {% elif user_rank == 2 %}
+                    <img src="/static/img/sliver.png" alt="Silver Medal " style="width: 60px; height: auto;" />
+                    <p><strong>Score:</strong> {{ user_score }}</p>
+
+                    <p>Great job! You're in second place!</p>
+                {% elif user_rank == 3 %}
+                    <img src="/static/img/bronze.png" alt="Bronze Medal" style="width: 60px; height: auto;" />
+                    <p><strong>Score:</strong> {{ user_score }}</p>
+
+                    <p>Well done! You're in third place!</p>
+                {% else %}
+                    <p><strong>Score:</strong> {{ user_score }}</p>
+
+                    <p>Keep up the great work to climb into the top three!</p>
+                {% endif %}
             </section>
 
             

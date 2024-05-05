@@ -202,6 +202,7 @@ def login():
         user = User.query.filter_by(name=username).first()
         if user and user.check_password(password):
             login_user(user)
+            
             session['loggedin'] = True
             session['username'] = user.name
             return render_template('main.html', msg='Login successful!')  
