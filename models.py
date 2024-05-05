@@ -53,6 +53,7 @@ class Request(db.Model):
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(255), nullable=False)
     username = db.Column(db.String(100))  # Changed to match the type of User.name
+    replies = db.relationship('Reply', backref='request', lazy='dynamic')
 
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}

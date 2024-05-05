@@ -338,19 +338,26 @@ def dashboard():
   # Directly access the requests, assuming the relationship is defined in the User model
     return render_template('dashboard.html', user=user, requests=requests,avatar=avatar,user_rank=user_rank, user_score=user_score)
 
+from flask_login import login_required, current_user  # Assuming you're using flask_login for user session management
 
 @app.route('/request/<int:request_id>')
 @login_required
 def specific_request(request_id):
-    request = Request.query.get_or_404(request_id)
-    print("Request Description:", request.description) 
-    return render_template('specific_request.html', request=request)
+    request_obj = Request.query.get(request_id)  # Using get for direct ID access
+    if not request_obj:
+        #flash('Request not found.', 'error')  # Flash a message if no request found
+        return redirect(url_for('main'))  # Redirect to a safe page
+
+    # Prepare reply form data if needed, for example:
+    # If using WTForms, instantiate your form here if it's going to be rendered on the same page
+
+    return render_template('specific_request.html', request=request_obj)
 
 @app.route('/delete_request/<int:request_id>', methods=['POST'])
 @login_required
 def delete_request(request_id):
-    request = Request.query.get_or_404(request_id)
-    if request.user != current_user:
+    request = Request.query.get(request_id)
+    if request.username != current_user.name:
         abort(403)  # Prevent deleting requests not owned by the user
     db.session.delete(request)
     db.session.commit()
