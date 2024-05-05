@@ -275,14 +275,68 @@ from flask_login import login_required, current_user
 
 from flask import render_template
 
+def get_user_rank_and_score(user_id):
+    # Reuse the same logic to calculate scores
+    post_scores = db.session.query(
+        User.id.label('user_id'),
+        (5 * func.count(Request.id)).label('score')
+    ).join(Request, User.name == Request.username).group_by(User.id).subquery()
+
+    reply_scores = db.session.query(
+        User.id.label('user_id'),
+        (3 * func.count(Reply.id)).label('score')
+    ).join(Reply, User.name == Reply.responderName).group_by(User.id).subquery()
+
+    like_scores = db.session.query(
+        User.id.label('user_id'),
+        func.count(Like.id).label('score')
+    ).join(Like, User.id == Like.user_id).group_by(User.id).subquery()
+
+    received_like_scores = db.session.query(
+        User.id.label('user_id'),
+        (2 * func.count(Like.id)).label('score')
+    ).join(Reply, Reply.responderName == User.name
+    ).join(Like, Reply.id == Like.reply_id).group_by(User.id).subquery()
+
+    final_scores = db.session.query(
+        User.id,
+        User.name,
+        (func.coalesce(post_scores.c.score, 0) +
+         func.coalesce(reply_scores.c.score, 0) +
+         func.coalesce(like_scores.c.score, 0) +
+         func.coalesce(received_like_scores.c.score, 0)).label('score')
+    ).select_from(User
+    ).outerjoin(post_scores, User.id == post_scores.c.user_id
+    ).outerjoin(reply_scores, User.id == reply_scores.c.user_id
+    ).outerjoin(like_scores, User.id == like_scores.c.user_id
+    ).outerjoin(received_like_scores, User.id == received_like_scores.c.user_id
+    ).order_by(db.desc('score')).all()
+
+    # Find user rank and score
+    rank = 1
+    current_score = None
+    user_rank = None
+    user_score = None
+    for index, result in enumerate(final_scores):
+        if result.id == user_id:
+            if current_score != result.score:
+                user_rank = index + 1
+                current_score = result.score
+            user_score = result.score
+            break
+
+    return user_rank, user_score
+
 @app.route('/dashboard')
 @login_required
 def dashboard():
     user = current_user
     requests = user.get_requests(user.name)
     avatar = gravatar_url(user.email)
+    user_rank, user_score = get_user_rank_and_score(user.id)
+
   # Directly access the requests, assuming the relationship is defined in the User model
-    return render_template('dashboard.html', user=user, requests=requests,avatar=avatar)
+    return render_template('dashboard.html', user=user, requests=requests,avatar=avatar,user_rank=user_rank, user_score=user_score)
 
 
 @app.route('/request/<int:request_id>')
