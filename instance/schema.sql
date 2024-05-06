@@ -15,6 +15,8 @@ CREATE TABLE IF NOT EXISTS students (
 CREATE TABLE IF NOT EXISTS user (
     name TEXT PRIMARY KEY,
     password TEXT NOT NULL,
-    email TEXT NOT NULL UNIQUE CHECK(email LIKE '%@%.%') -- 简单的格式校验和唯一性约束
+    email TEXT NOT NULL UNIQUE CHECK(email LIKE '%@%.%'), -- 简单的格式校验和唯一性约束
+    ALTER TABLE users ADD COLUMN avatar_url TEXT;
+
 );
 

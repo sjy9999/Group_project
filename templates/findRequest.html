@@ -12,6 +12,8 @@
 <body>
     <div class="container mt-5">
         <h2>Find Requests</h2>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-info mb-3">Dashboard</a>
+
         <form action="{{ url_for('findRequest') }}" method="get">
             <div class="form-group">
                 <label for="searchQuery">Search Requests:</label>
@@ -26,13 +28,22 @@
             <div class="card-body"> 
                 <h5 class="card-title">{{ row.title }}</h5>
                 <p class="card-text">{{ row.description }}</p>
-                <p class="card-text"><small class="text-muted">Posted by {{ row.username }} </small></p>
+                <img src="{{ row.avatar_url }}" alt="User Avatar" style="border-radius: 50%; width: 68px; height: 68px; float: left; margin-right: 10px;">
+
+
+
+                <p class="card-text"><small class="text-muted">Posted by {{ row.username }}</small></p>
                 <p>Replies count: {{ row.replies|length }}</p> <!-- 显示回复数量 -->
                 {% if row.replies %}
                     {% for reply in row.replies %}
+                    
+                    
                   
                     <div class="reply mt-2">
+                        
                         <!-- <p class="reply-info"><small class="text-muted">Replied by {{ reply.answerName }}</small></p> -->
+                        <img src="{{ reply.avatar_url }}" alt="Responder Avatar" style="border-radius: 50%; width: 48px; height: 48px; float: left; margin-right: 10px;" class="avatar">
+
                         <p class="reply-info"><small class="text-muted">Replied by {{ reply.responderName }}</small></p>
                         <div class="d-flex align-items-center justify-content-start">
                             <p class="mb-0 mr-2">{{ reply.reply_content }}</p>

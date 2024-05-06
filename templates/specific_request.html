@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Request Details</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body { padding: 20px; }
+        .reply-list { list-style-type: none; padding: 0; }
+        .reply-list li { background: #f8f9fa; border: 1px solid #dee2e6; padding: 8px 15px; margin-bottom: 10px; border-radius: 5px; }
+        .status-check { margin: 20px 0; }
+        .delete-btn { background-color: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+        .solved-badge { display: none; margin-left: 10px; font-size: 16px; } /* Style for the solved badge */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="request-title">{{ request.title }}<span class="badge badge-success solved-badge">Solved</span></h1>
+        <p>{{ request.description|safe }}</p>
+
+        <h2>Replies:</h2>
+        {% if request.replies %}
+            <ul class="reply-list">
+                {% for reply in request.replies %}
+                    <li><strong>{{ reply.responderName }}:</strong> {{ reply.reply_content }}</li>
+                {% else %}
+                    <li>No replies yet.</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No replies have been made to this request.</p>
+        {% endif %}
+
+        <!-- Status Check -->
+        <div class="status-check">
+            <h4>Is this request solved?</h4>
+            <button class="btn btn-success" onclick="markAsSolved()">Mark as Solved</button>
+        </div>
+
+       
+        <!-- Delete Form -->
+        <form action="{{ url_for('delete_request', request_id=request.id) }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="submit" class="delete-btn" value="Delete Request" onclick="return confirm('Are you sure you want to delete this request?');">
+        </form>
+    </div>
+    
+
+    <script>
+        const requestId = "{{ request.id }}"; // Assuming you have a unique identifier for each request.
+    
+        // Function to mark as solved
+        function markAsSolved() {
+            const solvedBadge = document.querySelector('.solved-badge');
+            solvedBadge.style.display = 'inline'; // Show the solved badge
+            localStorage.setItem('solved_' + requestId, 'true'); // Store the solved state in local storage
+        }
+    
+        // Function to check if the current request is marked as solved in local storage
+        function checkSolved() {
+            if (localStorage.getItem('solved_' + requestId) === 'true') {
+                const solvedBadge = document.querySelector('.solved-badge');
+                solvedBadge.style.display = 'inline'; // Show the solved badge if it was previously marked as solved
+            }
+        }
+    
+        // Call checkSolved on page load
+        document.addEventListener('DOMContentLoaded', checkSolved);
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.min.js"></script>
+</body>
+</html>
