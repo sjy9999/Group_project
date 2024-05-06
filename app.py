@@ -1061,33 +1061,74 @@ def like():
 
 
 #get count-likes
-from models import User, Request, Reply, Like  # 确保正确导入模型
-from sqlalchemy import func, distinct
+from flask import Flask, render_template
+import matplotlib.pyplot as plt
+import io
+import base64
+from models import User, Request, Reply, Like
+from sqlalchemy import func
+
+
 
 @app.route('/Ranking')
 def ranking():
-    # 发帖得分
+    """生成排行榜和折线图页面"""
+    rankings = ranking_logic()
+
+    # 准备折线图数据
+    user_names = [r[2] for r in rankings]  # 用户名
+    scores = [r[3] for r in rankings]  # 对应的得分
+
+    plt.style.use('dark_background')  # 使用暗色背景风格
+    fig, ax = plt.subplots(figsize=(12, 6))
+    ax.plot(user_names, scores, marker='o', linestyle='-', color='#39FF14')  # 荧光绿色线和点
+    ax.set_facecolor('black')  # 图表内部背景色
+    fig.patch.set_facecolor('none')  # 图表外围背景色透明
+
+    # 设置边框颜色
+    for spine in ax.spines.values():
+        spine.set_color('#39FF14')  # 设置为荧光绿色
+        spine.set_linewidth(2)  # 设置边框宽度
+
+    plt.xticks(rotation=45, color='#39FF14', ha='right')  # 设置X轴标签倾斜45度，颜色为荧光绿
+    plt.yticks(color='#39FF14')  # 设置Y轴刻度颜色
+    plt.subplots_adjust(bottom=0.2, top=0.9, left=0.1, right=0.9)
+    ax.grid(False)  # 移除网格线
+    ax.set_xlabel('User', color='#39FF14')  # X轴标题
+    ax.set_ylabel('Score', color='#39FF14')  # Y轴标题
+
+    # 将图表保存到字节流
+    img = io.BytesIO()
+    plt.savefig(img, format='png', bbox_inches='tight')
+    img.seek(0)
+    plt.close()
+
+    # 转换为 Base64 编码并嵌入 HTML
+    img_base64 = base64.b64encode(img.read()).decode('utf8')
+
+    # 传递排行榜数据和折线图到模板
+    return render_template('Ranking.html', rankings=rankings, img_base64=img_base64)
+
+def ranking_logic():
+    """从数据库中获取排行榜数据的逻辑"""
     post_scores = db.session.query(
         User.id.label('user_id'),
         (5 * func.count(Request.id)).label('score')
     ).join(Request, User.name == Request.username
     ).group_by(User.id).subquery()
 
-    # 回帖得分
     reply_scores = db.session.query(
         User.id.label('user_id'),
         (3 * func.count(Reply.id)).label('score')
     ).join(Reply, User.name == Reply.responderName
     ).group_by(User.id).subquery()
 
-    # 点赞得分（给别人的回复点赞）
     like_scores = db.session.query(
         User.id.label('user_id'),
         func.count(Like.id).label('score')
     ).join(Like, User.id == Like.user_id
     ).group_by(User.id).subquery()
 
-    # 被点赞得分（自己的回帖被别人点赞）
     received_like_scores = db.session.query(
         User.id.label('user_id'),
         (2 * func.count(Like.id)).label('score')
@@ -1095,7 +1136,6 @@ def ranking():
     ).join(Like, Reply.id == Like.reply_id
     ).group_by(User.id).subquery()
 
-    # 汇总得分，显式设置查询起始表为 User
     final_scores = db.session.query(
         User.id,
         User.name,
@@ -1113,7 +1153,6 @@ def ranking():
 
     results = final_scores.all()
 
-    # 手动添加排名
     rankings = []
     rank = 1
     current_score = None
@@ -1124,7 +1163,11 @@ def ranking():
             current_score = score
         rankings.append((rank, user_id, name, score))
 
-    return render_template('Ranking.html', rankings=rankings)
+    return rankings
+
+
+
+
 
 
 
