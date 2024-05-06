@@ -623,6 +623,7 @@ def findRequest():
 
                 # 获取与此请求相关的所有回复
                 replies = Reply.query.filter_by(request_id=req.id).all()
+                
                 row['replies'] = [model_to_dict(reply, with_avatar=True) for reply in replies]  # Ensure avatars for replies
                 for Replies in row['replies']:
                     like_count = Like.query.filter_by(reply_id=Replies['id']).count()
