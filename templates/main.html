@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>主界面</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            background: #f0f0f0; /* 页面整体背景设为浅灰色 */
+            font-family: Arial, sans-serif;
+        }
+        .navbar {
+            display: flex; /* 使用 flexbox 使得 logo 和标题水平排列 */
+            align-items: center; /* 垂直居中对齐   所有项 */
+            background: #f0f0f0;
+            color: #333;
+            padding: 10px;
+        }
+
+        .navbar-logo {
+            height: 32px; /* 限制 logo 的高度，可以根据需要调整 */
+            width: auto; /* 自动调整宽度以保持图片比例 */
+            margin-right: 10px; /* 在 logo 和标题之间添加一些间隔 */
+        }
+
+
+        .container {
+            display: flex;
+            flex-grow: 1; /* 占用除了顶部导航栏外的所有垂直空间 */
+        }
+        #sidebar {
+            flex: 0 0 200px; /* button侧边栏宽度     固定为200px */
+            background: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+        }
+        #main-content {
+            height: 700px; /* 设置高度为1200px       设置高度占父元素的70%*/
+            flex-grow: 1; /* 允许主内容区域增长填充额外的空间 */
+            max-width: none; /* 移除了最大宽度的限制 */
+            background-image: url('/static/img/wavy.jpg'); /* 设置背景图片     background-color: #ffffff; /* 主内容区域背景设为白色  */
+            background-size: cover; /* 覆盖整个内容区域 */
+            background-position: center; /* 图片居中显示 */
+            background-repeat: no-repeat; /* 不重复背景图片 */
+            
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: 0 8px 16px rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+            margin-left: 20px; /* 和侧边栏的间距 */
+            margin-right: 20px; /* 和margin-left一样，保持内容区域的对称性 */
+
+            display: flex; /* 使用flex布局 */
+            align-items: center; /* 垂直居中内容 */
+            justify-content: space-between; /* 两部分内容之间保留空间 */
+
+            color: #ccc; /* 设置文本颜色为浅色 */
+        }
+
+
+   
+        .button:hover {
+            background-color: #0056b3;
+        }
+
+
+
+        .button:last-child {
+            margin-bottom: 0; /* 最后一个按钮不添加底部间隔 */
+        }
+    
+        h1 {
+            font-family: 'Arial Black', Gadget, sans-serif; /* S-forum      示例使用 Arial Black */
+        }
+        .button-container {
+            display: flex;
+            align-items: center; /* 确保图标和按钮垂直居中 */
+            margin-bottom: 20px; /* 每个容器之间的间距 */
+        }
+
+        .button {
+            padding: 10px 20px; /* 增加按钮的内边距，使得更加美观 */
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            flex-grow: 1; /* 允许按钮填充剩余空间 */
+            box-sizing: border-box;
+        }
+
+        .button-logo {
+            height: 20px; /* 设置图标的高度为20px */
+            width: auto; /* 自动调整宽度以保持图标的宽高比 */
+            margin-right: 10px; /* 图标和按钮之间的间隔 */
+            margin-left: 10px;
+        }
+
+        .left-side {
+            width: 60%; /* 占据50%的宽度 */
+            padding-right: 20px; /* 如果需要，在两边之间增加一些间距 */
+        }
+/* box-shadow: 0 0 15px rgba(255, 255, 255, 0.6); 
+border-radius: 10px; 
+filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.5));  */
+.left-side .forum-logo {
+    width: auto; /* 或者设置为具体的px尺寸，根据需要调整 100% */
+    height: 350px; ; /* 保持图片比例 auto*/
+    display: block; /* 防止图片下方有空间 */
+    margin-bottom: 80px; /* 在图片和标题之间添加一些间隔 */
+    margin-left: 100px;
+    margin-top: 100px;
+
+    filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.1));
+}
+
+hTitle {
+    margin-left: 100px;
+    font-size: 44px; /* 设置字体大小 */
+    background: -webkit-linear-gradient(left, #ff4d20, #2f91f2); /* 为Webkit内核浏览器设置渐变背景 */
+    background: linear-gradient(to right, #ff4d20, #2f91f2); /* 设置标准的渐变背景 */
+    -webkit-background-clip: text; /* Webkit内核的剪裁到文本 */
+    background-clip: text; /* 标准的剪裁到文本 */
+    -webkit-text-fill-color: transparent; /* Webkit内核的文本颜色透明 */
+    color: transparent; /* 文本颜色透明 */
+    /* 其他样式保持不变 */
+}
+
+.left-side .forum-description {
+    margin-left: 100px;
+}
+
+
+
+.right-side {
+    width: 40%; /* 占据50%的宽度 */
+    padding-left: 20px; /* 如果需要，在两边之间增加一些间距 */
+}
+
+
+
+
+.right-side .function {
+    
+    margin-bottom: 60px; /* 每个功能块之间的间距 */
+}
+
+.right-side h3 {
+    font-size: 16px; /* 最小的字体大小 */
+    color: #cccccc; /* 浅色字体 */
+    margin-bottom: 5px;
+}
+
+.right-side h2 {
+    font-size: 24px; /* 最大的字体大小 */
+    color: #ffffff; /* 白色字体 */
+    margin-bottom: 5px;
+}
+
+.right-side p {
+    font-size: 18px; /* 中等的字体大小 */
+    color: #ffffff; /* 白色字体 */
+}
+
+
+    </style>
+
+</head>
+<body>
+
+<div class="navbar">
+    <img src="/static/img/weilai2.png" alt="Logo" class="navbar-logo">
+    <h1>S-forum</h1>
+</div>
+
+<div class="container">
+    <div id="sidebar">
+        <div class="button-container">
+            <img src="/static/img/fa.png" alt="Logo" class="button-logo">
+            <button class="button" onclick="location.href='{{ url_for('createRequest') }}'">Create Request</button>
+        </div>
+        <div class="button-container">
+            <img src="/static/img/hui.png" alt="Logo" class="button-logo">
+            <button class="button" onclick="location.href='{{ url_for('findRequest') }}'">Find Request</button>
+        </div>
+        <div class="button-container">
+            <img src="/static/img/ranking.png" alt="Logo" class="button-logo">
+            <button class="button" onclick="location.href='{{ url_for('ranking') }}'">Ranking</button>
+        </div>
+    </div>
+
+    <div id="main-content">
+        <div class="left-side">
+            <img src="/static/img/logot.png" alt="Forum Logo" class="forum-logo">
+            <hTitle>Welcome to S-forum</hTitle>
+            <p class="forum-description">People are free to express their opinions here on the forum, but please refrain from discussing sensitive topics such as politics, violence, or pornography.</p>
+        </div>
+        <!-- <div class="right-side">
+            <h3>Function 1 of APP</h4>
+                <p>Create the Request to ask for help</p>
+            <h3>Function 2 of APP</h4>
+                <p>Find the Request and answer to each questions</p>
+        </div> -->
+
+        <div class="right-side">
+            <div class="function">
+                <h3>Function 1 of APP</h3>
+                <h2>Create the Request</h2>
+                <p>You could start a topic for peopel to discuss or ask for help</p>
+            </div>
+            <div class="function">
+                <h3>Function 2 of APP</h3>
+                <h2>Find the Request</h2>
+                <p>People could show their view and give answers to each question</p>
+            </div>
+        </div>
+    </div>
+      
+</div>
+
+
+</body>
+</html>
