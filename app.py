@@ -3,6 +3,8 @@ import sqlite3
 # from passwordReset import PasswordResetService
 from flask_mail import Mail
 import os
+
+import pytz
 from routes import UserViews
 from flask_migrate import Migrate
 # from models import User  # 确保从 models.py 导入了 User
@@ -19,6 +21,8 @@ from wtforms import StringField, PasswordField, TextAreaField, SubmitField
 from flask_wtf.csrf import CSRFProtect, generate_csrf
 from wtforms.validators import InputRequired, Email
 from wtforms.validators import DataRequired
+from datetime import datetime,timezone
+
 
 
 
@@ -79,7 +83,9 @@ class RegisterForm(FlaskForm):
 
 
 @app.route('/', methods=['GET', 'POST'])
+
 @app.route('/access/', methods=['GET', 'POST'])
+
 def access():
     login_form = LoginForm()
     register_form = RegisterForm()
@@ -90,6 +96,21 @@ def access():
         user = User.query.filter_by(name=username).first()
         if user and user.check_password(password):
             login_user(user)
+            # Define the Shanghai timezone using pytz
+            shanghai_tz = pytz.timezone('Asia/Shanghai')
+
+# Get the current UTC time as a timezone-aware datetime object
+            current_utc_time = datetime.now(timezone.utc)
+
+# Convert the UTC time to Shanghai time
+            current_shanghai_time = current_utc_time.astimezone(shanghai_tz)
+
+# Now, you can store this in your database or use it
+            user.last_seen = current_shanghai_time
+
+# Commit changes to the database if this is being used in a web app
+            db.session.commit()
+           
             session['loggedin'] = True
             session['username'] = user.name
             return redirect(url_for('main'))  # 主页或成功页
@@ -192,7 +213,6 @@ def load_user(user_id):
     return db.session.query(User).get(int(user_id))
 
 
-
 @app.route('/login/', methods=['POST', 'GET'])
 def login():
     login_form = LoginForm()
@@ -200,11 +220,15 @@ def login():
         username = login_form.username.data
         password = login_form.password.data
         user = User.query.filter_by(name=username).first()
+        
         if user and user.check_password(password):
             login_user(user)
             
             session['loggedin'] = True
             session['username'] = user.name
+
+            
+
             return render_template('main.html', msg='Login successful!')  
             # return redirect(url_for('index'))  # 假设你有一个名为 'index' 的视图函数
         else:
@@ -243,6 +267,7 @@ def update_name():
 @app.route('/update_email', methods=['POST'])
 @login_required
 def update_email():
+    
     current_user.email = request.form['email']
     db.session.commit()
     flash('Your email has been updated.')
@@ -328,16 +353,26 @@ def get_user_rank_and_score(user_id):
 
     return user_rank, user_score
 
+
 @app.route('/dashboard')
 @login_required
 def dashboard():
+    
+
     user = current_user
     requests = user.get_requests(user.name)
     avatar = gravatar_url(user.email)
+    user_time_zone = pytz.timezone('Asia/Shanghai')  # Correctly using a specific timezone
+    un_last_seen = current_user.last_seen.astimezone(user_time_zone) if current_user.last_seen else "Never"
+    last_seen = un_last_seen.strftime("%Y-%m-%d %I:%M %p")  # Format with AM/PM
+
+
     user_rank, user_score = get_user_rank_and_score(user.id)
+    
+
 
   # Directly access the requests, assuming the relationship is defined in the User model
-    return render_template('dashboard.html', user=user, requests=requests,avatar=avatar,user_rank=user_rank, user_score=user_score)
+    return render_template('dashboard.html', user=user, requests=requests,avatar=avatar,user_rank=user_rank, user_score=user_score,last_seen=last_seen)
 
 from flask_login import login_required, current_user  # Assuming you're using flask_login for user session management
 

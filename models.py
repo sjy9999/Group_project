@@ -11,6 +11,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship, backref
+from datetime import datetime, timezone
 
 db = SQLAlchemy()
 
@@ -23,6 +24,8 @@ class User(db.Model,UserMixin):
     name = db.Column(db.String(100), nullable=False)
     password = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
+    last_seen = db.Column(db.DateTime, default=datetime.now(timezone.utc))
+
     @classmethod
     def get_requests(cls,user_name):
         return Request.query.filter_by(username=user_name).all()
@@ -91,6 +94,7 @@ class Like(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)  # 点赞用户的ID
     reply_id = db.Column(db.Integer, db.ForeignKey('replies.id'), nullable=False)  # 点赞的回复ID
     status = db.Column(db.String(10), default='active', nullable=False)  # 点赞状态，'active' 或 'revoked'
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.now(timezone.utc))  # New column
 
     # 关系定义
     user = db.relationship('User', backref=db.backref('likes', lazy='dynamic'))
