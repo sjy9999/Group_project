@@ -22,8 +22,13 @@ class PasswordResetService:
         msg = Message("Password Reset Requested",
                       recipients=[user_email])
         msg.body = f'This is from the cits5505 project, to reset your password, please visit the following link: {reset_url}'
-        from app import mail
+        
+        mail = current_app.extensions['mail']
         mail.send(msg)
+        # use current_app          from app import mail  this is false 
+        # mail.send(msg)
+        # from app import Mail
+
 
     @staticmethod
     def verify_reset_token(token, expiration=3600):
