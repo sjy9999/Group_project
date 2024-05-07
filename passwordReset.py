@@ -25,7 +25,6 @@ class PasswordResetService:
         
         mail = current_app.extensions['mail']
         mail.send(msg)
-
         # use current_app          from app import mail  this is false 
         # mail.send(msg)
         # from app import Mail
