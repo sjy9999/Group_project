@@ -52,3 +52,21 @@ a {
 a:hover {
     text-decoration: underline; /* 悬停时显示下划线 */
 }
+#chartTitle {
+    background-color: black; /* 页面背景色 */
+    color: #39FF14; /* 荧光绿色文字 */
+    font-family: 'Arial', sans-serif; /* 字体 */
+    margin: 0;
+    padding: 20px; /* 页面内边距 */
+    text-align: center;
+
+}
+#rankingChart {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: 80%; /* 或者你可以调整为其他宽度，根据需要 */
+        
+}
+
+
