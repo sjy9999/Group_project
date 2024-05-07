@@ -22,6 +22,7 @@ from wtforms.validators import DataRequired
 
 
 
+
 def create_app():
     # 项目启动       student.html 这是主界面  名字没事
     app = Flask(__name__)
@@ -35,11 +36,13 @@ def create_app():
     # app.secret_key = 'your_secret_key'  # 用于保持会话安全
     app.config['SECRET_KEY'] = '8f42a73054b1749f8f58848be5e6502c'
     app.config['SECURITY_PASSWORD_SALT'] = '3243f6a8885a308d313198a2e0370734'
+    
     app.config['MAIL_SERVER'] = 'smtp.gmail.com'  # Gmail的SMTP服务器  smtp.sina.com       smtp.gmail.com
     app.config['MAIL_PORT'] = 587  # 邮件发送端口
     app.config['MAIL_USE_TLS'] = True  # 启用传输层安全性协议
     app.config['MAIL_USERNAME'] = 's395615470@gmail.com'
     app.config['MAIL_PASSWORD'] = 'johgpueksgsakecj'  # 你的Gmail密码或应用密码
+
     app.config['MAIL_DEFAULT_SENDER'] = 's395615470@gmail.com'  # 默认的发件人邮箱地址
 
     migrate = Migrate()
@@ -83,6 +86,7 @@ class RegisterForm(FlaskForm):
 def access():
     login_form = LoginForm()
     register_form = RegisterForm()
+
     if 'login' in request.form and login_form.validate_on_submit():
         # 处理登录逻辑
         username = login_form.username.data
@@ -94,6 +98,7 @@ def access():
             session['username'] = user.name
             return redirect(url_for('main'))  # 主页或成功页
         else:
+            return render_template('result.html', login_form=login_form, register_form=register_form, msg='Incorrect username or password!')
             return render_template('result.html', login_form=login_form, register_form=register_form, login_msg='Incorrect username or password!')
 
     elif 'register' in request.form and register_form.validate_on_submit():
@@ -106,9 +111,12 @@ def access():
             new_user.set_password(password)
             db.session.add(new_user)
             db.session.commit()
+            return redirect(url_for('student'))  # 主页或成功页
             return redirect(url_for('main'))  # 主页或成功页
+        
         except Exception as e:
             db.session.rollback()
+            return render_template('result.html', login_form=login_form, register_form=register_form, msg=f'Registration failed, error: {str(e)}')
             return render_template('result.html', login_form=login_form, register_form=register_form, register_msg=f'Registration failed, error: {str(e)}')
 
     return render_template('student.html', login_form=login_form, register_form=register_form)

@@ -1,4 +1,4 @@
-This is the text about our agile assignment two.
+This is our agile assignment 2.
 
 <!-- 1 Would you like to know how to start it?  -->
 It's quite simple. Have you seen app.py? Click on it, then click "Run".
