@@ -78,13 +78,17 @@ class Reply(db.Model):
 
     reply_content = db.Column(db.String(255))
     responderName = db.Column(db.String(255))
-    
+    responder = relationship('User', primaryjoin='foreign(User.name) == Reply.responderName', uselist=False, viewonly=True)
+
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
     
     @hybrid_property
     def user(self):
-        return User.query.filter_by(name=self.responderName).first()
+        user = User.query.filter_by(name=self.responderName).first()
+        if user:
+            return {'bio': user.bio, 'last_seen': user.last_seen}
+        return None
     
     @hybrid_property
     def responder(self):

@@ -97,6 +97,7 @@ def access():
         # 处理登录逻辑
         username = login_form.username.data
         password = login_form.password.data
+
         user = User.query.filter_by(name=username).first()
         if user and user.check_password(password):
             login_user(user)
@@ -114,7 +115,6 @@ def access():
 
 # Commit changes to the database if this is being used in a web app
             db.session.commit()
-           
             session['loggedin'] = True
             session['username'] = user.name
             return redirect(url_for('main'))  # 主页或成功页
@@ -227,6 +227,7 @@ def login():
     if login_form.validate_on_submit():
         username = login_form.username.data
         password = login_form.password.data
+
         user = User.query.filter_by(name=username).first()
         
         if user and user.check_password(password):
@@ -633,22 +634,64 @@ def createRequest():
 #     else:
 #         # 如果不是POST请求，则渲染创建请求的页面
 #         return render_template('createRequest.html')
+from dateutil.relativedelta import relativedelta
 
-def model_to_dict(model, with_avatar=False):
-    data = {column.name: getattr(model, column.name) for column in model.__table__.columns}
+def time_since(dt):
+    """Return the time difference from now to a given datetime in a user-specific timezone."""
+    if dt is None:
+        return "Never"
     
-    # Check if avatar is needed and model has 'username' or 'responderName'
-    if with_avatar:
-        user = None
-        if hasattr(model, 'username'):
-            user = User.query.filter_by(name=model.username).first()
-        elif hasattr(model, 'responderName'):
-            user = User.query.filter_by(name=model.responderName).first()
+    now = datetime.now()  # Get current time
+    print("Now:", now)
+    print("Datetime being checked:", dt)
 
-        if user:
-            # If user is found, append their email and avatar URL
-            data['email'] = user.email
-            data['avatar_url'] = user.gravatar_url()
+    if dt > now:
+        # dt is in the future
+        diff = relativedelta(dt, now)  # Note the swapped arguments
+    else:
+        # dt is in the past
+        diff = relativedelta(now, dt)
+    print("Difference:", diff)
+    print("Years:", diff.years, "Months:", diff.months, "Days:", diff.days, "Hours:", diff.hours, "Minutes:", diff.minutes, "Seconds:", diff.seconds)
+
+
+
+    if diff.years > 0:
+        return f"{diff.years} year{'s' if diff.years > 1 else ''} ago"
+    if diff.months > 0:
+        return f"{diff.months} month{'s' if diff.months > 1 else ''} ago"
+    if diff.days > 0:
+        return f"{diff.days} day{'s' if diff.days > 1 else ''} ago"
+    if diff.hours > 0:
+        return f"{diff.hours} hour{'s' if diff.hours > 1 else ''} ago"
+    if diff.minutes > 0:
+        return f"{diff.minutes} minute{'s' if diff.minutes > 1 else ''} ago"
+    if diff.seconds > 0:
+        return f"{diff.seconds} second{'s' if diff.seconds > 1 else ''} ago"
+    return "just now"
+
+
+from sqlalchemy.exc import SQLAlchemyError
+
+def model_to_dict(model, with_avatar=False, include_user_details=False):
+    data = {column.name: getattr(model, column.name) for column in model.__table__.columns}
+
+    if with_avatar or include_user_details:
+        user_field = getattr(model, 'username', None) or getattr(model, 'responderName', None)
+
+        if user_field:
+            try:
+                user = User.query.filter_by(name=user_field).first()
+                if user:
+                    if with_avatar:
+                        data['email'] = user.email
+                        data['avatar_url'] = user.gravatar_url()
+                    if include_user_details:
+                        data['user_bio'] = getattr(user, 'bio', 'No bio available')
+                        data['user_last_seen'] = time_since(user.last_seen)
+            except SQLAlchemyError as e:
+                print(f"An error occurred while fetching user data: {str(e)}")
+
     return data
 
 
@@ -656,72 +699,42 @@ class ReplyForm(FlaskForm):
     reply = TextAreaField('Reply', validators=[DataRequired()])
 
 #  搜索帖子       http://127.0.0.1:5000/main/          @app.route('/findRequest')
+from flask import render_template, request
+
 @app.route('/findRequest')
 def findRequest():
-    # print("Request object:", request)
     search_queryFR = request.args.get('searchQueryFR', '').strip()
     rows = []
     message = 'No matching requests found.' if search_queryFR else 'Recent requests:'
+
     if search_queryFR:
         try:
-            matched_requests = Request.query.filter(Request.title.like('%' + search_queryFR + '%')).all()
-            rows = []
-            for req in matched_requests:
-                row = model_to_dict(req, with_avatar=True)  # Convert request to dictionary with avatar
-                
-                
-
-
-                # 获取与此请求相关的所有回复
-                replies = Reply.query.filter_by(request_id=req.id).all()
-                
-                row['replies'] = [model_to_dict(reply, with_avatar=True) for reply in replies]  # Ensure avatars for replies
-                for Replies in row['replies']:
-                    like_count = Like.query.filter_by(reply_id=Replies['id']).count()
-                    Replies['like_count'] = like_count
-                  
-                   
-                row['form'] = ReplyForm()
-
-                # 添加到结果列表
-                rows.append(row)
-
-            # matched_requests = Request.query.filter(Request.title.like('%' + search_queryFR + '%')).all()
-            # rows = [r.as_dict() for r in matched_requests]
-            # for row in rows:
-            #     form = ReplyForm()  # 为每个请求创建一个回复表单实例
-            #     row['form'] = form
-
-            if not rows:
-                message = 'No matching requests found.'
+            # Filter requests based on the title containing the search query
+            requests = Request.query.filter(Request.title.ilike(f'%{search_queryFR}%')).all()
         except Exception as e:
             message = 'An issue occurred during the search process.'
             print(f"Search request failed, error: {e}")
+            return render_template('findRequest.html', rows=[], message=message, search_queryFR=search_queryFR)
     else:
-        requests  = Request.query.order_by(Request.title).limit(5).all()
-        # rows = [r.as_dict() for r in rows]
-        rows = []
-        for req in requests:  # 改变变量名以避免覆盖全局 request 对象
-            row = model_to_dict(req, with_avatar=True)  # Ensure avatars for requests
-           
+        # Fetch recent requests if no search query is provided
+        requests = Request.query.order_by(Request.title).limit(5).all()
 
+    # Prepare data for all fetched requests
+    for req in requests:
+        row = model_to_dict(req, with_avatar=True, include_user_details=True)
+        replies = Reply.query.filter_by(request_id=req.id).all()
+        row['replies'] = [model_to_dict(reply, with_avatar=True) for reply in replies]  # Ensure avatars for replies
+        
+        # Aggregate likes for each reply and add other necessary data
+        for reply in row['replies']:
+            reply['like_count'] = Like.query.filter_by(reply_id=reply['id']).count()
 
-            # 获取与此请求相关的所有回复
-            replies = Reply.query.filter_by(request_id=req.id).all()
-            row['replies'] = [model_to_dict(reply, with_avatar=True) for reply in replies]  # Ensure avatars for replies
-            for Replies in row['replies']:
-                like_count = Like.query.filter_by(reply_id=Replies['id']).count()
-                Replies['like_count'] = like_count
-              
-                 # Check the first row's data specifically
+        row['form'] = ReplyForm()  # Instantiate a reply form for each request
+        rows.append(row)
 
-            # 为此请求实例化一个回复表单
-            row['form'] = ReplyForm()
-
-            # 添加到结果列表
-            rows.append(row)
-
+    # Render the template with the data
     return render_template('findRequest.html', rows=rows, message=message, search_queryFR=search_queryFR)
+
 
 
 

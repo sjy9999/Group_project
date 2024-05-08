@@ -2,6 +2,51 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
+    <style>
+        /* Tooltip container */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+    
+        /* Tooltip text */
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 120px;
+            background-color: black;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 150%;
+            left: 50%;
+            margin-left: -60px;
+            /* Use half of the width (120px/2 = 60px), to center the tooltip */
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+    
+        /* Tooltip arrow */
+        .tooltip .tooltiptext::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: black transparent transparent transparent;
+        }
+    
+        /* Show the tooltip text when you mouse over the tooltip container */
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -34,6 +79,11 @@
                 <h5 class="card-title">{{ row.title }}</h5>
                 <p class="card-text">{{ row.description }}</p>
                 <img src="{{ row.avatar_url }}" alt="User Avatar" style="border-radius: 50%; width: 68px; height: 68px; float: left; margin-right: 10px;">
+                <div class="tooltiptext">
+                    <strong>Last seen:</strong> {{ row.user_last_seen }}<br>
+                    <strong>Motto:</strong> {{ row.user_bio }}
+                </div>
+
 
 
 
