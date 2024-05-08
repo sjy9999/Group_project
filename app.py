@@ -362,12 +362,19 @@ def get_user_rank_and_score(user_id):
     return user_rank, user_score
 
 
-@app.route('/dashboard')
+@app.route('/dashboard', methods=['GET', 'POST'])
 @login_required
 def dashboard():
     
 
     user = current_user
+    # Handle form submission for updating bio
+    if request.method == 'POST':
+        new_bio = request.form.get('bio', '')
+        user.bio = new_bio
+        db.session.commit()
+        flash('Your bio has been updated successfully.', 'success')
+        return redirect(url_for('dashboard'))
     requests = user.get_requests(user.name)
     avatar = gravatar_url(user.email)
     user_time_zone = pytz.timezone('Asia/Shanghai')  # Correctly using a specific timezone
@@ -662,6 +669,7 @@ def findRequest():
             for req in matched_requests:
                 row = model_to_dict(req, with_avatar=True)  # Convert request to dictionary with avatar
                 
+                
 
 
                 # 获取与此请求相关的所有回复
@@ -671,7 +679,7 @@ def findRequest():
                 for Replies in row['replies']:
                     like_count = Like.query.filter_by(reply_id=Replies['id']).count()
                     Replies['like_count'] = like_count
-                    print("Reply with avatar:", row)  # Debug print
+                  
                    
                 row['form'] = ReplyForm()
 

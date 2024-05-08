@@ -25,6 +25,8 @@ class User(db.Model,UserMixin):
     password = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     last_seen = db.Column(db.DateTime, default=datetime.now(timezone.utc))
+    bio = db.Column(db.String(), nullable=True)  # Add this line for the bio column
+
 
     @classmethod
     def get_requests(cls,user_name):
@@ -76,6 +78,7 @@ class Reply(db.Model):
 
     reply_content = db.Column(db.String(255))
     responderName = db.Column(db.String(255))
+    
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
     
