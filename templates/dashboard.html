@@ -80,6 +80,8 @@
             <h1>Profile Settings</h1>
             <img src="{{ avatar }}" alt="User Avatar" class="avatar mb-3">
             <h2>{{ user.name }}</h2>
+            <p>Last seen: {{ last_seen }}</p>
+            <p>Motto: {{ user.bio }}</p>
             <p>Want a new profile picture? <a href="#" data-toggle="modal" data-target="#gravatarModal">Update on
                     Gravatar</a></p>
             <!-- Modal -->
@@ -114,6 +116,18 @@
                 <h2>Your Details</h2>
                 <p><strong>Name:</strong> {{ user.name }}</p>
                 <p><strong>Email:</strong> {{ user.email }}</p>
+
+                <!-- Bio Editing Form -->
+            <h2>Edit Your Bio</h2>
+            <form method="post" action="{{ url_for('dashboard') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <div class="form-group">
+                    <label for="bio">Bio:</label>
+                    <textarea name="bio" id="bio" rows="4" class="form-control">{{ user.bio }}</textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Update Bio</button>
+            </form>
 
             </section>
             <section class="form-section">
