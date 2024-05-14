@@ -117,10 +117,10 @@
                     {{ row.form.hidden_tag() }}
                     <input type="hidden" name="request_id" value="{{ row.id }}">
                     <input type="hidden" name="search_queryFR" value="{{ request.args.get('searchQueryFR', '') }}">
-                    <div class="form-group">
+                    <div class="form-group" style="margin-top: 10px;">
                         {{ row.form.reply(class="form-control", rows=3, placeholder="Enter your reply here") }}
                     </div>
-                    <button type="submit" class="btn btn-primary">Submit Reply</button>
+                    <button type="submit"  class="btn btn-primary" >Submit Reply</button>
                 </form>
                 
             </div>

@@ -15,7 +15,7 @@ from flask_wtf.csrf import CSRFProtect, generate_csrf
 from wtforms.validators import InputRequired, Email
 from wtforms.validators import DataRequired
 from datetime import datetime,timezone
-
+import re
 
 
 
@@ -127,6 +127,10 @@ def access():
         
         except Exception as e:
             db.session.rollback()
+            user_message = "Registration failed due to a database error. Please use a different username and email address."
+
+            return render_template('result.html', login_form=login_form, register_form=register_form, msg=user_message)
+
             return render_template('result.html', login_form=login_form, register_form=register_form, msg=f'Registration failed, error: {str(e)}')
             
 
@@ -151,6 +155,11 @@ def register():
             return redirect(url_for('some_success_page'))
         except Exception as e:
             db.session.rollback()
+
+            user_message = "Registration failed due to a database error. Please use a different username and email address."
+            return render_template("error.html", message=user_message)
+
+
             return render_template("error.html", message=f"Registration failed, error: {str(e)}")
 
     return render_template("student.html", register_form=register_form)
