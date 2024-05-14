@@ -1,13 +1,13 @@
 import sqlite3
 
-# 连接到 SQLite 数据库
+# link to database
 conn = sqlite3.connect('database.db')
 cursor = conn.cursor()
 
-# 删除旧的 requests 表（警告：这将移除表及其所有数据）
+# drop requests
 cursor.execute('DROP TABLE IF EXISTS requests')
 
-# 根据新的结构创建 requests 表，其中 username 字段可以为空
+# create requests 
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS requests (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -19,8 +19,8 @@ CREATE TABLE IF NOT EXISTS requests (
 )
 ''')
 
-# 提交事务
+# commit
 conn.commit()
 
-# 关闭连接
+# close
 conn.close()
