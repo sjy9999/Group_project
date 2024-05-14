@@ -1,8 +1,10 @@
-from flask import Flask, request, render_template, redirect, url_for, session,make_response, flash,jsonify
+from flask import Flask, request, render_template, redirect, url_for, session,make_response, flash,jsonify,flash
 import sqlite3
 # from passwordReset import PasswordResetService
 from flask_mail import Mail
 import os
+
+import pytz
 from routes import UserViews
 from flask_migrate import Migrate
 # from models import User  # 确保从 models.py 导入了 User
@@ -10,14 +12,17 @@ from flask_migrate import Migrate
 import logging
 
 
-#要求
+
+#要求  import
 from models import db
 from flask_login import LoginManager, login_user, logout_user, login_required
-from flask_wtf import FlaskForm
+from flask_wtf import FlaskForm,CSRFProtect
 from wtforms import StringField, PasswordField, TextAreaField, SubmitField
 from flask_wtf.csrf import CSRFProtect, generate_csrf
 from wtforms.validators import InputRequired, Email
 from wtforms.validators import DataRequired
+from datetime import datetime,timezone
+
 
 
 
@@ -25,6 +30,8 @@ from wtforms.validators import DataRequired
 def create_app():
     # 项目启动       student.html 这是主界面  名字没事
     app = Flask(__name__)
+    
+    
 
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
     # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///instance/database.db'
@@ -53,6 +60,7 @@ def create_app():
     login_manager.init_app(app)
     mail.init_app(app)
 
+
     app.register_blueprint(UserViews.bp)
 
     with app.app_context():
@@ -77,37 +85,10 @@ class RegisterForm(FlaskForm):
 
 
 
-# 先留着    先打开   这个界面   注册 登录账号       这是   http://127.0.0.1:5000/create/
-# @app.route('/create/')
-# def create_student():
-#     return render_template('student.html')    #渲染student.html模板
-
-# 先留着    添加学生的路由，支持POST和GET请求    @app.route('/addstudent/')     http://127.0.0.1:5000/addstudent/
-# @app.route('/addstudent/',methods = ['POST', 'GET'])
-# def add_student():
-#     try:
-#         #获取请求中的nm、add、city、pin的数据
-#         nm = request.form['nm']
-#         addr = request.form['add']
-#         city = request.form['city']
-#         pin = request.form['pin']
-#         with sqlite3.connect("database.db") as con:  
-#            cur = con.cursor()     
-#            cur.execute("INSERT INTO students (name,addr,city,pin) VALUES (?,?,?,?)",(nm,addr,city,pin) )                
-#            con.commit()    
-#            msg = "添加这个新的学生   成功"
-#     except:
-#         con.rollback()
-#         msg = "添加这个新的学生   失败"
-#     finally:
-#         # 这个才是对的
-#         if con:
-#             con.close()
-#         # 改url_for       而不是返回html
-#         return redirect(url_for('show_student'))
-
 @app.route('/', methods=['GET', 'POST'])
+
 @app.route('/access/', methods=['GET', 'POST'])
+
 def access():
     login_form = LoginForm()
     register_form = RegisterForm()
@@ -116,9 +97,24 @@ def access():
         # 处理登录逻辑
         username = login_form.username.data
         password = login_form.password.data
+
         user = User.query.filter_by(name=username).first()
         if user and user.check_password(password):
             login_user(user)
+            # Define the Shanghai timezone using pytz
+            shanghai_tz = pytz.timezone('Asia/Shanghai')
+
+# Get the current UTC time as a timezone-aware datetime object
+            current_utc_time = datetime.now(timezone.utc)
+
+# Convert the UTC time to Shanghai time
+            current_shanghai_time = current_utc_time.astimezone(shanghai_tz)
+
+# Now, you can store this in your database or use it
+            user.last_seen = current_shanghai_time
+
+# Commit changes to the database if this is being used in a web app
+            db.session.commit()
             session['loggedin'] = True
             session['username'] = user.name
             return redirect(url_for('main'))  # 主页或成功页
@@ -149,6 +145,9 @@ def access():
 # back
 # register 注册   http://127.0.0.1:5000  应该也返回这个       http://127.0.0.1:5000/register/
 # register比login复杂    GET 请求通常用于从服务器获取数据或者显示一个页面 POST 请求通常用于当用户提交表单数据到服务器
+
+
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     print("Register function called")  # 调试语句
@@ -169,8 +168,6 @@ def register():
             return render_template("error.html", message=f"Registration failed, error: {str(e)}")
 
     return render_template("student.html", register_form=register_form)
-
-
 
 # @app.route('/register/', methods=['POST', 'GET'])
 # def register():
@@ -224,47 +221,252 @@ def load_user(user_id):
     return db.session.query(User).get(int(user_id))
 
 
-
-# login   登录    http://127.0.0.1:5000  应该也返回这个    login    http://127.0.0.1:5000/login/
 @app.route('/login/', methods=['POST', 'GET'])
 def login():
     login_form = LoginForm()
     if login_form.validate_on_submit():
         username = login_form.username.data
         password = login_form.password.data
+
         user = User.query.filter_by(name=username).first()
+        
         if user and user.check_password(password):
             login_user(user)
+            
             session['loggedin'] = True
             session['username'] = user.name
+
+            
+
             return render_template('main.html', msg='Login successful!')  
             # return redirect(url_for('index'))  # 假设你有一个名为 'index' 的视图函数
         else:
             return render_template('result.html', form=login_form, msg='Incorrect username or password！')
     return render_template('login.html', login_form=login_form)
-# def login():
-#     msg = ''
-#     if request.method == 'POST':
-#         username = request.form['username']
-#         password = request.form['password']
-#         user = User.query.filter_by(name=username).first()
-#         # user = User.query.filter_by(name=username, password=password).first()
-#         if user and user.check_password(password):
-#             login_user(user)  # 使用 Flask-Login 登录用户
-#             session['loggedin'] = True  # 设置 session 中的登录标记
-#             session['username'] = user.name  # 保存用户的用户名到 session
-#             return render_template('main.html', msg='Login successful!')        
-#         else:
-#             # 登录失败，设置错误消息
-#             msg = 'Incorrect username or password！'
-#         # 登录失败时返回登录页面，并显示错误信息
-#         return render_template("result.html", msg=msg)  # 确保你有一个 login.html 模板
-#     # 如果不是POST请求，渲染登录表单页面
-#     return redirect(url_for('login'))
+
+def get_posts_with_avatars():
+    posts = get_all_posts()  # Your function to fetch posts
+    for post in posts:
+        post['user_avatar'] = generate_gravatar_url(post['user_email'], size=64)
+        for reply in post['replies']:
+            reply['user_avatar'] = generate_gravatar_url(reply['user_email'], size=48)
+    return posts
+
+from werkzeug.security import generate_password_hash
+
+@app.route('/update_profile', methods=['POST'])
 
 
 
 
+@app.route('/logout/', endpoint='logout1')
+def logout():
+    logout_user()
+
+    return redirect(url_for('student'))
+
+@app.route('/update_name', methods=['POST'])
+@login_required
+def update_name():
+    current_user.name = request.form['name']
+    db.session.commit()
+    flash('Your name has been updated.')
+    return redirect(url_for('dashboard'))
+
+@app.route('/update_email', methods=['POST'])
+@login_required
+def update_email():
+    
+    current_user.email = request.form['email']
+    db.session.commit()
+    flash('Your email has been updated.')
+    return redirect(url_for('dashboard'))
+
+@app.route('/update_password', methods=['POST'])
+@login_required
+def update_password():
+    if 'password' in request.form and request.form['password']:
+        # Update the user's password
+        hashed_password = generate_password_hash(request.form['password'])
+        current_user.password = hashed_password
+        db.session.commit()
+        flash('Password update successful. Redirecting to student page in 10 seconds...', 'success')
+    else:
+        flash('Please enter a new password.', 'error')
+    
+    # Redirect back to the dashboard page
+    return redirect(url_for('dashboard'))
+import hashlib
+import time
+
+def gravatar_url(email, size=100, default='retro', rating='g'):
+    """Generate a gravatar URL based on the email provided."""
+    hash = hashlib.md5(email.lower().encode('utf-8')).hexdigest()
+    url = f"https://www.gravatar.com/avatar/{hash}?s={size}&d={default}&r={rating}"
+    return url
+
+from flask import render_template, redirect, url_for, flash, session
+from flask_login import login_required, current_user
+
+from flask import render_template
+
+def get_user_rank_and_score(user_id):
+    # Reuse the same logic to calculate scores
+    post_scores = db.session.query(
+        User.id.label('user_id'),
+        (5 * func.count(Request.id)).label('score')
+    ).join(Request, User.name == Request.username).group_by(User.id).subquery()
+
+    reply_scores = db.session.query(
+        User.id.label('user_id'),
+        (3 * func.count(Reply.id)).label('score')
+    ).join(Reply, User.name == Reply.responderName).group_by(User.id).subquery()
+
+    like_scores = db.session.query(
+        User.id.label('user_id'),
+        func.count(Like.id).label('score')
+    ).join(Like, User.id == Like.user_id).group_by(User.id).subquery()
+
+    received_like_scores = db.session.query(
+        User.id.label('user_id'),
+        (2 * func.count(Like.id)).label('score')
+    ).join(Reply, Reply.responderName == User.name
+    ).join(Like, Reply.id == Like.reply_id).group_by(User.id).subquery()
+
+    final_scores = db.session.query(
+        User.id,
+        User.name,
+        (func.coalesce(post_scores.c.score, 0) +
+         func.coalesce(reply_scores.c.score, 0) +
+         func.coalesce(like_scores.c.score, 0) +
+         func.coalesce(received_like_scores.c.score, 0)).label('score')
+    ).select_from(User
+    ).outerjoin(post_scores, User.id == post_scores.c.user_id
+    ).outerjoin(reply_scores, User.id == reply_scores.c.user_id
+    ).outerjoin(like_scores, User.id == like_scores.c.user_id
+    ).outerjoin(received_like_scores, User.id == received_like_scores.c.user_id
+    ).order_by(db.desc('score')).all()
+
+    # Find user rank and score
+    rank = 1
+    current_score = None
+    user_rank = None
+    user_score = None
+    for index, result in enumerate(final_scores):
+        if result.id == user_id:
+            if current_score != result.score:
+                user_rank = index + 1
+                current_score = result.score
+            user_score = result.score
+            break
+
+    return user_rank, user_score
+
+
+@app.route('/dashboard', methods=['GET', 'POST'])
+@login_required
+def dashboard():
+    
+
+    user = current_user
+    # Handle form submission for updating bio
+    if request.method == 'POST':
+        new_bio = request.form.get('bio', '')
+        user.bio = new_bio
+        db.session.commit()
+        flash('Your bio has been updated successfully.', 'success')
+        return redirect(url_for('dashboard'))
+    requests = user.get_requests(user.name)
+    avatar = gravatar_url(user.email)
+    user_time_zone = pytz.timezone('Asia/Shanghai')  # Correctly using a specific timezone
+    un_last_seen = current_user.last_seen.astimezone(user_time_zone) if current_user.last_seen else "Never"
+    last_seen = un_last_seen.strftime("%Y-%m-%d %I:%M %p")  # Format with AM/PM
+
+
+    user_rank, user_score = get_user_rank_and_score(user.id)
+    
+
+
+  # Directly access the requests, assuming the relationship is defined in the User model
+    return render_template('dashboard.html', user=user, requests=requests,avatar=avatar,user_rank=user_rank, user_score=user_score,last_seen=last_seen)
+
+from flask_login import login_required, current_user  # Assuming you're using flask_login for user session management
+
+@app.route('/request/<int:request_id>')
+@login_required
+def specific_request(request_id):
+    request_obj = Request.query.get(request_id)  # Using get for direct ID access
+    if not request_obj:
+        #flash('Request not found.', 'error')  # Flash a message if no request found
+        return redirect(url_for('main'))  # Redirect to a safe page
+
+    # Prepare reply form data if needed, for example:
+    # If using WTForms, instantiate your form here if it's going to be rendered on the same page
+
+    return render_template('specific_request.html', request=request_obj)
+
+@app.route('/delete_request/<int:request_id>', methods=['POST'])
+@login_required
+def delete_request(request_id):
+    request = Request.query.get(request_id)
+    if request.username != current_user.name:
+        abort(403)  # Prevent deleting requests not owned by the user
+    db.session.delete(request)
+    db.session.commit()
+    flash('Request deleted successfully!', 'success')
+    return redirect(url_for('dashboard'))
+
+
+
+
+
+
+#from werkzeug.utils import secure_filename
+# import os
+
+# UPLOAD_FOLDER = 'C:/Users/Ge/Desktop/Group_project/UPLOAD_FOLDER'
+# ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+# app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+
+
+
+# def allowed_file(filename):
+#     return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg', 'gif'}
+
+# @app.route('/upload_avatar', methods=['POST'])
+# def upload_avatar():
+#     if 'avatar' not in request.files:
+#         flash('No file part')
+#         return redirect(request.url)
+#     file = request.files['avatar']
+#     if file.filename == '':
+#         flash('No selected file')
+#         return redirect(request.url)
+#     if file and allowed_file(file.filename):
+#         filename = secure_filename(file.filename)
+#         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+#         try:
+#             file.save(file_path)  # Save the file
+#             update_user_avatar_url(file_path)  # Update the database
+#             flash('Avatar uploaded successfully')
+#         except Exception as e:
+#             flash(f'Error saving file: {str(e)}')
+#             return redirect(request.url)
+#         return redirect(url_for('dashboard'))
+#     flash('File not allowed')
+#     return redirect(request.url)
+
+# def update_user_avatar_url(file_path):
+#     username = session.get('username')
+#     try:
+#         with sqlite3.connect("C:/Users/Ge/Desktop/Group_project/database.db") as con:
+#             cur = con.cursor()
+#             cur.execute("UPDATE users SET avatar_url = ? WHERE username = ?", (file_path, username))
+#             con.commit()
+#             flash('Avatar updated successfully.')
+#     except sqlite3.Error as error:
+#         flash(f"Error updating avatar: {str(error)}") 
 
     
 
@@ -432,84 +634,107 @@ def createRequest():
 #     else:
 #         # 如果不是POST请求，则渲染创建请求的页面
 #         return render_template('createRequest.html')
+from dateutil.relativedelta import relativedelta
+
+def time_since(dt):
+    """Return the time difference from now to a given datetime in a user-specific timezone."""
+    if dt is None:
+        return "Never"
+    
+    now = datetime.now()  # Get current time
+    print("Now:", now)
+    print("Datetime being checked:", dt)
+
+    if dt > now:
+        # dt is in the future
+        diff = relativedelta(dt, now)  # Note the swapped arguments
+    else:
+        # dt is in the past
+        diff = relativedelta(now, dt)
+    print("Difference:", diff)
+    print("Years:", diff.years, "Months:", diff.months, "Days:", diff.days, "Hours:", diff.hours, "Minutes:", diff.minutes, "Seconds:", diff.seconds)
 
 
-def model_to_dict(model):
-    return {column.name: getattr(model, column.name) for column in model.__table__.columns}
+
+    if diff.years > 0:
+        return f"{diff.years} year{'s' if diff.years > 1 else ''} ago"
+    if diff.months > 0:
+        return f"{diff.months} month{'s' if diff.months > 1 else ''} ago"
+    if diff.days > 0:
+        return f"{diff.days} day{'s' if diff.days > 1 else ''} ago"
+    if diff.hours > 0:
+        return f"{diff.hours} hour{'s' if diff.hours > 1 else ''} ago"
+    if diff.minutes > 0:
+        return f"{diff.minutes} minute{'s' if diff.minutes > 1 else ''} ago"
+    if diff.seconds > 0:
+        return f"{diff.seconds} second{'s' if diff.seconds > 1 else ''} ago"
+    return "just now"
+
+
+from sqlalchemy.exc import SQLAlchemyError
+
+def model_to_dict(model, with_avatar=False, include_user_details=False):
+    data = {column.name: getattr(model, column.name) for column in model.__table__.columns}
+
+    if with_avatar or include_user_details:
+        user_field = getattr(model, 'username', None) or getattr(model, 'responderName', None)
+
+        if user_field:
+            try:
+                user = User.query.filter_by(name=user_field).first()
+                if user:
+                    if with_avatar:
+                        data['email'] = user.email
+                        data['avatar_url'] = user.gravatar_url()
+                    if include_user_details:
+                        data['user_bio'] = getattr(user, 'bio', 'No bio available')
+                        data['user_last_seen'] = time_since(user.last_seen)
+            except SQLAlchemyError as e:
+                print(f"An error occurred while fetching user data: {str(e)}")
+
+    return data
+
 
 class ReplyForm(FlaskForm):
     reply = TextAreaField('Reply', validators=[DataRequired()])
 
 #  搜索帖子       http://127.0.0.1:5000/main/          @app.route('/findRequest')
+from flask import render_template, request
+
 @app.route('/findRequest')
 def findRequest():
-    # print("Request object:", request)
     search_queryFR = request.args.get('searchQueryFR', '').strip()
     rows = []
-    message = ''
+    message = 'No matching requests found.' if search_queryFR else 'Recent requests:'
+
     if search_queryFR:
         try:
-            matched_requests = Request.query.filter(Request.title.like('%' + search_queryFR + '%')).all()
-            rows = []
-            for req in matched_requests:
-                row = model_to_dict(req)  # 将每个请求转换为字典
-                # 获取与此请求相关的所有回复
-                replies = Reply.query.filter_by(request_id=req.id).all()
-                row['replies'] = [model_to_dict(reply) for reply in replies]
-                for Replies in row['replies']:
-                    like_count = Like.query.filter_by(reply_id=Replies['id']).count()
-                    Replies['like_count'] = like_count
-                # 为此请求实例化一个回复表单
-                row['form'] = ReplyForm()
-
-                # 添加到结果列表
-                rows.append(row)
-
-            # matched_requests = Request.query.filter(Request.title.like('%' + search_queryFR + '%')).all()
-            # rows = [r.as_dict() for r in matched_requests]
-            # for row in rows:
-            #     form = ReplyForm()  # 为每个请求创建一个回复表单实例
-            #     row['form'] = form
-
-            if not rows:
-                message = 'No matching requests found.'
+            # Filter requests based on the title containing the search query
+            requests = Request.query.filter(Request.title.ilike(f'%{search_queryFR}%')).all()
         except Exception as e:
             message = 'An issue occurred during the search process.'
             print(f"Search request failed, error: {e}")
+            return render_template('findRequest.html', rows=[], message=message, search_queryFR=search_queryFR)
     else:
-        requests  = Request.query.order_by(Request.title).limit(5).all()
-        # rows = [r.as_dict() for r in rows]
-        rows = []
-        for req in requests:  # 改变变量名以避免覆盖全局 request 对象
-            row = model_to_dict(req)
-            # 获取与此请求相关的所有回复
-            replies = Reply.query.filter_by(request_id=req.id).all()
-            row['replies'] = [model_to_dict(reply) for reply in replies]
-            for Replies in row['replies']:
-                like_count = Like.query.filter_by(reply_id=Replies['id']).count()
-                Replies['like_count'] = like_count
+        # Fetch recent requests if no search query is provided
+        requests = Request.query.order_by(Request.title).limit(5).all()
 
-            # 为此请求实例化一个回复表单
-            row['form'] = ReplyForm()
+    # Prepare data for all fetched requests
+    for req in requests:
+        row = model_to_dict(req, with_avatar=True, include_user_details=True)
+        replies = Reply.query.filter_by(request_id=req.id).all()
+        row['replies'] = [model_to_dict(reply, with_avatar=True) for reply in replies]  # Ensure avatars for replies
+        
+        # Aggregate likes for each reply and add other necessary data
+        for reply in row['replies']:
+            reply['like_count'] = Like.query.filter_by(reply_id=reply['id']).count()
 
-            # 添加到结果列表
-            rows.append(row)
+        row['form'] = ReplyForm()  # Instantiate a reply form for each request
+        rows.append(row)
 
-        # for request in requests :
-        #     row = model_to_dict(row)
-        #     # 获取与此请求相关的所有回复
-        #     replies = Reply.query.filter_by(request_id=request.id).all()
-        #     row['replies'] = [model_to_dict(reply) for reply in replies]
-
-        #     # 为此请求实例化一个回复表单
-        #     row['form'] = ReplyForm()
-
-        #     # 添加到结果列表
-        #     rows.append(row)
-
-        #     # form = ReplyForm()
-        #     # row['form'] = form
+    # Render the template with the data
     return render_template('findRequest.html', rows=rows, message=message, search_queryFR=search_queryFR)
+
 
 
 
@@ -900,33 +1125,74 @@ def like():
 
 
 #get count-likes
-from models import User, Request, Reply, Like  # 确保正确导入模型
-from sqlalchemy import func, distinct
+from flask import Flask, render_template
+import matplotlib.pyplot as plt
+import io
+import base64
+from models import User, Request, Reply, Like
+from sqlalchemy import func
+
+
 
 @app.route('/Ranking')
 def ranking():
-    # 发帖得分
+    """生成排行榜和折线图页面"""
+    rankings = ranking_logic()
+
+    # 准备折线图数据
+    user_names = [r[2] for r in rankings]  # 用户名
+    scores = [r[3] for r in rankings]  # 对应的得分
+
+    plt.style.use('dark_background')  # 使用暗色背景风格
+    fig, ax = plt.subplots(figsize=(12, 6))
+    ax.plot(user_names, scores, marker='o', linestyle='-', color='#39FF14')  # 荧光绿色线和点
+    ax.set_facecolor('black')  # 图表内部背景色
+    fig.patch.set_facecolor('none')  # 图表外围背景色透明
+
+    # 设置边框颜色
+    for spine in ax.spines.values():
+        spine.set_color('#39FF14')  # 设置为荧光绿色
+        spine.set_linewidth(2)  # 设置边框宽度
+
+    plt.xticks(rotation=45, color='#39FF14', ha='right')  # 设置X轴标签倾斜45度，颜色为荧光绿
+    plt.yticks(color='#39FF14')  # 设置Y轴刻度颜色
+    plt.subplots_adjust(bottom=0.2, top=0.9, left=0.1, right=0.9)
+    ax.grid(False)  # 移除网格线
+    ax.set_xlabel('User', color='#39FF14')  # X轴标题
+    ax.set_ylabel('Score', color='#39FF14')  # Y轴标题
+
+    # 将图表保存到字节流
+    img = io.BytesIO()
+    plt.savefig(img, format='png', bbox_inches='tight')
+    img.seek(0)
+    plt.close()
+
+    # 转换为 Base64 编码并嵌入 HTML
+    img_base64 = base64.b64encode(img.read()).decode('utf8')
+
+    # 传递排行榜数据和折线图到模板
+    return render_template('Ranking.html', rankings=rankings, img_base64=img_base64)
+
+def ranking_logic():
+    """从数据库中获取排行榜数据的逻辑"""
     post_scores = db.session.query(
         User.id.label('user_id'),
         (5 * func.count(Request.id)).label('score')
     ).join(Request, User.name == Request.username
     ).group_by(User.id).subquery()
 
-    # 回帖得分
     reply_scores = db.session.query(
         User.id.label('user_id'),
         (3 * func.count(Reply.id)).label('score')
     ).join(Reply, User.name == Reply.responderName
     ).group_by(User.id).subquery()
 
-    # 点赞得分（给别人的回复点赞）
     like_scores = db.session.query(
         User.id.label('user_id'),
         func.count(Like.id).label('score')
     ).join(Like, User.id == Like.user_id
     ).group_by(User.id).subquery()
 
-    # 被点赞得分（自己的回帖被别人点赞）
     received_like_scores = db.session.query(
         User.id.label('user_id'),
         (2 * func.count(Like.id)).label('score')
@@ -934,7 +1200,6 @@ def ranking():
     ).join(Like, Reply.id == Like.reply_id
     ).group_by(User.id).subquery()
 
-    # 汇总得分，显式设置查询起始表为 User
     final_scores = db.session.query(
         User.id,
         User.name,
@@ -952,7 +1217,6 @@ def ranking():
 
     results = final_scores.all()
 
-    # 手动添加排名
     rankings = []
     rank = 1
     current_score = None
@@ -963,7 +1227,11 @@ def ranking():
             current_score = score
         rankings.append((rank, user_id, name, score))
 
-    return render_template('Ranking.html', rankings=rankings)
+    return rankings
+
+
+
+
 
 
 
