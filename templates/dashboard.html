@@ -23,7 +23,6 @@
             padding: 15px;
             margin: 5px 0;
             background-color: rgba(50, 50, 50, 0.7);
-            /* 半透明灰色背景 */
             border: 1px solid #ddd;
             border-radius: 8px;
             text-decoration: none;
@@ -46,7 +45,6 @@
             margin: 0;
             font-size: 1.25rem;
             color: #fff;
-            /* 白色字体 */
         }
 
         .no-requests {
@@ -131,7 +129,6 @@
 
             font-family: Arial, sans-serif;
             background-image: url('/static/img/wavy.jpg');
-            /* 设置背景图片 */
             background-size: cover;
             background-repeat: no-repeat;
             background-attachment: fixed;
@@ -169,22 +166,17 @@
         .logo-container {
             display: flex;
             align-items: center;
-            /* 垂直对齐 */
             padding: 10px 20px;
             margin-bottom: -30px;
-            /* 调整 logo 容器的下边距 */
         }
 
         .logo {
             width: 50px;
-            /* 调整 logo 的宽度 */
             margin-right: 10px;
-            /* 调整 logo 和标题之间的间距 */
         }
 
         .logo-container h1 {
             background: linear-gradient(to right, #2a14f5, #d14c3b);
-            /* 设置渐变颜色 */
             background-clip: text;
             color: transparent;
             -webkit-text-fill-color: transparent;
@@ -194,19 +186,15 @@
         .modal-body,
         .modal-footer {
             color: #000000;
-            /* 修改为你需要的颜色 */
         }
 
         .modal-header .modal-title {
             color: #000000;
-            /* 修改为你需要的颜色 */
         }
 
         .modal-footer .btn {
             color: #ffffff;
-            /* 保持按钮的字体颜色为白色 */
             background-color: #007bff;
-            /* 修改按钮背景颜色，使其在黑色背景上更显眼 */
         }
 
         .form-control {
@@ -214,12 +202,38 @@
             padding: 10px;
             font-size: 16px;
             background-color: rgba(50, 50, 50, 0.7);
-            /* 半透明灰色背景 */
             color: #fff;
-            /* 白色字体 */
             border: 1px solid #ddd;
-            /* 边框颜色 */
         }
+        /* static/css/styles.css */
+        #fireworks-container {
+            position: relative;
+            width: 100%;
+            height: 100px; 
+            overflow: hidden;
+        }
+        .firework {
+            position: absolute;
+            bottom: 0;
+            width: 0;
+            height: 0;
+        }
+        .particle {
+            position: absolute;
+            bottom: 0;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background-color: var(--color);
+            animation: explode 1s ease-out forwards;
+        }
+        @keyframes explode {
+            to {
+                transform: translate(var(--dx), var(--dy));
+                opacity: 0;
+            }
+        }
+
     </style>
 </head>
 <!--Start of Tawk.to Script-->
@@ -308,6 +322,8 @@
             <img src="/static/img/gold.png" alt="Gold Medal" style="width: 60px; height: auto;" />
             <p><strong>Score:</strong> {{ user_score }}</p>
             <p>Congratulations! You're in first place!</p>
+            <div id="fireworks-container" data-user-rank="{{ user_rank }}"></div>
+
             {% elif user_rank == 2 %}
             <img src="/static/img/silver.png" alt="Silver Medal " style="width: 60px; height: auto;" />
             <p><strong>Score:</strong> {{ user_score }}</p>
@@ -380,16 +396,8 @@
 
 
             <section class="form-section">
-                <h2>Edit Your Details</h2>
-                <form action="{{ url_for('update_name') }}" method="post">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <div class="form-group">
-                        <label for="name">Name:</label>
-                        <input type="text" class="form-control" id="name" name="name" value="{{ user.name }}">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Update Name</button>
-                </form>
-
+                <h2>Edit User Details</h2>
+            
                 <form action="{{ url_for('update_email') }}" method="post">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="form-group">
@@ -410,7 +418,7 @@
             </section>
 
             <section class="form-section theme-color-picker">
-                <h2>Customize Your Theme</h2>
+                <h2>Customize User Theme</h2>
                 <div class="form-group">
                     <label for="theme-color">Choose a theme color:</label>
                     <input type="color" class="form-control" id="theme-color" value="#ffffff">
@@ -492,6 +500,50 @@
             Tawk_API.toggle();  // Open the Tawk.to chat window
         });
     </script>
+   <script>
+    // static/js/fireworks.js
+document.addEventListener('DOMContentLoaded', (event) => {
+    const container = document.getElementById('fireworks-container');
+    const userRank = container.getAttribute('data-user-rank');
+
+    if (userRank == 1) {
+        setInterval(createFirework, 1000);
+    }
+
+    function createFirework() {
+        const colors = ['#ff4242', '#42ff42', '#4242ff', '#f0f0f0', '#ff42f0', '#ffff42', '#42ffff'];
+
+        const firework = document.createElement('div');
+        firework.className = 'firework';
+        firework.style.left = `${Math.random() * 100}%`;
+        container.appendChild(firework);
+
+        for (let i = 0; i < 20; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    const color = colors[Math.floor(Math.random() * colors.length)];
+                    particle.style.setProperty('--color', color);
+                    const angle = Math.random() * 2 * Math.PI;
+                    const radius = 100 + Math.random() * 100; // 控制爆炸半径
+                    const dx = radius * Math.cos(angle);
+                    const dy = radius * Math.sin(angle);
+                    particle.style.setProperty('--dx', `${dx}px`);
+                    particle.style.setProperty('--dy', `${dy}px`);
+                    firework.appendChild(particle);
+
+                    particle.addEventListener('animationend', () => {
+                        particle.remove();
+                    });
+        }
+
+        // Remove the firework container after animation
+        setTimeout(() => {
+            firework.remove();
+        }, 1000);
+    }
+});
+</script>
+    
 
 
 

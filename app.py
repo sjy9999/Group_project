@@ -258,17 +258,7 @@ def logout():
 
     return redirect(url_for('student'))
 
-@app.route('/update_name', methods=['POST'])
-@login_required
-def update_name():
-    new_name = request.form.get('name')
-    if new_name:
-        current_user.name = new_name
-        db.session.commit()
-        flash('Name updated successfully!', 'success')
-    else:
-        flash('Name cannot be empty.', 'error')
-    return redirect(url_for('dashboard'))
+
 
 @app.route('/update_email', methods=['POST'])
 @login_required
