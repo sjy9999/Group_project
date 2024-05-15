@@ -13,6 +13,7 @@ config = context.config
 # This line sets up loggers basically.
 fileConfig(config.config_file_name)
 logger = logging.getLogger('alembic.env')
+HUGGINGFACEHUB_API_TOKEN='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'
 
 
 def get_engine():
