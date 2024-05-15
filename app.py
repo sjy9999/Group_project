@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, url_for, session,make_response, flash,jsonify,flash
+from flask import Flask, abort, request, render_template, redirect, url_for, session,make_response, flash,jsonify,flash
 import sqlite3
 # from passwordReset import PasswordResetService
 from flask_mail import Mail
@@ -244,13 +244,6 @@ def login():
             return render_template('result.html', form=login_form, msg='Incorrect username or password！')
     return render_template('login.html', login_form=login_form)
 
-def get_posts_with_avatars():
-    posts = get_all_posts()  # Your function to fetch posts
-    for post in posts:
-        post['user_avatar'] = generate_gravatar_url(post['user_email'], size=64)
-        for reply in post['replies']:
-            reply['user_avatar'] = generate_gravatar_url(reply['user_email'], size=48)
-    return posts
 
 from werkzeug.security import generate_password_hash
 
@@ -268,9 +261,13 @@ def logout():
 @app.route('/update_name', methods=['POST'])
 @login_required
 def update_name():
-    current_user.name = request.form['name']
-    db.session.commit()
-    flash('Your name has been updated.')
+    new_name = request.form.get('name')
+    if new_name:
+        current_user.name = new_name
+        db.session.commit()
+        flash('Name updated successfully!', 'success')
+    else:
+        flash('Name cannot be empty.', 'error')
     return redirect(url_for('dashboard'))
 
 @app.route('/update_email', methods=['POST'])
