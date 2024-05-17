@@ -6,9 +6,7 @@ It's quite simple. Have you seen app.py? Click on it, then click "Run".
 
 
 Inside, there are different modules.
-<!-- 1 -->
 
-<<<<<<< HEAD
 ### 1
 First, for registration and login, each username corresponds to one email, and no one else can use the same username and email. This prevents duplicate usernames. If you forget your password, you can click the "Forgot Password" button and enter your email. You will receive a link in your email, which you can follow to update your password.
 
@@ -28,13 +26,8 @@ Now entering the "Create Post" interface, here you can start a request. For exam
 Now entering the "Search requests" interface, here you can search for posts. Initially, this project will display some posts made by others, allowing you to browse what they have discussed. You can see their replies and who replied. For example, a post titled "who is the goat," Peter replied "Messi," Jack replied "Ronaldo," and Rose replied "Jordan." 
 If you have a specific target, like searching for "goat," all posts related to "goat" will be shown, and you can also share your opinion, like your answer might be "Tim Duncan" or "Kobe." By clicking submit, you can post your reply, and others can see your response.
 Of course, if you search for Brunnswick, a small town in the UK, you'll find it's not popular yet. No posts about it and no replies below.
-=======
-<!-- 2 -->
 
-<!-- 3 -->
->>>>>>> parent of 49cbc95 (Resolved merge by adopting all changes from junyi-Sun)
 
-<!-- 4 -->
 
 <!-- 5 -->
 

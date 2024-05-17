@@ -83,11 +83,7 @@
                 </a>
             </div>
         </div>
-<<<<<<< HEAD
         <!-- right page  -->
-=======
-        <!-- 右侧   表单部分 -->
->>>>>>> parent of 49cbc95 (Resolved merge by adopting all changes from junyi-Sun)
         <div class="col-md-4">
             <div class="container">
                 <h2 class="mb-4">Register</h2>
@@ -132,22 +128,8 @@
                         </div>
                     </div>
                     <button type="submit" name="login" class="btn btn-primary">Login</button>
-<<<<<<< HEAD
                     <a href="{{ url_for('forgot_password') }}" class="btn btn-primary">Forget my password</a>           
                 </form> 
-=======
-                    <a href="{{ url_for('forgot_password') }}" class="btn btn-primary">Forget my password</a>
-                    <!-- <a href="{{ url_for('forgot_password') }}" class="btn btn-primary">Forget my password</a> -->
-                </form>
-                <!-- 将忘记密码链接移出表单 -->
-                <!-- <a href="{{ url_for('forgot_password') }}" class="btn btn-primary">Forget my password</a> -->
-
-                
-        
-
-
-                
->>>>>>> parent of 49cbc95 (Resolved merge by adopting all changes from junyi-Sun)
             </div>
         </div>
         
@@ -156,64 +138,38 @@
 <script>
     // login       action="{{ url_for('register') }}"
 document.addEventListener("DOMContentLoaded", function() {
-    // 用于登录表单的密码切换
-    var toggleLoginPassword = document.querySelector(".toggle-login-password"); // 确保这个类名在HTML中是唯一的
+    // switch password
+    var toggleLoginPassword = document.querySelector(".toggle-login-password"); 
     toggleLoginPassword.addEventListener('click', function() {
         var loginPasswordInput = document.getElementById('passwordLogin');
         if (loginPasswordInput.type === 'password') {
             loginPasswordInput.type = 'text';
-            toggleLoginPassword.innerHTML = '<i class="fa fa-eye-slash" aria-hidden="true"></i>'; // 密码可见时的图标
+            toggleLoginPassword.innerHTML = '<i class="fa fa-eye-slash" aria-hidden="true"></i>'; // show password
         } else {
             loginPasswordInput.type = 'password';
-            toggleLoginPassword.innerHTML = '<i class="fa fa-eye" aria-hidden="true"></i>'; // 密码隐藏时的图标
+            toggleLoginPassword.innerHTML = '<i class="fa fa-eye" aria-hidden="true"></i>'; // hide password
         }
     });
 
-<<<<<<< HEAD
     // Used for password switching for the registration form   用于注册表单的密码切换
     var toggleRegisterPassword = document.querySelector(".toggle-register-password"); // special in HTML
-=======
-    // 用于注册表单的密码切换
-    var toggleRegisterPassword = document.querySelector(".toggle-register-password"); // 确保这个类名在HTML中是唯一的
->>>>>>> parent of 49cbc95 (Resolved merge by adopting all changes from junyi-Sun)
     toggleRegisterPassword.addEventListener('click', function() {
         var registerPasswordInput = document.getElementById('password');
         if (registerPasswordInput.type === 'password') {
             registerPasswordInput.type = 'text';
-            toggleRegisterPassword.innerHTML = '<i class="fa fa-eye-slash" aria-hidden="true"></i>'; // 密码可见时的图标
+            toggleRegisterPassword.innerHTML = '<i class="fa fa-eye-slash" aria-hidden="true"></i>'; // show password
         } else {
             registerPasswordInput.type = 'password';
-            toggleRegisterPassword.innerHTML = '<i class="fa fa-eye" aria-hidden="true"></i>'; // 密码隐藏时的图标
+            toggleRegisterPassword.innerHTML = '<i class="fa fa-eye" aria-hidden="true"></i>'; // hide password
         }
     });
 });
 
-<<<<<<< HEAD
-=======
-    // document.addEventListener("DOMContentLoaded", function() {
-    //     var togglePasswordButton = document.querySelector('.toggle-password');
-    //     togglePasswordButton.addEventListener('click', function(e) {
-    //         var passwordInput = document.getElementById('password');
-    //         if (passwordInput.type === 'password') {
-    //             passwordInput.type = 'text';
-    //             togglePasswordButton.innerHTML = '<i class="fa fa-eye-slash" aria-hidden="true"></i>';
-    //         } else {
-    //             passwordInput.type = 'password';
-    //             togglePasswordButton.innerHTML = '<i class="fa fa-eye" aria-hidden="true"></i>';
-    //         }
-    //     });
-    // });
-
->>>>>>> parent of 49cbc95 (Resolved merge by adopting all changes from junyi-Sun)
 </script>
     
-<!-- 引入Bootstrap的JS和依赖 -->
+<!-- intro Bootstrap JS -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.9/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
-
-
-
-<!-- Bootstrap   btn-primary 通常表示主要按钮样式，而 btn-secondary 表示次要按钮样式 -->
