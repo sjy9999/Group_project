@@ -88,7 +88,7 @@
 
 
                 <p class="card-text"><small class="text-muted">Posted by {{ row.username }}</small></p>
-                <p>Replies count: {{ row.replies|length }}</p> <!-- 显示回复数量 -->
+                <p>Replies count: {{ row.replies|length }}</p> <!-- show the num of reply 显示回复数量 -->
                 {% if row.replies %}
                     {% for reply in row.replies %}
                     

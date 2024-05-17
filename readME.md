@@ -7,7 +7,6 @@ It's quite simple. Have you seen app.py? Click on it, then click "Run".
 
 ## Inside, there are different modules.
 
-
 ### 1
 First, for registration and login, each username corresponds to one email, and no one else can use the same username and email. This prevents duplicate usernames. If you forget your password, you can click the "Forgot Password" button and enter your email. You will receive a link in your email, which you can follow to update your password.
 
@@ -30,6 +29,17 @@ Of course, if you search for Brunnswick, a small town in the UK, you'll find it'
 
 
 <!-- 5 -->
+
+
+
+
+
+## Other text
+### Some changes about this program have resulted in a lot of unnecessary work.
+At the beginning, this project used SQLite3, but later changed to SQLAlchemy. CSRFProtect was not initially included, but later added, which led to many changes in both frontend and backend. Flask-Login functionality was not used initially, and a custom login function was implemented instead. Later, this was also changed to meet the course requirements for Flask-Login. These changes consumed a lot of redundant time.
+
+### Some regrets
+There are many issues with this project, such as the lack of decoupling. We also have other courses besides CITS5505, namely three courses assigned on May 6th, with a due date of May 20th. Within 14 days, we need to start from scratch and complete three entirely new assignments. Moreover, these three assignments are the final ones of this semester, making them the most challenging and comprehensive. This leaves us with no time. At the end of the project, we can only ensure that it runs without errors or bugs. As for high-quality code with high cohesion and low coupling, we would definitely improve it if we had sufficient time. However, we simply don't have the time now.
 
 
 Hope you like it!
