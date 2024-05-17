@@ -1,4 +1,4 @@
-<!-- regi login 登录  注册界面  -->
+<!-- register login page -->
 <!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -6,22 +6,19 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>FirstPage标题</title>
-    <!-- 引入Bootstrap CSS -->
+    <!-- 引入 introduce Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet">
     <style>
-        /* .container {
-            padding-top: 20px;
-        } */
         .container {
             max-height: 100vh;
-    display: flex;          /* 启用Flexbox */
-    flex-direction: column; /* 子元素垂直排列 */
-    justify-content: center; /* 垂直居中 */
-    height: 100%;            /* 设置高度为100% */
-    padding-top: 10px;
-    padding-bottom: 10px;
-}
+            display: flex;          /* Enable Flexbox    启用Flexbox */
+            flex-direction: column; /* Arrange child elements vertically  子元素垂直排列 */
+            justify-content: center; /* Vertically center  垂直居中 */
+            height: 100%;            /* Set height to 100%  设置高度为100% */
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
 
         .full-height {
             height: 100vh; /* Use full height of the screen */
@@ -33,30 +30,28 @@
         }
         .img-full-width {
             max-width: 100%;
-            /* auto 左侧图片*/
+            /* auto left image  左侧图片*/
             height: 100vh;
         }
         .or-separator {
-            text-align: center; /* 居中文本 */
-            margin: 20px 0; /* 上下边距，增加一些间隔 */
-            font-size: 16px; /* 字体大小 */
-            color: #333; /* 字体颜色，可以根据需要调整 */
+            text-align: center; /* Center text */
+            margin: 20px 0; /* Add some spacing top and bottom   上下边距，增加一些间隔 */
+            font-size: 16px; /* Font size   字体大小 */
+            color: #333; /* Font color, adjust as needed   字体颜色，可以根据需要调整 */
         }
         .container h2 {
-    font-size: 36px; /* 设置更大的字体大小 */
-    font-weight: bold; /* 使文字加粗 */
-    color: #000000; /* 设置字体颜色，这里使用了Bootstrap的主题蓝色 */
-    margin-bottom: 20px; /* 增加下边距，保持视觉分隔 */
-}
+            font-size: 36px; /* Larger font size    设置更大的字体大小 */
+            font-weight: bold; /* Bold text    使文字加粗 */
+            color: #000000; /* Font color, using Bootstrap's primary theme blue  设置字体颜色，Bootstrap主题蓝色 */
+            margin-bottom: 20px; /* Add bottom margin for visual separation  增加下边距，保持视觉分隔 */
+        }
+        .container .form-group {
+            margin-bottom: 10px; /* Default might be 15px or more   默认可能是15px或更多 */
+        }
 
-.container .form-group {
-    margin-bottom: 10px; /* 默认可能是15px或更多 */
-}
-
-.container input, .container button {
-    padding: 5px 5px; /* 根据需要减小填充 */
-}
-
+        .container input, .container button {
+            padding: 5px 5px; /* Reduce padding as needed   根据需要减小填充 */
+        }
 
     </style>
 </head>
@@ -64,7 +59,7 @@
 
 <div class="container-fluid full-height">
     <div class="row full-height">
-        <!-- 左侧图片轮播部分 -->
+        <!-- image carousel section   左侧图片轮播部分 -->
         <div class="col-md-8">
             <div id="carouselExample" class="carousel slide full-height" data-ride="carousel">
                 <div class="carousel-inner full-height">
@@ -88,7 +83,7 @@
                 </a>
             </div>
         </div>
-        <!-- right   -->
+        <!-- right page  -->
         <div class="col-md-4">
             <div class="container">
                 <h2 class="mb-4">Register</h2>
@@ -134,14 +129,7 @@
                     </div>
                     <button type="submit" name="login" class="btn btn-primary">Login</button>
                     <a href="{{ url_for('forgot_password') }}" class="btn btn-primary">Forget my password</a>           
-                </form>
-
-
-                
-        
-
-
-                
+                </form> 
             </div>
         </div>
         
@@ -163,7 +151,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    // 用于注册表单的密码切换
+    // Used for password switching for the registration form   用于注册表单的密码切换
     var toggleRegisterPassword = document.querySelector(".toggle-register-password"); // special in HTML
     toggleRegisterPassword.addEventListener('click', function() {
         var registerPasswordInput = document.getElementById('password');
@@ -177,7 +165,6 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 
-   
 </script>
     
 <!-- intro Bootstrap JS -->
