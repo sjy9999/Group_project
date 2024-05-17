@@ -1,13 +1,9 @@
 
-# from flask_sqlalchemy import SQLAlchemy
+
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-# app = Flask(__name__)
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# db = SQLAlchemy(app)
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship, backref
@@ -15,8 +11,7 @@ from datetime import datetime, timezone
 
 db = SQLAlchemy()
 
-# user_id = request.form['user_id']
-# user = session.query(User).filter(User.id == user_id).one()
+
 import hashlib
 class User(db.Model,UserMixin):
     __tablename__ = 'users'
@@ -36,10 +31,10 @@ class User(db.Model,UserMixin):
     def get(user_id):
         return db.session.get(User, int(user_id))
     def set_password(self, password):
-        """创建哈希密码的方法"""
+        """create hash password"""
         self.password = generate_password_hash(password)
     def check_password(self, password):
-        """检查哈希密码的方法"""
+        """check hash password"""
         return check_password_hash(self.password, password)
     
     def gravatar_url(self, size=100, default='retro', rating='g'):
@@ -59,7 +54,6 @@ class Request(db.Model):
     description = db.Column(db.String(255), nullable=False)
     username = db.Column(db.String(100))  # Changed to match the type of User.name
     replies = db.relationship('Reply', backref='request', lazy='dynamic')
-    
 
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
