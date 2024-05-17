@@ -1,3 +1,7 @@
+# At the beginning of the project, we tested connecting to the database directly. 
+# Later, we changed to using SQLAlchemy. This needs to be clarified. 
+# However, SQLite3 can also be used in this project, despite some drawbacks of SQLite3, such as security vulnerabilities.
+
 import sqlite3
 # 创建新表
 # 运行test.py可以发现在项目目录中创建了一个名为database的数据库

@@ -11,6 +11,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship, backref
+from datetime import datetime, timezone
 
 db = SQLAlchemy()
 
@@ -23,6 +24,10 @@ class User(db.Model,UserMixin):
     name = db.Column(db.String(100), nullable=False)
     password = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
+    last_seen = db.Column(db.DateTime, default=datetime.now(timezone.utc))
+    bio = db.Column(db.String(), nullable=True)  # Add this line for the bio column
+
+
     @classmethod
     def get_requests(cls,user_name):
         return Request.query.filter_by(username=user_name).all()
@@ -54,6 +59,7 @@ class Request(db.Model):
     description = db.Column(db.String(255), nullable=False)
     username = db.Column(db.String(100))  # Changed to match the type of User.name
     replies = db.relationship('Reply', backref='request', lazy='dynamic')
+    
 
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
@@ -73,12 +79,17 @@ class Reply(db.Model):
 
     reply_content = db.Column(db.String(255))
     responderName = db.Column(db.String(255))
+    responder = relationship('User', primaryjoin='foreign(User.name) == Reply.responderName', uselist=False, viewonly=True)
+
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
     
     @hybrid_property
     def user(self):
-        return User.query.filter_by(name=self.responderName).first()
+        user = User.query.filter_by(name=self.responderName).first()
+        if user:
+            return {'bio': user.bio, 'last_seen': user.last_seen}
+        return None
     
     @hybrid_property
     def responder(self):
@@ -91,6 +102,7 @@ class Like(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)  # 点赞用户的ID
     reply_id = db.Column(db.Integer, db.ForeignKey('replies.id'), nullable=False)  # 点赞的回复ID
     status = db.Column(db.String(10), default='active', nullable=False)  # 点赞状态，'active' 或 'revoked'
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.now(timezone.utc))  # New column
 
     # 关系定义
     user = db.relationship('User', backref=db.backref('likes', lazy='dynamic'))
