@@ -879,7 +879,7 @@ def ranking_logic():
 
 
 
-# this is for back   
+# this is at the end of lines   
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
