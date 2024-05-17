@@ -1,72 +1,109 @@
-/* 设置整体页面背景和文字颜色 */
 body {
-    background-color: black; /* 页面背景色 */
-    color: #39FF14; /* 荧光绿色文字 */
-    font-family: 'Arial', sans-serif; /* 字体 */
+    font-family: 'Arial', sans-serif;
     margin: 0;
-    padding: 20px; /* 页面内边距 */
+    padding: 0;
+    background: linear-gradient(90deg, #71b7e6, #9b59b6);
+    background-size: cover;
+    color: #f7f7f7;
+    animation: fadeIn 2s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 h1 {
-    text-align: center; /* 标题居中 */
+    text-align: center;
+    margin-top: 20px;
+    font-size: 2.5em;
+    color: #000000;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 table {
-    width: 80%; /* 表格宽度 */
-    margin: 20px auto; /* 表格居中显示 */
-    border-collapse: collapse; /* 边框合并 */
+    width: 80%;
+    margin: 20px auto;
+    border-collapse: collapse;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    animation: slideIn 1s ease-out;
 }
 
+@keyframes slideIn {
+    from { transform: translateY(50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+.back-button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    background-color: #0077cc;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    font-size: 1em;
+    z-index: 1000;
+}
+
+.back-button:hover {
+    background-color: #005fa3;
+    transform: scale(1.05);
+}
+
+
 th, td {
-    border: 1px solid #39FF14; /* 设置表格边框颜色 */
-    padding: 10px; /* 单元格内边距 */
-    text-align: left; /* 文字对齐 */
+    padding: 15px;
+    text-align: center;
+    border-bottom: 1px solid #000000;
+    transition: background-color 0.3s ease;
+}
+.logo {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 100px; /* Adjust size as needed */
+    height: auto;
+    z-index: 1000;
+    animation: fadeIn 2s ease-in;
 }
 
 th {
-    background-color: #282828; /* 表头背景色 */
-    color: #39FF14; /* 表头文字颜色 */
+    background-color: #0077cc;
+    color: #111010;
+    font-weight: bold;
+    text-transform: uppercase;
 }
 
-td {
-    background-color: #121212; /* 单元格背景色 */
-    color: #39FF14; /* 单元格文字颜色 */
-}
-
-/* 鼠标悬停时单元格效果 */
 tr:hover {
-    background-color: #1e1e1e;
+    background-color: rgba(0, 119, 204, 0.1);
 }
 
-/* 增加一些表格边框的光泽效果 */
-table, th, td {
-    box-shadow: 0 0 15px #39FF14;
-}
-
-/* 链接样式 */
-a {
-    color: #39FF14;
-    text-decoration: none; /* 去除下划线 */
-}
-
-a:hover {
-    text-decoration: underline; /* 悬停时显示下划线 */
-}
 #chartTitle {
-    background-color: black; /* 页面背景色 */
-    color: #39FF14; /* 荧光绿色文字 */
-    font-family: 'Arial', sans-serif; /* 字体 */
-    margin: 0;
-    padding: 20px; /* 页面内边距 */
     text-align: center;
-
+    margin-top: 40px;
+    font-size: 2em;
+    color: #000000;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    animation: fadeIn 1s ease-in;
 }
+
 #rankingChart {
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-        width: 80%; /* 或者你可以调整为其他宽度，根据需要 */
-        
+    display: block;
+    margin: 20px auto;
+    max-width: 90%;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    animation: popUp 1s ease-out;
 }
 
-
+@keyframes popUp {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -108,7 +109,7 @@
 
 
         body {
-            background: url('your-background-image.jpg') no-repeat center center fixed;
+            background: linear-gradient(90deg, #71b7e6, #9b59b6);
             background-size: cover;
             color: #ffffff;
         }
@@ -178,6 +179,7 @@
         .logo-container h1 {
             background: linear-gradient(to right, #2a14f5, #d14c3b);
             background-clip: text;
+            -webkit-background-clip: text;
             color: transparent;
             -webkit-text-fill-color: transparent;
         }
@@ -205,19 +207,22 @@
             color: #fff;
             border: 1px solid #ddd;
         }
+
         /* static/css/styles.css */
         #fireworks-container {
             position: relative;
             width: 100%;
-            height: 100px; 
+            height: 100px;
             overflow: hidden;
         }
+
         .firework {
             position: absolute;
             bottom: 0;
             width: 0;
             height: 0;
         }
+
         .particle {
             position: absolute;
             bottom: 0;
@@ -227,13 +232,13 @@
             background-color: var(--color);
             animation: explode 1s ease-out forwards;
         }
+
         @keyframes explode {
             to {
                 transform: translate(var(--dx), var(--dy));
                 opacity: 0;
             }
         }
-
     </style>
 </head>
 <!--Start of Tawk.to Script-->
@@ -280,8 +285,6 @@
 
     </div>
 
-
-
     <div class="container">
         <header class="text-center mb-4">
             <h1>Profile Settings</h1>
@@ -325,8 +328,9 @@
             <div id="fireworks-container" data-user-rank="{{ user_rank }}"></div>
 
             {% elif user_rank == 2 %}
-            <img src="/static/img/silver.png" alt="Silver Medal " style="width: 60px; height: auto;" />
+            <img src="/static/img/sliver.png" alt="Silver Medal " style="width: 60px; height: auto;" />
             <p><strong>Score:</strong> {{ user_score }}</p>
+
             <p>Great job! You're in second place!</p>
             {% elif user_rank == 3 %}
             <img src="/static/img/bronze.png" alt="Bronze Medal" style="width: 60px; height: auto;" />
@@ -390,14 +394,9 @@
                     {% endfor %}
                 </div>
             </section>
-
-
-
-
-
             <section class="form-section">
                 <h2>Edit User Details</h2>
-            
+
                 <form action="{{ url_for('update_email') }}" method="post">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="form-group">
@@ -433,10 +432,15 @@
                 </div>
             </section>
 
+            <button onclick="history.back()" class="btn btn-secondary btn-block mt-3">Go Back</button>
+
             <form action="{{ url_for('logout') }}" method="post">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="btn btn-danger">Logout</button>
+                <button type="submit" class="btn btn-secondary btn-block mt-3">Logout</button>
             </form>
+
+
+
         </main>
     </div>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
@@ -447,14 +451,14 @@
             // Load the saved theme color from localStorage
             const savedThemeColor = localStorage.getItem('themeColor');
             if (savedThemeColor) {
-                document.body.style.backgroundColor = savedThemeColor;
+                document.body.style.background = `linear-gradient(90deg, ${savedThemeColor}, ${savedThemeColor})`;
                 document.getElementById('theme-color').value = savedThemeColor;
             }
 
             const updateThemeButton = document.getElementById('update-theme-btn');
             updateThemeButton.addEventListener('click', function () {
                 const themeColor = document.getElementById('theme-color').value;
-                document.body.style.backgroundColor = themeColor;
+                document.body.style.background = `linear-gradient(90deg, ${themeColor}, ${themeColor})`;
                 localStorage.setItem('themeColor', themeColor);
             });
 
@@ -499,32 +503,31 @@
             chatBox.style.display = 'block';
             Tawk_API.toggle();  // Open the Tawk.to chat window
         });
-    </script>
-   <script>
-    // static/js/fireworks.js
-document.addEventListener('DOMContentLoaded', (event) => {
-    const container = document.getElementById('fireworks-container');
-    const userRank = container.getAttribute('data-user-rank');
 
-    if (userRank == 1) {
-        setInterval(createFirework, 1000);
-    }
+        // static/js/fireworks.js
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const container = document.getElementById('fireworks-container');
+            const userRank = container.getAttribute('data-user-rank');
 
-    function createFirework() {
-        const colors = ['#ff4242', '#42ff42', '#4242ff', '#f0f0f0', '#ff42f0', '#ffff42', '#42ffff'];
+            if (userRank == 1) {
+                setInterval(createFirework, 1000);
+            }
 
-        const firework = document.createElement('div');
-        firework.className = 'firework';
-        firework.style.left = `${Math.random() * 100}%`;
-        container.appendChild(firework);
+            function createFirework() {
+                const colors = ['#ff4242', '#42ff42', '#4242ff', '#f0f0f0', '#ff42f0', '#ffff42', '#42ffff'];
 
-        for (let i = 0; i < 20; i++) {
+                const firework = document.createElement('div');
+                firework.className = 'firework';
+                firework.style.left = `${Math.random() * 100}%`;
+                container.appendChild(firework);
+
+                for (let i = 0; i < 20; i++) {
                     const particle = document.createElement('div');
                     particle.className = 'particle';
                     const color = colors[Math.floor(Math.random() * colors.length)];
                     particle.style.setProperty('--color', color);
                     const angle = Math.random() * 2 * Math.PI;
-                    const radius = 100 + Math.random() * 100; // 控制爆炸半径
+                    const radius = 100 + Math.random() * 100;
                     const dx = radius * Math.cos(angle);
                     const dy = radius * Math.sin(angle);
                     particle.style.setProperty('--dx', `${dx}px`);
@@ -534,19 +537,14 @@ document.addEventListener('DOMContentLoaded', (event) => {
                     particle.addEventListener('animationend', () => {
                         particle.remove();
                     });
-        }
-
-        // Remove the firework container after animation
-        setTimeout(() => {
-            firework.remove();
-        }, 1000);
-    }
-});
-</script>
-    
-
-
-
+                }
+                // Remove the firework container after animation
+                setTimeout(() => {
+                    firework.remove();
+                }, 1000);
+            }
+        });
+    </script>
 
 </body>
 
