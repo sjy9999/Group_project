@@ -28,6 +28,15 @@ If you have a specific target, like searching for "goat," all posts related to "
 Of course, if you search for Brunnswick, a small town in the UK, you'll find it's not popular yet. No posts about it and no replies below.
 
 
+### 5
+Then in the ranking interface,user ranking system with a corresponding ranking chart, ranking users based on their scores and visualizing the data in a chart format. The main features include a user ranking table showing rank, user ID, name, and score, alongside a ranking chart for visual representation of user scores. The interface also includes a "Back to Main" button for easy navigation.
+
+
+### 6
+In the The profile settings page includes user details such as name, bio, email, and last seen time, with an option to update the profile picture via Gravatar. The user ranking section prominently shows the user's rank, score, and a congratulatory message for top 3 positions. Additionally, users can edit their bio for personalized profile information, and customize their theme color for a personalized experience. The current weather section provides real-time weather updates including location, temperature, description, humidity, and wind speed. The user requests section allows users to view and manage their requests. For enhanced user support, a live chat option is available. Navigation is made easy with "Go Back" and "Logout" buttons.
+
+### 7
+The Swan-Forum Guidelines section promotes community standards, encouraging respectful interactions, avoiding spam, and sharing valuable content.
 
 <!-- 5 -->
 

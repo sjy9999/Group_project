@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, url_for, session,make_response, flash,jsonify,flash
+from flask import Flask, abort, request, render_template, redirect, url_for, session,make_response, flash,jsonify,flash
 import sqlite3
 from flask_mail import Mail
 import os
@@ -6,7 +6,6 @@ import pytz
 from routes import UserViews
 from flask_migrate import Migrate
 import logging
-#require  要求  import
 from models import db
 from flask_login import LoginManager, login_user, logout_user, login_required
 from flask_wtf import FlaskForm,CSRFProtect
@@ -16,9 +15,6 @@ from wtforms.validators import InputRequired, Email
 from wtforms.validators import DataRequired
 from datetime import datetime,timezone
 import re
-
-
-
 
 def create_app():
     # project start   student.html
@@ -60,9 +56,6 @@ def create_app():
     return app
 
 
-
-
-
 app = create_app()
 
 class LoginForm(FlaskForm):
@@ -85,7 +78,6 @@ def access():
     register_form = RegisterForm()
 
     if 'login' in request.form and login_form.validate_on_submit():
-        # 处理登录逻辑
         username = login_form.username.data
         password = login_form.password.data
 
@@ -94,17 +86,11 @@ def access():
             login_user(user)
             # Define the Shanghai timezone using pytz
             shanghai_tz = pytz.timezone('Asia/Shanghai')
-
-# Get the current UTC time as a timezone-aware datetime object
+            # Get the current UTC time as a timezone-aware datetime object
             current_utc_time = datetime.now(timezone.utc)
-
-# Convert the UTC time to Shanghai time
+            # Convert the UTC time to Shanghai time
             current_shanghai_time = current_utc_time.astimezone(shanghai_tz)
-
-# Now, you can store this in your database or use it
             user.last_seen = current_shanghai_time
-
-# Commit changes to the database if this is being used in a web app
             db.session.commit()
             session['loggedin'] = True
             session['username'] = user.name
@@ -137,7 +123,7 @@ def access():
     return render_template('student.html', login_form=login_form, register_form=register_form)
 
 
-# register 注册    return  http://127.0.0.1:5000      http://127.0.0.1:5000/register/    GET
+# register    return  http://127.0.0.1:5000      http://127.0.0.1:5000/register/    GET
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     print("Register function called")  # for test 调试语句
@@ -170,7 +156,7 @@ login_manager.init_app(app)
 
 @login_manager.user_loader
 def load_user(user_id):
-    return db.session.query(User).get(int(user_id))
+    return db.session.get(User, int(user_id))
 
 
 @app.route('/login/', methods=['POST', 'GET'])
@@ -193,19 +179,10 @@ def login():
             return render_template('result.html', form=login_form, msg='Incorrect username or password！')
     return render_template('login.html', login_form=login_form)
 
-def get_posts_with_avatars():
-    posts = get_all_posts()  # Your function to fetch posts
-    for post in posts:
-        post['user_avatar'] = generate_gravatar_url(post['user_email'], size=64)
-        for reply in post['replies']:
-            reply['user_avatar'] = generate_gravatar_url(reply['user_email'], size=48)
-    return posts
 
 from werkzeug.security import generate_password_hash
 
 @app.route('/update_profile', methods=['POST'])
-
-
 
 
 @app.route('/logout/', endpoint='logout1')
@@ -316,8 +293,6 @@ def get_user_rank_and_score(user_id):
 @app.route('/dashboard', methods=['GET', 'POST'])
 @login_required
 def dashboard():
-    
-
     user = current_user
     # Handle form submission for updating bio
     if request.method == 'POST':
@@ -331,12 +306,7 @@ def dashboard():
     user_time_zone = pytz.timezone('Asia/Shanghai')  # Correctly using a specific timezone
     un_last_seen = current_user.last_seen.astimezone(user_time_zone) if current_user.last_seen else "Never"
     last_seen = un_last_seen.strftime("%Y-%m-%d %I:%M %p")  # Format with AM/PM
-
-
     user_rank, user_score = get_user_rank_and_score(user.id)
-    
-
-
   # Directly access the requests, assuming the relationship is defined in the User model
     return render_template('dashboard.html', user=user, requests=requests,avatar=avatar,user_rank=user_rank, user_score=user_score,last_seen=last_seen)
 
@@ -368,114 +338,15 @@ def delete_request(request_id):
 
 
 
-
-
-
-#from werkzeug.utils import secure_filename
-# import os
-
-# UPLOAD_FOLDER = 'C:/Users/Ge/Desktop/Group_project/UPLOAD_FOLDER'
-# ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-# app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-
-
-
-# def allowed_file(filename):
-#     return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg', 'gif'}
-
-# @app.route('/upload_avatar', methods=['POST'])
-# def upload_avatar():
-#     if 'avatar' not in request.files:
-#         flash('No file part')
-#         return redirect(request.url)
-#     file = request.files['avatar']
-#     if file.filename == '':
-#         flash('No selected file')
-#         return redirect(request.url)
-#     if file and allowed_file(file.filename):
-#         filename = secure_filename(file.filename)
-#         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-#         try:
-#             file.save(file_path)  # Save the file
-#             update_user_avatar_url(file_path)  # Update the database
-#             flash('Avatar uploaded successfully')
-#         except Exception as e:
-#             flash(f'Error saving file: {str(e)}')
-#             return redirect(request.url)
-#         return redirect(url_for('dashboard'))
-#     flash('File not allowed')
-#     return redirect(request.url)
-
-# def update_user_avatar_url(file_path):
-#     username = session.get('username')
-#     try:
-#         with sqlite3.connect("C:/Users/Ge/Desktop/Group_project/database.db") as con:
-#             cur = con.cursor()
-#             cur.execute("UPDATE users SET avatar_url = ? WHERE username = ?", (file_path, username))
-#             con.commit()
-#             flash('Avatar updated successfully.')
-#     except sqlite3.Error as error:
-#         flash(f"Error updating avatar: {str(error)}") 
-
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 @app.route('/errorPage')
 def errorPage():
     # show the error
     return "There is an error and please try later"
 
-
-
 # this is for a main    http://127.0.0.1:5000   
 @app.route('/')
 def regi_login():
     return render_template('student.html')
-
-
-
-
 
 # view page       http://127.0.0.1:5000/main/
 @app.route('/main')
@@ -511,10 +382,8 @@ def time_since(dt):
     """Return the time difference from now to a given datetime in a user-specific timezone."""
     if dt is None:
         return "Never"
-    
     now = datetime.now()  # Get current time
-    print("Now:", now)
-    print("Datetime being checked:", dt)
+   
 
     if dt > now:
         # dt is in the future
@@ -522,9 +391,7 @@ def time_since(dt):
     else:
         # dt is in the past
         diff = relativedelta(now, dt)
-    print("Difference:", diff)
-    print("Years:", diff.years, "Months:", diff.months, "Days:", diff.days, "Hours:", diff.hours, "Minutes:", diff.minutes, "Seconds:", diff.seconds)
-
+  
 
 
     if diff.years > 0:
@@ -605,8 +472,6 @@ def findRequest():
 
     # Render the template with the data
     return render_template('findRequest.html', rows=rows, message=message, search_queryFR=search_queryFR)
-
-
 
 
 
@@ -714,6 +579,9 @@ def reset_password(token):
     return render_template('reset_password.html', form=form, register_form=register_form, login_form=login_form, token=token)
 
 
+@app.route('/guidelines')
+def guidelines():
+    return render_template('guidelines.html')
 
 
 
@@ -773,6 +641,10 @@ from flask import Flask, render_template
 import matplotlib.pyplot as plt
 import io
 import base64
+import matplotlib
+
+matplotlib.use('Agg')  # Use the Agg backend for non-GUI environments
+
 from models import User, Request, Reply, Like
 from sqlalchemy import func
 
@@ -780,45 +652,46 @@ from sqlalchemy import func
 
 @app.route('/Ranking')
 def ranking():
-    """生成排行榜和折线图页面"""
+    """Generate ranking and line chart page"""
     rankings = ranking_logic()
 
-    # 准备折线图数据
-    user_names = [r[2] for r in rankings]  # 用户名
-    scores = [r[3] for r in rankings]  # 对应的得分
+    # Prepare line chart data
+    user_names = [r[2] for r in rankings]  # User names
+    scores = [r[3] for r in rankings]  # Corresponding scores
 
-    plt.style.use('dark_background')  # 使用暗色背景风格
+    plt.style.use('grayscale')  # Use grayscale background style
     fig, ax = plt.subplots(figsize=(12, 6))
-    ax.plot(user_names, scores, marker='o', linestyle='-', color='#39FF14')  # 荧光绿色线和点
-    ax.set_facecolor('black')  # 图表内部背景色
-    fig.patch.set_facecolor('none')  # 图表外围背景色透明
+    ax.plot(user_names, scores, marker='o', linestyle='-', color='black')  # Black line and points
+    ax.set_facecolor((0.5, 0.5, 0.5, 0.5))  # RGBA where 0.5 is the transparency level
+    fig.patch.set_facecolor('none')  # Transparent outer background of the chart
+    fig.patch.set_alpha(0.01)
 
-    # 设置边框颜色
+    # Set border color
     for spine in ax.spines.values():
-        spine.set_color('#39FF14')  # 设置为荧光绿色
-        spine.set_linewidth(2)  # 设置边框宽度
+        spine.set_color('black')  # Set to black
+        spine.set_linewidth(1)  # Set border width
 
-    plt.xticks(rotation=45, color='#39FF14', ha='right')  # 设置X轴标签倾斜45度，颜色为荧光绿
-    plt.yticks(color='#39FF14')  # 设置Y轴刻度颜色
+    plt.xticks(rotation=45, color='black', ha='right')  # Rotate X-axis labels 45 degrees, set color to black
+    plt.yticks(color='black')  # Set Y-axis tick color
     plt.subplots_adjust(bottom=0.2, top=0.9, left=0.1, right=0.9)
-    ax.grid(False)  # 移除网格线
-    ax.set_xlabel('User', color='#39FF14')  # X轴标题
-    ax.set_ylabel('Score', color='#39FF14')  # Y轴标题
+    ax.grid(False)  # Remove grid lines
+    ax.set_xlabel('User', color='black')  # X-axis title
+    ax.set_ylabel('Score', color='black')  # Y-axis title
 
-    # 将图表保存到字节流
+    # Save the chart to a byte stream
     img = io.BytesIO()
     plt.savefig(img, format='png', bbox_inches='tight')
     img.seek(0)
     plt.close()
 
-    # 转换为 Base64 编码并嵌入 HTML
+    # Convert to Base64 encoding and embed in HTML
     img_base64 = base64.b64encode(img.read()).decode('utf8')
 
-    # 传递排行榜数据和折线图到模板
+    # Pass ranking data and line chart to the template
     return render_template('Ranking.html', rankings=rankings, img_base64=img_base64)
 
 def ranking_logic():
-    """从数据库中获取排行榜数据的逻辑"""
+    """Logic for retrieving ranking data from the database"""
     post_scores = db.session.query(
         User.id.label('user_id'),
         (5 * func.count(Request.id)).label('score')
@@ -872,11 +745,6 @@ def ranking_logic():
         rankings.append((rank, user_id, name, score))
 
     return rankings
-
-
-
-
-
 
 
 # this is at the end of lines   
