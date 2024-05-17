@@ -451,14 +451,14 @@
             // Load the saved theme color from localStorage
             const savedThemeColor = localStorage.getItem('themeColor');
             if (savedThemeColor) {
-                document.body.style.backgroundColor = savedThemeColor;
+                document.body.style.background = `linear-gradient(90deg, ${savedThemeColor}, ${savedThemeColor})`;
                 document.getElementById('theme-color').value = savedThemeColor;
             }
 
             const updateThemeButton = document.getElementById('update-theme-btn');
             updateThemeButton.addEventListener('click', function () {
                 const themeColor = document.getElementById('theme-color').value;
-                document.body.style.backgroundColor = themeColor;
+                document.body.style.background = `linear-gradient(90deg, ${themeColor}, ${themeColor})`;
                 localStorage.setItem('themeColor', themeColor);
             });
 
