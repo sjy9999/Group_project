@@ -1222,11 +1222,7 @@ def ranking_logic():
 
 
 
-<<<<<<< HEAD
 # this is at the end of lines   
-=======
-# back   可能要用部分
->>>>>>> parent of 49cbc95 (Resolved merge by adopting all changes from junyi-Sun)
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
