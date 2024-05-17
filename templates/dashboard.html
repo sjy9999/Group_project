@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+    <style>
+        .requests-list {
+            list-style-type: none;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .request-card {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin: 5px 0;
+            background-color: rgba(50, 50, 50, 0.7);
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #333;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .request-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-icon {
+            font-size: 2rem;
+            color: #007bff;
+            margin-right: 15px;
+        }
+
+        .card-content h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            color: #fff;
+        }
+
+        .no-requests {
+            font-size: 1.25rem;
+            color: #666;
+            text-align: center;
+            width: 100%;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+
+        .section-title {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: #007bff;
+            border-bottom: 2px solid #007bff;
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+
+        .user-details {
+            margin-bottom: 20px;
+        }
+
+        .user-details p {
+            margin: 5px 0;
+            font-size: 18px;
+        }
+
+        .bio-form .form-group {
+            margin-bottom: 15px;
+        }
+
+        .bio-form label {
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .bio-form .form-control {
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        .bio-form .btn {
+            background-color: #007bff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .bio-form .btn:hover {
+            background-color: #0056b3;
+        }
+
+
+
+        body {
+            background: url('your-background-image.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #ffffff;
+        }
+
+        .avatar {
+            width: 128px;
+            height: 128px;
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+            box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .container {
+            margin-top: 60px;
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 20px;
+            border-radius: 10px;
+
+            font-family: Arial, sans-serif;
+            background-image: url('/static/img/wavy.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+
+        }
+
+        .form-section {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .alert-custom {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+
+        .weather-container {
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .weather-container p {
+            margin: 5px 0;
+            font-size: 16px;
+            color: #ffffff;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            margin-bottom: -30px;
+        }
+
+        .logo {
+            width: 50px;
+            margin-right: 10px;
+        }
+
+        .logo-container h1 {
+            background: linear-gradient(to right, #2a14f5, #d14c3b);
+            background-clip: text;
+            color: transparent;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .modal-header,
+        .modal-body,
+        .modal-footer {
+            color: #000000;
+        }
+
+        .modal-header .modal-title {
+            color: #000000;
+        }
+
+        .modal-footer .btn {
+            color: #ffffff;
+            background-color: #007bff;
+        }
+
+        .form-control {
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 16px;
+            background-color: rgba(50, 50, 50, 0.7);
+            color: #fff;
+            border: 1px solid #ddd;
+        }
+        /* static/css/styles.css */
+        #fireworks-container {
+            position: relative;
+            width: 100%;
+            height: 100px; 
+            overflow: hidden;
+        }
+        .firework {
+            position: absolute;
+            bottom: 0;
+            width: 0;
+            height: 0;
+        }
+        .particle {
+            position: absolute;
+            bottom: 0;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background-color: var(--color);
+            animation: explode 1s ease-out forwards;
+        }
+        @keyframes explode {
+            to {
+                transform: translate(var(--dx), var(--dy));
+                opacity: 0;
+            }
+        }
+
+    </style>
+</head>
+<!--Start of Tawk.to Script-->
+<script type="text/javascript">
+    var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
+    (function () {
+        var s1 = document.createElement("script"), s0 = document.getElementsByTagName("script")[0];
+        s1.async = true;
+        s1.src = 'https://embed.tawk.to/664435a99a809f19fb3103f3/1htt738an';
+        s1.charset = 'UTF-8';
+        s1.setAttribute('crossorigin', '*');
+        s0.parentNode.insertBefore(s1, s0);
+    })();
+</script>
+<!--End of Tawk.to Script-->
+
+<body>
+    <!-- Displaying flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-custom alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    {% if category == 'success' and 'Redirecting' in message %}
+    <script>
+        console.log("Redirect script triggered");
+        setTimeout(function () {
+            console.log("Attempting to redirect to student page");
+            window.location.href = "{{ url_for('student') }}";
+        }, 5000);  // 10000 milliseconds = 10 seconds
+    </script>
+    {% endif %}
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+    <div class="logo-container">
+        <img src="/static/img/logot.png" alt="Logo" class="logo">
+        <h1>S-forum</h1>
+    </div>
+
+    </div>
+
+
+
+    <div class="container">
+        <header class="text-center mb-4">
+            <h1>Profile Settings</h1>
+            <img src="{{ avatar }}" alt="User Avatar" class="avatar mb-3">
+            <h2>{{ user.name }}</h2>
+            <p>Bio: {{ user.bio }}</p>
+            <p>Last seen: {{ last_seen }}</p>
+            <p>Want a new profile picture? <a href="#" data-toggle="modal" data-target="#gravatarModal">Update on
+                    Gravatar</a></p>
+            <!-- Modal -->
+            <div class="modal fade" id="gravatarModal" tabindex="-1" aria-labelledby="gravatarModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="gravatarModalLabel">Update Your Avatar</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            To update your avatar, please visit <a href="https://en.gravatar.com/emails/"
+                                target="_blank">Gravatar</a>. Gravatar is a globally recognized avatar linked to your
+                            email address.
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <section class="form-section">
+            <h2>User Ranking</h2>
+            <p><strong>Rank:</strong> {{ user_rank }}</p>
+            {% if user_rank == 1 %}
+            <img src="/static/img/gold.png" alt="Gold Medal" style="width: 60px; height: auto;" />
+            <p><strong>Score:</strong> {{ user_score }}</p>
+            <p>Congratulations! You're in first place!</p>
+            <div id="fireworks-container" data-user-rank="{{ user_rank }}"></div>
+
+            {% elif user_rank == 2 %}
+            <img src="/static/img/silver.png" alt="Silver Medal " style="width: 60px; height: auto;" />
+            <p><strong>Score:</strong> {{ user_score }}</p>
+            <p>Great job! You're in second place!</p>
+            {% elif user_rank == 3 %}
+            <img src="/static/img/bronze.png" alt="Bronze Medal" style="width: 60px; height: auto;" />
+            <p><strong>Score:</strong> {{ user_score }}</p>
+            <p>Well done! You're in third place!</p>
+            {% else %}
+            <p><strong>Score:</strong> {{ user_score }}</p>
+            <p>Keep up the great work to climb into the top three!</p>
+            {% endif %}
+        </section>
+
+        <main>
+            <section class="form-section">
+                <h2>User Details</h2>
+                <p><strong>Name:</strong> {{ user.name }}</p>
+                <p><strong>Email:</strong> {{ user.email }}</p>
+
+                <!-- Bio Editing Form -->
+                <h2>Edit Your Bio</h2>
+                <form method="post" action="{{ url_for('dashboard') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="form-group">
+                        <label for="bio">Bio:</label>
+                        <textarea name="bio" id="bio" rows="4" class="form-control">{{ user.bio }}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update Bio</button>
+                </form>
+            </section>
+
+            <section class="form-section">
+                <h2>Current Weather</h2>
+                <div id="weather-container" class="weather-container">
+                    <p id="weather-loading">Loading weather data...</p>
+                    <div id="weather-details" style="display: none;">
+                        <p id="weather-city"></p>
+                        <p id="weather-temperature"></p>
+                        <p id="weather-description"></p>
+                        <img id="weather-icon" src="" alt="Weather Icon" />
+                    </div>
+                </div>
+            </section>
+
+            <section class="form-section">
+                <h2>User Requests</h2>
+                <div class="requests-list">
+                    {% for request in requests %}
+                    <div class="request-card">
+                        <a href="{{ url_for('specific_request', request_id=request.id) }}" class="request-link">
+                            <div class="card-icon">
+                                <i class="fas fa-question-circle"></i>
+                            </div>
+                            <div class="card-content">
+                                <h3>{{ request.title }}</h3>
+                            </div>
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="no-requests">
+                        <i class="fas fa-exclamation-circle"></i> None Request.
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+
+
+
+
+            <section class="form-section">
+                <h2>Edit User Details</h2>
+            
+                <form action="{{ url_for('update_email') }}" method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update Email</button>
+                </form>
+                <form action="{{ url_for('update_password') }}" method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="form-group">
+                        <label for="password">New Password:</label>
+                        <input type="password" class="form-control" id="password" name="password"
+                            placeholder="Enter new password">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update Password</button>
+                </form>
+            </section>
+
+            <section class="form-section theme-color-picker">
+                <h2>Customize User Theme</h2>
+                <div class="form-group">
+                    <label for="theme-color">Choose a theme color:</label>
+                    <input type="color" class="form-control" id="theme-color" value="#ffffff">
+                </div>
+                <button class="btn btn-primary" id="update-theme-btn">Update Theme Color</button>
+            </section>
+            <section class="form-section">
+                <h2>Live Chat Support</h2>
+                <button id="chat-button" class="btn btn-primary">Chat with Support</button>
+                <div id="chat-box" style="display: none;">
+                    <!-- The chat box will be managed by Tawk.to -->
+                </div>
+            </section>
+
+            <form action="{{ url_for('logout') }}" method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-danger">Logout</button>
+            </form>
+        </main>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Load the saved theme color from localStorage
+            const savedThemeColor = localStorage.getItem('themeColor');
+            if (savedThemeColor) {
+                document.body.style.backgroundColor = savedThemeColor;
+                document.getElementById('theme-color').value = savedThemeColor;
+            }
+
+            const updateThemeButton = document.getElementById('update-theme-btn');
+            updateThemeButton.addEventListener('click', function () {
+                const themeColor = document.getElementById('theme-color').value;
+                document.body.style.backgroundColor = themeColor;
+                localStorage.setItem('themeColor', themeColor);
+            });
+
+            const url = `https://pro.openweathermap.org/data/2.5/weather?q=Perth,AU&APPID=c69678ccfe3302b8b573ab28abd1f058&units=metric`;
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const iconCode = data.weather[0].icon;
+                    const iconUrl = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
+                    const city = data.name;
+                    const country = data.sys.country;
+                    const temp = data.main.temp;
+                    const weatherDescription = data.weather[0].description;
+                    const humidity = data.main.humidity;
+                    const windSpeed = data.wind.speed;
+                    const weatherContainer = document.getElementById('weather-container');
+
+                    weatherContainer.innerHTML = `
+                        <p>Location: ${city}, ${country}</p>
+                        <p>Temperature: ${temp}°C</p>
+                        <p>Description: ${weatherDescription}</p>
+                        <p>Humidity: ${humidity}%</p>
+                        <p>Wind Speed: ${windSpeed} m/s</p>
+                        <img src="${iconUrl}" alt="Weather Icon" />
+                    `;
+                })
+                .catch(error => {
+                    console.error('Error fetching weather:', error);
+                    document.getElementById('weather-container').innerHTML = '<p>Error loading weather data.</p>';
+                });
+        });</script>
+
+    <script>
+        document.getElementById('chat-button').addEventListener('click', function () {
+            var chatBox = document.getElementById('chat-box');
+            chatBox.style.display = 'block';
+            Tawk_API.toggle();  // Open the Tawk.to chat window
+        });
+    </script>
+   <script>
+    // static/js/fireworks.js
+document.addEventListener('DOMContentLoaded', (event) => {
+    const container = document.getElementById('fireworks-container');
+    const userRank = container.getAttribute('data-user-rank');
+
+    if (userRank == 1) {
+        setInterval(createFirework, 1000);
+    }
+
+    function createFirework() {
+        const colors = ['#ff4242', '#42ff42', '#4242ff', '#f0f0f0', '#ff42f0', '#ffff42', '#42ffff'];
+
+        const firework = document.createElement('div');
+        firework.className = 'firework';
+        firework.style.left = `${Math.random() * 100}%`;
+        container.appendChild(firework);
+
+        for (let i = 0; i < 20; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    const color = colors[Math.floor(Math.random() * colors.length)];
+                    particle.style.setProperty('--color', color);
+                    const angle = Math.random() * 2 * Math.PI;
+                    const radius = 100 + Math.random() * 100; // 控制爆炸半径
+                    const dx = radius * Math.cos(angle);
+                    const dy = radius * Math.sin(angle);
+                    particle.style.setProperty('--dx', `${dx}px`);
+                    particle.style.setProperty('--dy', `${dy}px`);
+                    firework.appendChild(particle);
+
+                    particle.addEventListener('animationend', () => {
+                        particle.remove();
+                    });
+        }
+
+        // Remove the firework container after animation
+        setTimeout(() => {
+            firework.remove();
+        }, 1000);
+    }
+});
+</script>
+    
+
+
+
+
+</body>
+
+</html>

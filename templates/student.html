@@ -1,0 +1,175 @@
+<!-- register login page -->
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FirstPage标题</title>
+    <!-- 引入 introduce Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet">
+    <style>
+        .container {
+            max-height: 100vh;
+            display: flex;          /* Enable Flexbox    启用Flexbox */
+            flex-direction: column; /* Arrange child elements vertically  子元素垂直排列 */
+            justify-content: center; /* Vertically center  垂直居中 */
+            height: 100%;            /* Set height to 100%  设置高度为100% */
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+
+        .full-height {
+            height: 100vh; /* Use full height of the screen */
+        }
+
+        .img-full-height {
+            max-height: 100%;
+            width: auto;
+        }
+        .img-full-width {
+            max-width: 100%;
+            /* auto left image  左侧图片*/
+            height: 100vh;
+        }
+        .or-separator {
+            text-align: center; /* Center text */
+            margin: 20px 0; /* Add some spacing top and bottom   上下边距，增加一些间隔 */
+            font-size: 16px; /* Font size   字体大小 */
+            color: #333; /* Font color, adjust as needed   字体颜色，可以根据需要调整 */
+        }
+        .container h2 {
+            font-size: 36px; /* Larger font size    设置更大的字体大小 */
+            font-weight: bold; /* Bold text    使文字加粗 */
+            color: #000000; /* Font color, using Bootstrap's primary theme blue  设置字体颜色，Bootstrap主题蓝色 */
+            margin-bottom: 20px; /* Add bottom margin for visual separation  增加下边距，保持视觉分隔 */
+        }
+        .container .form-group {
+            margin-bottom: 10px; /* Default might be 15px or more   默认可能是15px或更多 */
+        }
+
+        .container input, .container button {
+            padding: 5px 5px; /* Reduce padding as needed   根据需要减小填充 */
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container-fluid full-height">
+    <div class="row full-height">
+        <!-- image carousel section   左侧图片轮播部分 -->
+        <div class="col-md-8">
+            <div id="carouselExample" class="carousel slide full-height" data-ride="carousel">
+                <div class="carousel-inner full-height">
+                    <div class="carousel-item active full-height">
+                        <img src="/static/img/s1.jpg" class="d-block w-100 img-full-height" alt="s1">
+                    </div>
+                    <div class="carousel-item full-height">
+                        <img src="/static/img/s2.jpg" class="d-block w-100 img-full-height" alt="s2">
+                    </div>
+                    <div class="carousel-item full-height">
+                        <img src="/static/img/s3.jpg" class="d-block w-100 img-full-height" alt="s3">
+                    </div>
+                </div>
+                <a class="carousel-control-prev" href="#carouselExample" role="button" data-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Previous</span>
+                </a>
+                <a class="carousel-control-next" href="#carouselExample" role="button" data-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Next</span>
+                </a>
+            </div>
+        </div>
+        <!-- right page  -->
+        <div class="col-md-4">
+            <div class="container">
+                <h2 class="mb-4">Register</h2>
+                <form action="{{ url_for('access') }}" method="POST" class="needs-validation" novalidate>
+                    {{ register_form.hidden_tag() }}
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        {{ register_form.username(class="form-control", id="username", required=True) }}
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="input-group">
+                            {{ register_form.password(class="form-control", id="password", required=True) }}
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary toggle-register-password" type="button"><i class="fa fa-eye"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        {{ register_form.email(class="form-control", id="email") }}
+                    </div>
+                    <button type="submit" name="register" class="btn btn-primary">Register</button>
+                </form>
+
+                <h2 class="mb-4 mt-5">Login</h2>
+                <!-- access -->
+                
+                <form action="{{ url_for('access') }}" method="POST" class="needs-validation" novalidate>
+                    {{ login_form.hidden_tag() }}
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        {{ login_form.username(class="form-control", id="username", required=True) }}
+                    </div>
+                    <div class="form-group">
+                        <label for="passwordLogin">Password</label>
+                        <div class="input-group">
+                            {{ login_form.password(class="form-control", id="passwordLogin", required=True) }}
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary toggle-login-password" type="button"><i class="fa fa-eye"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" name="login" class="btn btn-primary">Login</button>
+                    <a href="{{ url_for('forgot_password') }}" class="btn btn-primary">Forget my password</a>           
+                </form> 
+            </div>
+        </div>
+        
+    </div>
+</div>
+<script>
+    // login       action="{{ url_for('register') }}"
+document.addEventListener("DOMContentLoaded", function() {
+    // switch password
+    var toggleLoginPassword = document.querySelector(".toggle-login-password"); 
+    toggleLoginPassword.addEventListener('click', function() {
+        var loginPasswordInput = document.getElementById('passwordLogin');
+        if (loginPasswordInput.type === 'password') {
+            loginPasswordInput.type = 'text';
+            toggleLoginPassword.innerHTML = '<i class="fa fa-eye-slash" aria-hidden="true"></i>'; // show password
+        } else {
+            loginPasswordInput.type = 'password';
+            toggleLoginPassword.innerHTML = '<i class="fa fa-eye" aria-hidden="true"></i>'; // hide password
+        }
+    });
+
+    // Used for password switching for the registration form   用于注册表单的密码切换
+    var toggleRegisterPassword = document.querySelector(".toggle-register-password"); // special in HTML
+    toggleRegisterPassword.addEventListener('click', function() {
+        var registerPasswordInput = document.getElementById('password');
+        if (registerPasswordInput.type === 'password') {
+            registerPasswordInput.type = 'text';
+            toggleRegisterPassword.innerHTML = '<i class="fa fa-eye-slash" aria-hidden="true"></i>'; // show password
+        } else {
+            registerPasswordInput.type = 'password';
+            toggleRegisterPassword.innerHTML = '<i class="fa fa-eye" aria-hidden="true"></i>'; // hide password
+        }
+    });
+});
+
+</script>
+    
+<!-- intro Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.9/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
