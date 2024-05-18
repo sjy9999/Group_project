@@ -50,9 +50,6 @@ In the The profile settings page includes user details such as name, bio, email,
 ### 7
 The Swan-Forum Guidelines section promotes community standards, encouraging respectful interactions, avoiding spam, and sharing valuable content.
 
-<!-- 5 -->
-
-
 
 
 
