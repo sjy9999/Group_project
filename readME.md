@@ -1,7 +1,19 @@
 This is our agile assignment 2.
+Group member
+Name
+Junyi Sun
+Id 
+24382608
+Github name
+sjy9999
+
+
 
 <!-- 1 Would you like to know how to start it?  -->
 It's quite simple. Have you seen app.py? Click on it, then click "Run".
+
+
+
 
 
 
@@ -38,18 +50,21 @@ In the The profile settings page includes user details such as name, bio, email,
 ### 7
 The Swan-Forum Guidelines section promotes community standards, encouraging respectful interactions, avoiding spam, and sharing valuable content.
 
-<!-- 5 -->
 
 
 
-
-
-## Other text
+## Other
 ### Some changes about this program have resulted in a lot of unnecessary work.
 At the beginning, this project used SQLite3, but later changed to SQLAlchemy. CSRFProtect was not initially included, but later added, which led to many changes in both frontend and backend. Flask-Login functionality was not used initially, and a custom login function was implemented instead. Later, this was also changed to meet the course requirements for Flask-Login. These changes consumed a lot of redundant time.
 
 ### Some regrets
 There are many issues with this project, such as the lack of decoupling. We also have other courses besides CITS5505, namely three courses assigned on May 6th, with a due date of May 20th. Within 14 days, we need to start from scratch and complete three entirely new assignments. Moreover, these three assignments are the final ones of this semester, making them the most challenging and comprehensive. This leaves us with no time. At the end of the project, we can only ensure that it runs without errors or bugs. As for high-quality code with high cohesion and low coupling, we would definitely improve it if we had sufficient time. However, we simply don't have the time now.
+
+
+
+
+
+
 
 
 Hope you like it!

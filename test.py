@@ -5,6 +5,9 @@ import sqlite3
 conn = sqlite3.connect('database.db') 
 # this is ori
 # conn.execute('CREATE TABLE students (name TEXT, addr TEXT, city TEXT, pin TEXT)') 
+
+conn = sqlite3.connect('database.db')  #db link
+
 conn.execute('''
 CREATE TABLE IF NOT EXISTS students (
     name TEXT,
@@ -22,7 +25,6 @@ CREATE TABLE IF NOT EXISTS users (
 )
 ''') 
 
-
 conn.execute('''
 ALTER TABLE users ADD COLUMN avatar_url TEXT;
 ''')
@@ -37,8 +39,12 @@ CREATE TABLE IF NOT EXISTS requests (
     FOREIGN KEY(username) REFERENCES users(name)
 )
 ''') 
+''') 
+
 
 # request_id    reply_content  
+
+
 conn.execute('''
 CREATE TABLE IF NOT EXISTS replies (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -47,4 +53,7 @@ CREATE TABLE IF NOT EXISTS replies (
     answerName TEXT
 )
 ''') 
-conn.close()      
+
+
+
+conn.close()    
