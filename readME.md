@@ -21,10 +21,41 @@ This is our Agile Assignment 2.
 **GitHub Username:** Cyf1160819266
 
 
+## Prerequisites
+
+This application is designed to run using Python (version 3) within a virtual environment. It leverages the Flask framework for web development and SQLite for the database. To set up the virtual environment and install the required packages, please follow the instructions in the `requirements.txt` file.
+
+## Installing
+
+1. **Create a Virtual Environment:**
+   - Use `pip` or another package manager to install the `virtualenv` tool:
+     ```sh
+     pip install virtualenv
+     ```
+   - Activate the virtual environment:
+     ```sh
+     source venv/bin/activate
+     ```
+   This setup will include Flask and all necessary packages.
+
+2. **Install SQLite:**
+   - **Windows:**  
+     Download and install SQLite from the official website.
+   - **Linux:**
+     ```sh
+     sudo apt-get install sqlite3
+     ```
+
+3. **Set Up the Database:**
+   - Initialize the database and start the application:
+     ```sh
+     flask db init
+     flask run
+     ```
+
+
 <!-- 1 Would you like to know how to start it?  -->
 It's quite simple. Have you seen app.py? Click on it, then click "Run".
-
-
 
 Inside, there are different modules.
 
@@ -60,7 +91,7 @@ In the The profile settings page includes user details such as name, bio, email,
 The Swan-Forum Guidelines section promotes community standards, encouraging respectful interactions, avoiding spam, and sharing valuable content.
 
 
-## Other
+## Refelection
 ### Some changes about this program have resulted in a lot of unnecessary work.
 At the beginning, this project used SQLite3, but later changed to SQLAlchemy. CSRFProtect was not initially included, but later added, which led to many changes in both frontend and backend. Flask-Login functionality was not used initially, and a custom login function was implemented instead. Later, this was also changed to meet the course requirements for Flask-Login. These changes consumed a lot of redundant time.
 
@@ -76,5 +107,9 @@ like allowing users to follow each other to foster a more interactive community 
 
 ### Final Thoughts
 Despite the time constraints and challenges, we are proud of what we have accomplished. We have learned a great deal through this process and look forward to applying these lessons in future projects.
+
+## Contributing
+For guidelines on our code of conduct and instructions on how to submit pull requests, please refer to 'contribution'.
+
 
 Hope you like it!
