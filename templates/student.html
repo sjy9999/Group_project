@@ -153,6 +153,7 @@
 
 <body>
     <div class="container-fluid full-height">
+
         <div class="row full-height">
             <!-- image carousel section -->
             <div class="col-md-8">
@@ -181,6 +182,17 @@
             <!-- right page -->
             <div class="col-md-4">
                 <div class="container">
+                    <!-- Display the flash messages here -->
+                    {% with messages = get_flashed_messages(with_categories=True) %}
+                    {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}" role="alert">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                    {% endwith %}
+
                     <h2 class="mb-4">Register</h2>
                     <form action="{{ url_for('access') }}" method="POST" class="needs-validation" novalidate>
                         {{ register_form.hidden_tag() }}
@@ -210,7 +222,7 @@
                         {{ login_form.hidden_tag() }}
                         <div class="form-group">
                             <label for="username">Username</label>
-                            {{ login_form.username(class="form-control", id="username", required=True) }}
+                            {{ login_form.username(class="form-control", id="username1", required=True) }}
                         </div>
                         <div class="form-group">
                             <label for="passwordLogin">Password</label>

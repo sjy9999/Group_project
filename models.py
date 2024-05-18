@@ -48,9 +48,6 @@ class User(db.Model,UserMixin):
         url = f"https://www.gravatar.com/avatar/{hash}?s={size}&d={default}&r={rating}"
         return url
     
-    
-    
-
 
 class Request(db.Model):
     __tablename__ = 'requests'
@@ -68,9 +65,6 @@ class Request(db.Model):
         return User.query.filter_by(name=self.responderName).first()
     
     
-    
-    
-
 
 class Reply(db.Model):
     __tablename__ = 'replies'
@@ -99,16 +93,15 @@ class Reply(db.Model):
 class Like(db.Model):
     __tablename__ = 'likes'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)  # 点赞用户的ID
-    reply_id = db.Column(db.Integer, db.ForeignKey('replies.id'), nullable=False)  # 点赞的回复ID
-    status = db.Column(db.String(10), default='active', nullable=False)  # 点赞状态，'active' 或 'revoked'
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)  
+    reply_id = db.Column(db.Integer, db.ForeignKey('replies.id'), nullable=False) 
+    status = db.Column(db.String(10), default='active', nullable=False)  # status，'active' or 'revoked'
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.now(timezone.utc))  # New column
 
-    # 关系定义
     user = db.relationship('User', backref=db.backref('likes', lazy='dynamic'))
     reply = db.relationship('Reply', backref=db.backref('likes', lazy='dynamic'))
 
-    # 保证每个用户对每个回复只能点赞一次
+    # make sure only one like each user
     __table_args__ = (db.UniqueConstraint('user_id', 'reply_id', name='unique_user_reply'),)
     
 

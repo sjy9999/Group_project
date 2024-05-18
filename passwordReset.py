@@ -5,7 +5,6 @@ import sqlite3
 from models import User  # import User
 from werkzeug.security import generate_password_hash
 
-
 class PasswordResetService:
     # ini
     @staticmethod
@@ -23,7 +22,6 @@ class PasswordResetService:
         
         mail = current_app.extensions['mail']
         mail.send(msg)
-
 
 
     @staticmethod

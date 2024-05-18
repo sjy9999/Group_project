@@ -1,5 +1,4 @@
 # test_unit.py
-
 import unittest
 from app import create_app, db
 from models import User, Request, Reply, Like
@@ -30,7 +29,7 @@ class UserModelTestCase(unittest.TestCase):
 
     def test_request_creation(self):
         user = User(name='testuser', email='test@example.com')
-        user.set_password('testpassword')  # 确保设置密码
+        user.set_password('testpassword') 
         db.session.add(user)
         db.session.commit()
         request = Request(title='Test Request', description='Test Description', username=user.name)
