@@ -21,10 +21,41 @@ This is our Agile Assignment 2.
 **GitHub Username:** Cyf1160819266
 
 
+## Prerequisites
+
+This application is designed to run using Python (version 3) within a virtual environment. It leverages the Flask framework for web development and SQLite for the database. To set up the virtual environment and install the required packages, please follow the instructions in the `requirements.txt` file.
+
+## Installing
+
+1. **Create a Virtual Environment:**
+   - Use `pip` or another package manager to install the `virtualenv` tool:
+     ```sh
+     pip install virtualenv
+     ```
+   - Activate the virtual environment:
+     ```sh
+     source venv/bin/activate
+     ```
+   This setup will include Flask and all necessary packages.
+
+2. **Install SQLite:**
+   - **Windows:**  
+     Download and install SQLite from the official website.
+   - **Linux:**
+     ```sh
+     sudo apt-get install sqlite3
+     ```
+
+3. **Set Up the Database:**
+   - Initialize the database and start the application:
+     ```sh
+     flask db init
+     flask run
+     ```
+
+
 <!-- 1 Would you like to know how to start it?  -->
 It's quite simple. Have you seen app.py? Click on it, then click "Run".
-
-
 
 Inside, there are different modules.
 
