@@ -105,7 +105,7 @@ Our project uses Selenium for automated testing to ensure the functionality of v
 ## Download and Configure the WebDriver
 Choose the appropriate WebDriver for your browser and add it to your system PATH.Ensure that the WebDriver version matches your browser version.Check network connectivity and the availability of the target website.
 
-- [ChromeDriver](https://sites.google.com/a/chromium.org/chromedriver/)
+- [ChromeDriver](https://developer.chrome.com/docs/chromedriver/get-started/)
 - [GeckoDriver (Firefox)](https://github.com/mozilla/geckodriver/releases)
 - [EdgeDriver](https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/)
 
@@ -113,8 +113,8 @@ Choose the appropriate WebDriver for your browser and add it to your system PATH
 Run the following command in your terminal to execute the Selenium tests:
 
 ```sh
-PS> python Seleniumtest.py
-
+python Seleniumtest.py 
+```
 ## Refelection
 ### Some changes about this program have resulted in a lot of unnecessary work.
 At the beginning, this project used SQLite3, but later changed to SQLAlchemy. CSRFProtect was not initially included, but later added, which led to many changes in both frontend and backend. Flask-Login functionality was not used initially, and a custom login function was implemented instead. Later, this was also changed to meet the course requirements for Flask-Login. These changes consumed a lot of redundant time.
