@@ -40,8 +40,6 @@ CREATE TABLE IF NOT EXISTS requests (
 )
 ''') 
 
-
-
 # request_id    reply_content  
 
 
@@ -53,8 +51,5 @@ CREATE TABLE IF NOT EXISTS replies (
     answerName TEXT
 )
 ''') 
-
-
-
 
 conn.close()    

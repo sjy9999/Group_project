@@ -275,7 +275,6 @@ if __name__ == "__main__":
     suite.addTest(TestFlaskApp('test_ranking_page'))
     suite.addTest(TestFlaskApp('test_login_logout'))
 
-
     # Run the test suite
     runner = unittest.TextTestRunner()
     runner.run(suite)
