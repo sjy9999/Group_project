@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS requests (
     FOREIGN KEY(username) REFERENCES users(name)
 )
 ''') 
-''') 
+
 
 
 # request_id    reply_content  
@@ -53,6 +53,7 @@ CREATE TABLE IF NOT EXISTS replies (
     answerName TEXT
 )
 ''') 
+
 
 
 
