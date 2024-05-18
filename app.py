@@ -456,9 +456,10 @@ def replyRequest():
         request_id = request.form.get('request_id')
 
         if not responderName:
-            return redirect(url_for('login'))
+            return redirect(url_for('student'))
         
-        if reply_content and request_title and request_id:
+        # if reply_content and request_title and request_id:
+        if reply_content and request_id:
             matching_request = Request.query.filter(
                         Request.title.like('%' + request_title + '%'),
                         Request.id == request_id  # ID is match
