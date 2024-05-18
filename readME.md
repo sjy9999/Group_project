@@ -109,7 +109,7 @@ like allowing users to follow each other to foster a more interactive community 
 Despite the time constraints and challenges, we are proud of what we have accomplished. We have learned a great deal through this process and look forward to applying these lessons in future projects.
 
 ## Contributing
-For guidelines on our code of conduct and instructions on how to submit pull requests, please refer to `gitlog.md`.
+For guidelines on our code of conduct and instructions on how to submit pull requests, please refer to 'contribution'.
 
 
 Hope you like it!
