@@ -25,7 +25,7 @@ def create_app():
     app.config['SECRET_KEY'] = '8f42a73054b1749f8f58848be5e6502c'
     app.config['SECURITY_PASSWORD_SALT'] = '3243f6a8885a308d313198a2e0370734'
     
-    app.config['MAIL_SERVER'] = 'smtp.gmail.com'  # Gmail SMTP服务器    smtp.gmail.com
+    app.config['MAIL_SERVER'] = 'smtp.gmail.com'  # Gmail SMTP   smtp.gmail.com
     app.config['MAIL_PORT'] = 587  # port
     app.config['MAIL_USE_TLS'] = True  
     app.config['MAIL_USERNAME'] = 's395615470@gmail.com'
@@ -363,8 +363,6 @@ def time_since(dt):
         # dt is in the past
         diff = relativedelta(now, dt)
   
-
-
     if diff.years > 0:
         return f"{diff.years} year{'s' if diff.years > 1 else ''} ago"
     if diff.months > 0:
@@ -457,7 +455,6 @@ def replyRequest():
 
         if not responderName:
             return redirect(url_for('student'))
-        
         # if reply_content and request_title and request_id:
         if reply_content and request_id:
             matching_request = Request.query.filter(

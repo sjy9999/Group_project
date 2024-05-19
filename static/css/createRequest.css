@@ -1,0 +1,29 @@
+body {
+    background: linear-gradient(90deg, #71b7e6, #9b59b6);
+    color: #000000;
+}
+
+.container {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    padding: 30px;
+}
+
+.form-group label {
+    color: #333;
+}
+
+.btn-custom {
+    background-color: #5a67d8;
+    border-color: #5a67d800;
+}
+
+.btn-custom:hover {
+    background-color: #434190;
+    border-color: #434190;
+}
+
+.char-counter {
+    font-size: 0.9em;
+    color: #555;
+}

@@ -1,0 +1,49 @@
+body {
+    background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+}
+
+.container {
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    max-width: 600px;
+    margin: auto;
+}
+
+h2 {
+    color: #333;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.alert {
+    border-radius: 10px;
+}
+
+.btn-custom {
+    background-color: #5a67d8;
+    border-color: #5a67d800;
+    color: #fff;
+    font-weight: bold;
+    padding: 10px 20px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-custom:hover {
+    background-color: #434190;
+    border-color: #434190;
+}
+
+.btn-light {
+    font-weight: bold;
+    padding: 10px 20px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-light:hover {
+    background-color: #f8f9fa;
+}
