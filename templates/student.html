@@ -49,14 +49,11 @@
                     <h1>Swan-forum</h1>
                 </div>
                 <div class="container">
-                    
-                    <!-- Display the flash messages here -->
-                    {% with messages = get_flashed_messages(with_categories=True) %}
+
+                    {% with messages = get_flashed_messages(with_categories=true) %}
                     {% if messages %}
                     {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}" role="alert">
-                        {{ message }}
-                    </div>
+                    <div class="flash-{{ category }}">{{ message }}</div>
                     {% endfor %}
                     {% endif %}
                     {% endwith %}
@@ -73,7 +70,8 @@
                             <div class="input-group">
                                 {{ register_form.password(class="form-control", id="password", required=True) }}
                                 <div class="input-group-append">
-                                    <button class="btn btn-outline-secondary toggle-register-password" type="button"><i class="fa fa-eye"></i></button>
+                                    <button class="btn btn-outline-secondary toggle-register-password" type="button"><i
+                                            class="fa fa-eye"></i></button>
                                 </div>
                             </div>
                         </div>

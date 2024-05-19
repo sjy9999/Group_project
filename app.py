@@ -118,9 +118,8 @@ def access():
         # this part to show in the interface    print(register_form.errors) this is for the debug
         for field, errors in register_form.errors.items():
             for error in errors:
-                flash('Registration fail! Please check the email form', 'fail')
-                # make it fixed 
-                # flash(f"Error in the {field} field - {error}", 'error')
+                flash('Registration fail! Please check the form below.', 'fail')
+                
                 return redirect(url_for('student'))
              
     return render_template('student.html', login_form=login_form, register_form=register_form, msg='Registration successful! Please log in.')

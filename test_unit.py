@@ -1,4 +1,5 @@
 # test_unit.py
+from sqlite3 import IntegrityError
 import unittest
 from app import create_app, db
 from models import User, Request, Reply, Like

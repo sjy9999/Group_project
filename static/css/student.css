@@ -142,32 +142,33 @@ body {
     opacity: 1;
 }
 
-.alert.fail {
-    color: white;
-    background-color: purple;
-    padding: 10px;
-    border-radius: 5px;
-    display: flex;
-    align-items: center;
-    font-family: Arial, sans-serif; /* Example font */
-    font-size: 16px; /* Larger font size */
-    font-weight: bold; /* Bold font */
+.flash-success {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 15px;
+    border: 1px solid #c3e6cb;
+    border-radius: 4px;
+    margin-bottom: 20px;
 }
 
-.alert.fail .icon {
-    margin-right: 10px;
-    /* content: url('path_to_your_icon');  */
-    /* Update with actual path */
+.flash-fail {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 15px;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+    margin-bottom: 20px;
 }
+
 .logo-container {
     display: flex;
     align-items: center;
     padding: 10px -10px;
-    margin-bottom: -20px;
+    margin-bottom: -170px;
 }
 
 .logo {
-    width: 50px;
+    width: 90px;
     margin-right: 5px;
 }
 .logo-container h1 {
