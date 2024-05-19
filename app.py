@@ -1,3 +1,4 @@
+import re
 from flask import Flask, abort, request, render_template, redirect, url_for, session,make_response, flash,jsonify,flash
 import sqlite3
 from flask_mail import Mail
@@ -14,7 +15,9 @@ from flask_wtf.csrf import CSRFProtect, generate_csrf
 from wtforms.validators import InputRequired, Email
 from wtforms.validators import DataRequired
 from datetime import datetime,timezone
-import re
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, SubmitField
+from wtforms.validators import DataRequired, Email
 
 def create_app():
     # project start   student.html
@@ -25,7 +28,7 @@ def create_app():
     app.config['SECRET_KEY'] = '8f42a73054b1749f8f58848be5e6502c'
     app.config['SECURITY_PASSWORD_SALT'] = '3243f6a8885a308d313198a2e0370734'
     
-    app.config['MAIL_SERVER'] = 'smtp.gmail.com'  # Gmail SMTP服务器    smtp.gmail.com
+    app.config['MAIL_SERVER'] = 'smtp.gmail.com'  # Gmail SMTP   smtp.gmail.com
     app.config['MAIL_PORT'] = 587  # port
     app.config['MAIL_USE_TLS'] = True  
     app.config['MAIL_USERNAME'] = 's395615470@gmail.com'
@@ -58,6 +61,12 @@ def create_app():
 
 app = create_app()
 
+
+def is_valid_email(email):
+    # Define a regex pattern for validating email addresses
+    email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return re.match(email_regex, email)
+
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[InputRequired()])
     password = PasswordField('Password', validators=[InputRequired()])
@@ -66,21 +75,18 @@ class RegisterForm(FlaskForm):
     username = StringField('Username', validators=[InputRequired()])
     password = PasswordField('Password', validators=[InputRequired()])
     email = StringField('Email', validators=[Email()])
-
-
+    submit = SubmitField('Register')
 
 @app.route('/', methods=['GET', 'POST'])
-
 @app.route('/access/', methods=['GET', 'POST'])
-
 def access():
     login_form = LoginForm()
     register_form = RegisterForm()
-
+    
     if 'login' in request.form and login_form.validate_on_submit():
+        # Handle login logic
         username = login_form.username.data
         password = login_form.password.data
-
         user = User.query.filter_by(name=username).first()
         if user and user.check_password(password):
             login_user(user)
@@ -91,16 +97,42 @@ def access():
             # Convert the UTC time to Shanghai time
             current_shanghai_time = current_utc_time.astimezone(shanghai_tz)
             user.last_seen = current_shanghai_time
+            # Commit changes to the database if this is being used in a web app
             db.session.commit()
             session['loggedin'] = True
             session['username'] = user.name
-            return redirect(url_for('main'))  # sucess
-        
+            return redirect(url_for('main'))  # success page
         else:
-            return render_template('result.html', login_form=login_form, register_form=register_form, msg='Incorrect username or password!')  
+            return render_template('result.html', login_form=login_form, register_form=register_form, msg='Incorrect username or password!')
 
     elif 'register' in request.form and register_form.validate_on_submit():
-        # register logic 
+        # Handle registration logic
+        username = register_form.username.data
+        password = register_form.password.data
+        email = register_form.email.data
+        if not is_valid_email(email):
+            user_message = "Registration failed due to invalid email format. Please enter a valid email address."
+            return render_template('result.html', login_form=login_form, register_form=register_form, msg=user_message)
+        try:
+            new_user = User(name=username, email=email)
+            new_user.set_password(password)
+            db.session.add(new_user)
+            db.session.commit()
+            flash('Registration successful! Please log in.', 'success')
+            return redirect(url_for('student'))
+        except Exception as e:
+            db.session.rollback()
+            user_message = "Registration failed due to a database error. Please use a different username and email address."
+            return render_template('result.html', login_form=login_form, register_form=register_form, msg=user_message)
+
+    return render_template('student.html', login_form=login_form, register_form=register_form)
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    print("Register function called")  # for testing
+    register_form = RegisterForm()
+
+    if register_form.validate_on_submit():
         try:
             username = register_form.username.data
             password = register_form.password.data
@@ -110,17 +142,13 @@ def access():
             db.session.add(new_user)
             db.session.commit()
             flash('Registration successful! Please log in.', 'success')
-            return redirect(url_for('student'))
-        
+            return redirect(url_for('access'))
         except Exception as e:
             db.session.rollback()
             user_message = "Registration failed due to a database error. Please use a different username and email address."
-            return render_template('result.html', login_form=login_form, register_form=register_form, msg=user_message)
-    
-    return render_template('student.html', login_form=login_form, register_form=register_form, msg='Registration successful! Please log in.')
+            return render_template("error.html", message=user_message)
 
-
-
+    return render_template("student.html", register_form=register_form)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -136,7 +164,6 @@ def login():
     if login_form.validate_on_submit():
         username = login_form.username.data
         password = login_form.password.data
-
         user = User.query.filter_by(name=username).first()
         
         if user and user.check_password(password):
@@ -144,12 +171,12 @@ def login():
             
             session['loggedin'] = True
             session['username'] = user.name
+            
             return render_template('main.html', msg='Login successful!')  
-
+            # return redirect(url_for('index'))  # 假设你有一个名为 'index' 的视图函数
         else:
             return render_template('result.html', form=login_form, msg='Incorrect username or password！')
     return render_template('login.html', login_form=login_form)
-
 
 from werkzeug.security import generate_password_hash
 
@@ -363,8 +390,6 @@ def time_since(dt):
         # dt is in the past
         diff = relativedelta(now, dt)
   
-
-
     if diff.years > 0:
         return f"{diff.years} year{'s' if diff.years > 1 else ''} ago"
     if diff.months > 0:
@@ -457,7 +482,6 @@ def replyRequest():
 
         if not responderName:
             return redirect(url_for('student'))
-        
         # if reply_content and request_title and request_id:
         if reply_content and request_id:
             matching_request = Request.query.filter(
