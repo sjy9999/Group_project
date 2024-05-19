@@ -149,6 +149,9 @@ body {
     border-radius: 5px;
     display: flex;
     align-items: center;
+    font-family: Arial, sans-serif; /* Example font */
+    font-size: 16px; /* Larger font size */
+    font-weight: bold; /* Bold font */
 }
 
 .alert.fail .icon {

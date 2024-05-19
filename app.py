@@ -125,28 +125,28 @@ def access():
              
     return render_template('student.html', login_form=login_form, register_form=register_form, msg='Registration successful! Please log in.')
 
-# register 注册    return  http://127.0.0.1:5000      http://127.0.0.1:5000/register/    GET
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    # print("Register function called")  # for test 调试语句
-    register_form = RegisterForm()
+# # register 注册    return  http://127.0.0.1:5000      http://127.0.0.1:5000/register/    GET
+# @app.route('/register', methods=['GET', 'POST'])
+# def register():
+#     # print("Register function called")  # for test 调试语句
+#     register_form = RegisterForm()
     
-    if register_form.validate_on_submit():
-        try:
-            username = register_form.username.data
-            password = register_form.password.data
-            email = register_form.email.data
-            new_user = User(name=username, email=email)
-            new_user.set_password(password)
-            db.session.add(new_user)
-            db.session.commit()
-            return redirect(url_for('some_success_page'))
-        except Exception as e:
-            db.session.rollback()
-            user_message = "Registration failed due to a database error. Please use a different username and email address."
-            return render_template("error.html", message=user_message)
-            return render_template("error.html", message=f"Registration failed, error: {str(e)}")
-    return render_template("student.html", register_form=register_form)
+#     if register_form.validate_on_submit():
+#         try:
+#             username = register_form.username.data
+#             password = register_form.password.data
+#             email = register_form.email.data
+#             new_user = User(name=username, email=email)
+#             new_user.set_password(password)
+#             db.session.add(new_user)
+#             db.session.commit()
+#             return redirect(url_for('student'))
+#         except Exception as e:
+#             db.session.rollback()
+#             user_message = "Registration failed due to a database error. Please use a different username and email address."
+#             return render_template("error.html", message=user_message)
+#             return render_template("error.html", message=f"Registration failed, error: {str(e)}")
+#     return render_template("student.html", register_form=register_form)
 
 
 
