@@ -136,3 +136,18 @@ body {
     visibility: visible;
     opacity: 1;
 }
+
+.alert.fail {
+    color: white;
+    background-color: purple;
+    padding: 10px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+}
+
+.alert.fail .icon {
+    margin-right: 10px;
+    /* content: url('path_to_your_icon');  */
+    /* Update with actual path */
+}

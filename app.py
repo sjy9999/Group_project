@@ -70,9 +70,7 @@ class RegisterForm(FlaskForm):
 
 
 @app.route('/', methods=['GET', 'POST'])
-
 @app.route('/access/', methods=['GET', 'POST'])
-
 def access():
     login_form = LoginForm()
     register_form = RegisterForm()
@@ -95,7 +93,7 @@ def access():
             session['loggedin'] = True
             session['username'] = user.name
             return redirect(url_for('main'))  # sucess
-        
+
         else:
             return render_template('result.html', login_form=login_form, register_form=register_form, msg='Incorrect username or password!')  
 
@@ -116,9 +114,39 @@ def access():
             db.session.rollback()
             user_message = "Registration failed due to a database error. Please use a different username and email address."
             return render_template('result.html', login_form=login_form, register_form=register_form, msg=user_message)
-    
+    else:
+        # this part to show in the interface    print(register_form.errors) this is for the debug
+        for field, errors in register_form.errors.items():
+            for error in errors:
+                flash('Registration fail! Please check the email form', 'fail')
+                # make it fixed 
+                # flash(f"Error in the {field} field - {error}", 'error')
+                return redirect(url_for('student'))
+             
     return render_template('student.html', login_form=login_form, register_form=register_form, msg='Registration successful! Please log in.')
 
+# register 注册    return  http://127.0.0.1:5000      http://127.0.0.1:5000/register/    GET
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    # print("Register function called")  # for test 调试语句
+    register_form = RegisterForm()
+    
+    if register_form.validate_on_submit():
+        try:
+            username = register_form.username.data
+            password = register_form.password.data
+            email = register_form.email.data
+            new_user = User(name=username, email=email)
+            new_user.set_password(password)
+            db.session.add(new_user)
+            db.session.commit()
+            return redirect(url_for('some_success_page'))
+        except Exception as e:
+            db.session.rollback()
+            user_message = "Registration failed due to a database error. Please use a different username and email address."
+            return render_template("error.html", message=user_message)
+            return render_template("error.html", message=f"Registration failed, error: {str(e)}")
+    return render_template("student.html", register_form=register_form)
 
 
 
@@ -128,6 +156,7 @@ login_manager.init_app(app)
 @login_manager.user_loader
 def load_user(user_id):
     return db.session.get(User, int(user_id))
+
 
 
 @app.route('/login/', methods=['POST', 'GET'])
