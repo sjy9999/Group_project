@@ -4,6 +4,9 @@ import unittest
 from app import create_app, db
 from models import User, Request, Reply, Like
 from flask import url_for
+from flask_login import current_user
+
+
 
 class UserModelTestCase(unittest.TestCase):
 
@@ -25,6 +28,7 @@ class UserModelTestCase(unittest.TestCase):
         self.ctx = self.app.app_context()
         self.ctx.push()
         db.create_all()
+
         # 创建一个测试用户
         test_user = User(name='testuser', email='999@example.com')
         test_user.set_password('testpassword')
@@ -92,16 +96,64 @@ class UserModelTestCase(unittest.TestCase):
         db.session.commit()
         retrieved_request = Request.query.filter_by(title='Orphan Request').first()
         self.assertIsNotNone(retrieved_request)  # This assumes that there should not be a request without a valid user
-    
-    def test_user_login(self):
-        response = self.client.post('/access/', data=dict(
-            login='login',
-            username='testuser',
-            password='testpassword'
-        ), follow_redirects=True)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b'Main Page', response.data)  # Replace with actual text in your main page
 
+    def test_user_login(self):
+        response = self.client.post('/access/', data={
+            'username': 'testuser',
+            'password': 'testpassword'
+        }, follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(current_user.is_authenticated)
+        self.assertEqual(current_user.name, 'testuser')
+
+    def test_user_logout(self):
+        self.client.post('/access/', data={
+            'username': 'testuser',
+            'password': 'testpassword'
+        })
+        response = self.client.get('/logout/', follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(current_user.is_authenticated)
+
+    def test_create_request(self):
+        self.client.post('/access/', data={
+            'username': 'testuser',
+            'password': 'testpassword'
+        })
+        response = self.client.post('/createRequest', data={
+            'title': 'Test Request',
+            'description': 'This is a test request.'
+        }, follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(Request.query.filter_by(title='Test Request').first())
+
+    def test_find_request(self):
+        self.client.post('/access/', data={
+            'username': 'testuser',
+            'password': 'testpassword'
+        })
+        request = Request(title='Test Request', description='Test Description', username='testuser')
+        db.session.add(request)
+        db.session.commit()
+        response = self.client.get('/findRequest', query_string={'searchQueryFR': 'Test Request'})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Test Request', response.data)
+
+    def test_reply_request(self):
+        self.client.post('/access/', data={
+            'username': 'testuser',
+            'password': 'testpassword'
+        })
+        request = Request(title='Test Request', description='Test Description', username='testuser')
+        db.session.add(request)
+        db.session.commit()
+        response = self.client.post('/replyRequest', data={
+            'reply': 'This is a test reply.',
+            'search_queryFR': 'Test Request',
+            'request_id': request.id
+        }, follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(Reply.query.filter_by(reply_content='This is a test reply.').first())
 
 
 if __name__ == '__main__':
