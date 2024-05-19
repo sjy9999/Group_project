@@ -85,14 +85,19 @@ body {
     border-radius: 50%;
 }
 
-.toggle-password {
+.toggle-password,
+.toggle-register-password,
+.toggle-login-password {
     color: black;
-    /* Change icon color to black */
-    margin-top: 0px;
-
-
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 3rem 1rem;
+    font-size: 1.5rem; /* Adjust this value to change the size */
+    margin-top: 0px; /* Adjust this value to move the icon down */
+    margin-left: 3px;
 }
+
 
 .form-control:focus {
     border-color: #71b7e6;
@@ -150,4 +155,22 @@ body {
     margin-right: 10px;
     /* content: url('path_to_your_icon');  */
     /* Update with actual path */
+}
+.logo-container {
+    display: flex;
+    align-items: center;
+    padding: 10px -10px;
+    margin-bottom: -20px;
+}
+
+.logo {
+    width: 50px;
+    margin-right: 5px;
+}
+.logo-container h1 {
+    background: linear-gradient(to right, #2a14f5, #d14c3b);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
 }

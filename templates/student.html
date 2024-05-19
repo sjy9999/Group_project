@@ -43,7 +43,13 @@
             </div>
             <!-- right page -->
             <div class="col-md-4">
+
+                <div class="logo-container">
+                    <img src="/static/img/logot.png" alt="Logo" class="logo">
+                    <h1>Swan-forum</h1>
+                </div>
                 <div class="container">
+                    
                     <!-- Display the flash messages here -->
                     {% with messages = get_flashed_messages(with_categories=True) %}
                     {% if messages %}
